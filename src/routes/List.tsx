@@ -28,6 +28,7 @@ export default function ListRoute() {
     [items, list]
   );
   const uncheckedCount = items.filter(i => !i.checked).length;
+  const checkedCount = items.length - uncheckedCount;
 
   if (listLoading || itemsLoading) {
     return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
@@ -73,21 +74,21 @@ export default function ListRoute() {
     }
   };
 
+  const onFinishShopping = async () => {
+    if (!confirm(`完成采购？将清掉 ${checkedCount} 项已购物品`)) return;
+    try {
+      await clearChecked(list.id);
+      // Realtime 会推送 DELETE 事件，UI 自动刷新
+    } catch {
+      alert('操作失败');
+    }
+  };
+
   const onMore = async () => {
-    const choice = prompt('操作：\n1 = 清空已购\n2 = 管理超市\n3 = 设置', '');
+    const choice = prompt('操作：\n1 = 管理超市\n2 = 设置', '');
     if (choice === '1') {
-      const checkedCnt = items.filter(i => i.checked).length;
-      if (!checkedCnt) { alert('没有已购物品'); return; }
-      if (!confirm(`将删除 ${checkedCnt} 项已勾选物品`)) return;
-      try {
-        const n = await clearChecked(list.id);
-        alert(`清空了 ${n} 项`);
-      } catch {
-        alert('清空失败');
-      }
-    } else if (choice === '2') {
       nav('/manage-markets');
-    } else if (choice === '3') {
+    } else if (choice === '2') {
       nav('/settings');
     }
   };
@@ -145,7 +146,15 @@ export default function ListRoute() {
         )}
       </main>
 
-      <footer className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3 bg-gradient-to-t from-white via-white/95 to-transparent">
+      <footer className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3 bg-gradient-to-t from-white via-white/95 to-transparent space-y-2">
+        {checkedCount > 0 && (
+          <button
+            onClick={onFinishShopping}
+            className="w-full h-11 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium active:bg-gray-200"
+          >
+            🛍️ 完成采购，清掉 {checkedCount} 项
+          </button>
+        )}
         <button
           onClick={() => setShowAdd(true)}
           className="w-full h-12 bg-primary active:bg-primary-dark text-white rounded-xl font-semibold text-base"
