@@ -1,0 +1,29 @@
+# Node
+node_modules/
+*.log
+npm-debug.log*
+
+# 小程序
+miniprogram_npm/
+
+# 云函数依赖
+cloudfunctions/*/node_modules/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Brainstorming（本地可视化草稿）
+.superpowers/
+
+# Claude Code 本地设置
+.claude/settings.local.json
+
+# Build
+dist/
+build/
+*.tsbuildinfo
