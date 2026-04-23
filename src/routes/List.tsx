@@ -35,8 +35,8 @@ export default function ListRoute() {
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 350, tolerance: 8 } })
   );
 
   // 拖拽中显示所有超市（含空），方便放入空超市
