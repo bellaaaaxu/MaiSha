@@ -1,3 +1,4 @@
+import { useDraggable } from '@dnd-kit/core';
 import type { Item } from '@/types/item';
 
 interface Props {
@@ -8,11 +9,20 @@ interface Props {
 
 export function ItemRow({ item, onToggle, onMenu }: Props) {
   const checked = item.checked;
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: item.id,
+    data: { item }
+  });
+
   return (
     <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={{ touchAction: 'manipulation' }}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1.5 ${
         checked ? 'bg-gray-100' : 'bg-white'
-      } active:bg-green-50`}
+      } active:bg-green-50 ${isDragging ? 'opacity-30' : ''}`}
     >
       <button
         onClick={() => onToggle(item)}
@@ -38,6 +48,7 @@ export function ItemRow({ item, onToggle, onMenu }: Props) {
         )}
       </div>
       <button
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onMenu(item); }}
         className="w-8 h-8 flex items-center justify-center text-gray-400 active:opacity-50"
         aria-label="更多操作"

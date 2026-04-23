@@ -16,9 +16,10 @@ export interface MarketGroup {
 
 export function groupItemsByMarketAndCategory(
   items: Item[],
-  supermarkets: Supermarket[]
+  supermarkets: Supermarket[],
+  includeEmpty = false
 ): MarketGroup[] {
-  if (!items.length) return [];
+  if (!items.length && !includeEmpty) return [];
 
   const validIds = new Set(supermarkets.map(s => s.id));
   const fallbackId = UNDELETABLE_SUPERMARKET_ID;
@@ -34,7 +35,16 @@ export function groupItemsByMarketAndCategory(
   const out: MarketGroup[] = [];
   for (const s of supermarkets) {
     const bucket = byMarket.get(s.id);
-    if (!bucket || !bucket.length) continue;
+    if (!bucket || !bucket.length) {
+      if (includeEmpty) {
+        out.push({
+          supermarket: marketMap.get(s.id)!,
+          categories: [],
+          totalCount: 0
+        });
+      }
+      continue;
+    }
 
     const catOrder: CategoryKey[] = [];
     const catMap = new Map<CategoryKey, CategoryGroup>();
