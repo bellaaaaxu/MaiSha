@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import Onboarding from './routes/Onboarding';
 import ListRoute from './routes/List';
+import EditItem from './routes/EditItem';
+import ManageMarkets from './routes/ManageMarkets';
+import Settings from './routes/Settings';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/" element={<FirstOpenRedirect />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/list" element={<ListRoute />} />
+        <Route path="/edit-item/:id" element={<EditItem />} />
+        <Route path="/manage-markets" element={<ManageMarkets />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>

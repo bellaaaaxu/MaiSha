@@ -16,9 +16,11 @@ import { useItems } from '@/hooks/useItems';
 import { SupermarketCard } from '@/components/SupermarketCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
+import { MoreMenu } from '@/components/MoreMenu';
 import { groupItemsByMarketAndCategory } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
+import { generateShareText } from '@/utils/share-text';
 import type { Item, NewItemInput } from '@/types/item';
 
 export default function ListRoute() {
@@ -31,6 +33,7 @@ export default function ListRoute() {
   const { items, loading: itemsLoading } = useItems(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [menuItem, setMenuItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
 
@@ -100,10 +103,14 @@ export default function ListRoute() {
     }
   };
 
-  const onMore = async () => {
-    const choice = prompt('操作：\n1 = 管理超市\n2 = 设置', '');
-    if (choice === '1') nav('/manage-markets');
-    else if (choice === '2') nav('/settings');
+  const onCopyShareText = async () => {
+    const text = generateShareText(items, list.supermarkets);
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('清单文本已复制');
+    } catch {
+      prompt('复制：', text);
+    }
   };
 
   const onMenuDelete = async (item: Item) => {
@@ -167,7 +174,7 @@ export default function ListRoute() {
           </div>
           <div className="flex gap-4">
             <button onClick={onShareMenu} className="text-xl" aria-label="分享">📤</button>
-            <button onClick={onMore} className="text-xl" aria-label="更多">⋯</button>
+            <button onClick={() => setShowMore(true)} className="text-xl" aria-label="更多">⋯</button>
           </div>
         </header>
 
@@ -220,6 +227,14 @@ export default function ListRoute() {
           onEdit={onMenuEdit}
           onDelete={onMenuDelete}
           onDuplicate={onMenuDuplicate}
+        />
+
+        <MoreMenu
+          open={showMore}
+          onClose={() => setShowMore(false)}
+          onCopyShareText={onCopyShareText}
+          onManageMarkets={() => nav('/manage-markets')}
+          onSettings={() => nav('/settings')}
         />
       </div>
 
