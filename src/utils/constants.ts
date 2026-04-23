@@ -2,12 +2,10 @@ import type { Supermarket } from '@/types/supermarket';
 import type { CategoryKey } from '@/types/item';
 
 export const DEFAULT_SUPERMARKETS: Supermarket[] = [
-  { id: 'hm',   name: '盒马',     emoji: '🛒' },
-  { id: 'cc',   name: '菜场',     emoji: '🥬' },
-  { id: 'sm',   name: '山姆',     emoji: '🏬' },
-  { id: 'jd',   name: '京东到家', emoji: '📦' },
-  { id: 'cvs',  name: '便利店',   emoji: '🏪' },
-  { id: 'none', name: '未分类',   emoji: '❓' }
+  { id: 'tnt',    name: 'T&T 大统华', emoji: '🥬' },
+  { id: 'yc',     name: '元初',       emoji: '🛒' },
+  { id: 'costco', name: 'Costco',     emoji: '🏬' },
+  { id: 'none',   name: '未分类',     emoji: '❓' }
 ];
 
 export const UNDELETABLE_SUPERMARKET_ID = 'none';
