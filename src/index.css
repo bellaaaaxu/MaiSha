@@ -1,6 +1,13 @@
-/* Tailwind directives 在 Task 2 加入 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html, body, #root {
   height: 100%;
   margin: 0;
   font-family: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
 }
