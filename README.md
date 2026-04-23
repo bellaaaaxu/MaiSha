@@ -44,14 +44,14 @@ npm run build         # 生产构建
 ## 首次使用
 
 1. [Supabase 配置](docs/dev/supabase-setup.md) — 建 project, 跑 migration, 启用匿名登录和 Realtime
-2. [Vercel 部署](docs/dev/vercel-deploy.md) — 一键连 GitHub 部署
+2. [Cloudflare Pages 部署](docs/dev/cloudflare-deploy.md) — 一键连 GitHub 部署
 
 ## 文档
 
 - [设计文档](docs/superpowers/specs/2026-04-23-maisha-design.md)
 - [实现计划](docs/superpowers/plans/2026-04-23-maisha-v1.md)
 - [Supabase 配置](docs/dev/supabase-setup.md)
-- [Vercel 部署](docs/dev/vercel-deploy.md)
+- [Cloudflare Pages 部署](docs/dev/cloudflare-deploy.md)
 
 ## 路线图
 
