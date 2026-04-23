@@ -28,7 +28,11 @@ CF Pages 自动触发新部署，一般 1-2 分钟内上线。
 
 ## SPA 回退
 
-`public/_redirects` 已配置 `/* /index.html 200`，直接访问 `/list`、`/settings` 等子路径刷新时会回退到 `index.html`，由 React Router 接管。
+Cloudflare 部署时会自动配置 Workers + Static Assets，在 `wrangler.jsonc` 里生成：
+```json
+"assets": { "not_found_handling": "single-page-application" }
+```
+这个原生机制就能在 `/list`、`/settings` 等子路径刷新时回退到 `index.html` 由 React Router 接管。**不需要也不能有 `_redirects` 文件**（会与 SPA 回退冲突触发死循环检测）。
 
 ## 给老公分享
 
