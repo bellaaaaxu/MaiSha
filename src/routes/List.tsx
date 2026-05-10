@@ -17,6 +17,7 @@ import { SupermarketCard } from '@/components/SupermarketCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
 import { MoreMenu } from '@/components/MoreMenu';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { groupItemsByMarketAndCategory } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
@@ -36,6 +37,7 @@ export default function ListRoute() {
   const [showMore, setShowMore] = useState(false);
   const [menuItem, setMenuItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -78,7 +80,6 @@ export default function ListRoute() {
         supermarket: input.supermarket ?? 'none',
         category_emoji: input.category_emoji ?? '📦'
       });
-      setShowAdd(false);
     } catch {
       alert('添加失败');
     }
@@ -95,7 +96,7 @@ export default function ListRoute() {
   };
 
   const onFinishShopping = async () => {
-    if (!confirm(`完成采购？将清掉 ${checkedCount} 项已购物品`)) return;
+    setShowFinishConfirm(false);
     try {
       await clearChecked(list.id);
     } catch {
@@ -164,17 +165,27 @@ export default function ListRoute() {
       onDragEnd={onDragEnd}
       onDragCancel={onDragCancel}
     >
-      <div className="min-h-screen pb-36">
-        <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center sticky top-0 z-10">
+      <div
+        className="min-h-screen pb-36"
+        style={{ background: 'linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%)' }}
+      >
+        <header
+          className="px-4 py-3 flex items-center sticky top-0 z-10"
+          style={{
+            background: 'rgba(250,246,240,0.9)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(215,205,188,0.3)',
+          }}
+        >
           <div className="flex-1">
-            <div className="text-lg font-semibold">买啥</div>
-            <div className="text-xs text-gray-500">
+            <div className="text-lg font-semibold" style={{ color: '#5a4e3c' }}>买啥</div>
+            <div className="text-xs" style={{ color: '#a0937e' }}>
               共享 · {uncheckedCount}项待买
             </div>
           </div>
           <div className="flex gap-4">
-            <button onClick={onShareMenu} className="text-xl" aria-label="分享">📤</button>
-            <button onClick={() => setShowMore(true)} className="text-xl" aria-label="更多">⋯</button>
+            <button onClick={onShareMenu} className="text-xl active:opacity-60" aria-label="分享">📤</button>
+            <button onClick={() => setShowMore(true)} className="text-xl active:opacity-60" style={{ color: '#a0937e' }} aria-label="更多">⋯</button>
           </div>
         </header>
 
@@ -182,8 +193,8 @@ export default function ListRoute() {
           {groups.length === 0 ? (
             <div className="py-24 text-center">
               <div className="text-6xl mb-4">🛒</div>
-              <div className="text-base text-gray-500">清单是空的</div>
-              <div className="text-xs text-gray-400 mt-1">点底部 + 添加第一项</div>
+              <div className="text-base" style={{ color: '#a0937e' }}>清单是空的</div>
+              <div className="text-xs mt-1" style={{ color: '#c4b49a' }}>点底部 + 添加第一项</div>
             </div>
           ) : (
             groups.map(g => (
@@ -197,18 +208,25 @@ export default function ListRoute() {
           )}
         </main>
 
-        <footer className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3 bg-gradient-to-t from-white via-white/95 to-transparent space-y-2">
+        <footer
+          className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3 space-y-2"
+          style={{
+            background: 'linear-gradient(to top, #f3ede4 60%, transparent)',
+          }}
+        >
           {checkedCount > 0 && (
             <button
-              onClick={onFinishShopping}
-              className="w-full h-11 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium active:bg-gray-200"
+              onClick={() => setShowFinishConfirm(true)}
+              className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
+              style={{ background: 'rgba(255,252,247,0.7)', color: '#7a6e5d', border: '1px solid rgba(215,205,188,0.4)' }}
             >
               🛍️ 完成采购，清掉 {checkedCount} 项
             </button>
           )}
           <button
             onClick={() => setShowAdd(true)}
-            className="w-full h-12 bg-primary active:bg-primary-dark text-white rounded-xl font-semibold text-base"
+            className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90"
+            style={{ background: '#7ca982' }}
           >
             + 添加物品
           </button>
@@ -235,6 +253,16 @@ export default function ListRoute() {
           onCopyShareText={onCopyShareText}
           onManageMarkets={() => nav('/manage-markets')}
           onSettings={() => nav('/settings')}
+        />
+
+        <ConfirmModal
+          open={showFinishConfirm}
+          title="完成采购"
+          message={`将清掉 ${checkedCount} 项已购物品，未勾选的保留。`}
+          confirmText="清掉已购"
+          cancelText="再想想"
+          onConfirm={onFinishShopping}
+          onCancel={() => setShowFinishConfirm(false)}
         />
       </div>
 

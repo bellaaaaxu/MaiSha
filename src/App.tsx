@@ -4,9 +4,19 @@ import ListRoute from './routes/List';
 import EditItem from './routes/EditItem';
 import ManageMarkets from './routes/ManageMarkets';
 import Settings from './routes/Settings';
+import IconPreview from './routes/IconPreview';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
+  return (
+    <Routes>
+      <Route path="/icon-preview" element={<IconPreview />} />
+      <Route path="*" element={<AuthedApp />} />
+    </Routes>
+  );
+}
+
+function AuthedApp() {
   const { uid, loading, error } = useAuth();
 
   if (loading) {

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { getIconPath } from '@/utils/icon-registry';
 import type { Item } from '@/types/item';
 
 interface Props {
@@ -13,48 +15,84 @@ export function ItemRow({ item, onToggle, onMenu }: Props) {
     id: item.id,
     data: { item }
   });
+  const iconPath = getIconPath(item.name);
+  const [iconErr, setIconErr] = useState(false);
+  const hasIcon = iconPath && !iconErr;
 
   return (
     <div
       ref={setNodeRef}
       {...attributes}
+      {...listeners}
       style={{ touchAction: 'manipulation' }}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1.5 ${
-        checked ? 'bg-gray-100' : 'bg-white'
-      } ${isDragging ? 'opacity-30' : ''}`}
+      onClick={() => onToggle(item)}
+      className={`flex items-center gap-3 rounded-2xl p-2.5 mb-2 transition-all cursor-grab active:cursor-grabbing select-none ${
+        isDragging ? 'opacity-30' : ''
+      }`}
+      role="button"
     >
-      <button
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={() => onToggle(item)}
-        className={`w-7 h-7 flex items-center justify-center text-lg shrink-0 ${
-          checked ? 'text-primary' : 'text-gray-300'
-        }`}
-        aria-label={checked ? '取消勾选' : '勾选'}
-      >
-        {checked ? '✓' : '○'}
-      </button>
-
-      {/* 中间文字区：长按这里才拖动；快速点也可勾选 */}
+      {/* icon or emoji */}
       <div
-        {...listeners}
-        onClick={() => onToggle(item)}
-        className="flex-1 min-w-0 cursor-grab active:cursor-grabbing select-none"
+        className={`shrink-0 flex items-center justify-center rounded-xl ${
+          checked ? 'opacity-40 grayscale' : ''
+        }`}
+        style={{
+          width: hasIcon ? 56 : 44,
+          height: hasIcon ? 56 : 44,
+          background: 'rgba(255,252,247,0.5)',
+          border: '1px solid rgba(215,205,188,0.3)',
+        }}
       >
-        <div className={`text-sm ${checked ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+        {hasIcon ? (
+          <img
+            src={iconPath}
+            alt=""
+            className="w-full h-full object-contain rounded-xl p-1"
+            style={{ mixBlendMode: 'multiply' }}
+            onError={() => setIconErr(true)}
+          />
+        ) : (
+          <span className="text-xl">{item.category_emoji}</span>
+        )}
+      </div>
+
+      {/* text */}
+      <div className="flex-1 min-w-0">
+        <div
+          className={`text-sm font-medium ${checked ? 'line-through' : ''}`}
+          style={{ color: checked ? '#b8a992' : '#5a4e3c' }}
+        >
           {item.name}
-          {item.note && <span className="text-xs text-gray-500 ml-1">· {item.note}</span>}
         </div>
-        {item.quantity && (
-          <div className={`text-xs mt-0.5 ${checked ? 'line-through text-gray-400' : 'text-gray-500'}`}>
-            × {item.quantity}
+        {(item.note || item.quantity) && (
+          <div className={`text-xs mt-0.5 ${checked ? 'line-through' : ''}`} style={{ color: '#a0937e' }}>
+            {[item.note, item.quantity && `× ${item.quantity}`].filter(Boolean).join(' · ')}
           </div>
         )}
       </div>
 
+      {/* checkbox */}
+      <button
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); onToggle(item); }}
+        className="w-7 h-7 flex items-center justify-center shrink-0"
+        aria-label={checked ? '取消勾选' : '勾选'}
+      >
+        {checked ? (
+          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
+            <span className="text-white text-xs">✓</span>
+          </div>
+        ) : (
+          <div className="w-5 h-5 rounded-full border-2" style={{ borderColor: '#d5cbbe' }} />
+        )}
+      </button>
+
+      {/* menu */}
       <button
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onMenu(item); }}
-        className="w-8 h-8 flex items-center justify-center text-gray-400 active:opacity-50 shrink-0"
+        className="w-6 h-6 flex items-center justify-center active:opacity-50 shrink-0"
+        style={{ color: '#c4b49a' }}
         aria-label="更多操作"
       >
         ⋮
