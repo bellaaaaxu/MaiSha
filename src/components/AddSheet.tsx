@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getTopFrequentItems, getRecentItems, type FrequentItem } from '@/utils/frequent-items';
+import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
 import { matchCategory } from '@/utils/category-matcher';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput, CategoryKey } from '@/types/item';
@@ -107,10 +107,6 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
     setAddedNames(prev => new Set(prev).add(f.name));
   };
 
-  const hasIcon = (name: string) => {
-    const item = UNIQUE_ICON_ITEMS.find(i => i.name === name);
-    return item && !iconErrors.has(item.icon);
-  };
 
   return (
     <div

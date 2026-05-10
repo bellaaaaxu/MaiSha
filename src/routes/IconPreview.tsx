@@ -129,7 +129,7 @@ export default function IconPreview() {
           </div>
 
           {/* unchecked items */}
-          {unchecked.map((item, i) => (
+          {unchecked.map((item) => (
             <MockItemRow
               key={item.name}
               item={item}
