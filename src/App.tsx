@@ -5,14 +5,18 @@ import EditItem from './routes/EditItem';
 import ManageMarkets from './routes/ManageMarkets';
 import Settings from './routes/Settings';
 import IconPreview from './routes/IconPreview';
+import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/icon-preview" element={<IconPreview />} />
-      <Route path="*" element={<AuthedApp />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/icon-preview" element={<IconPreview />} />
+        <Route path="*" element={<AuthedApp />} />
+      </Routes>
+      <UpdatePrompt />
+    </>
   );
 }
 
