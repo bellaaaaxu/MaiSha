@@ -186,7 +186,9 @@ export default function IconPreview() {
         uid="preview-user"
         supermarkets={[
           { id: 'tnt', name: 'T&T 大统华', emoji: '🥬' },
+          { id: 'yc', name: '元初', emoji: '🛒' },
           { id: 'costco', name: 'Costco', emoji: '🏬' },
+          { id: 'wholefoods', name: 'Whole Foods', emoji: '🥗' },
           { id: 'none', name: '未分类', emoji: '❓' },
         ]}
         onClose={() => setShowAdd(false)}

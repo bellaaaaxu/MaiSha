@@ -183,14 +183,14 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
           <div className="text-[10px] font-medium tracking-wider mb-1.5" style={{ color: '#a0937e' }}>
             添加到
           </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+          <div className="flex flex-wrap gap-1.5">
             {supermarkets.map(m => {
               const active = selectedMarket === m.id;
               return (
                 <button
                   key={m.id}
                   onClick={() => setSelectedMarket(m.id)}
-                  className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium shrink-0 transition-all active:scale-95"
+                  className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all active:scale-95"
                   style={{
                     background: active ? '#7ca982' : 'rgba(255,252,247,0.6)',
                     color: active ? '#fff' : '#5a4e3c',
