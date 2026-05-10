@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
 import { matchCategory } from '@/utils/category-matcher';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
@@ -8,7 +8,8 @@ interface Props {
   open: boolean;
   uid: string;
   onClose: () => void;
-  onSubmit: (input: NewItemInput) => void;
+  onAdd: (input: NewItemInput) => Promise<string>;
+  onRemove: (itemId: string) => Promise<void>;
 }
 
 const CATEGORY_ORDER = ['蔬菜', '肉蛋', '乳制品', '主食', '调料', '日用', '烘焙', '饮料'];
@@ -41,16 +42,20 @@ function groupByCategory(items: IconItem[]) {
   return groups;
 }
 
-export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
+export function AddSheet({ open, uid, onClose, onAdd, onRemove }: Props) {
   const [value, setValue] = useState('');
   const [frequent, setFrequent] = useState<FrequentItem[]>([]);
-  const [addedNames, setAddedNames] = useState<Set<string>>(new Set());
+  const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
+  const [animating, setAnimating] = useState<Map<string, 'pop' | 'remove'>>(new Map());
+  const [busy, setBusy] = useState<Set<string>>(new Set());
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (open) {
       setFrequent(getTopFrequentItems(uid, 12));
-      setAddedNames(new Set());
+      setAddedItems(new Map());
+      setAnimating(new Map());
+      setBusy(new Set());
       setIconErrors(new Set());
     } else {
       setValue('');
@@ -67,11 +72,38 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
 
   const groups = useMemo(() => groupByCategory(filtered), [filtered]);
 
+  const triggerAnim = useCallback((name: string, type: 'pop' | 'remove') => {
+    setAnimating(prev => new Map(prev).set(name, type));
+    setTimeout(() => setAnimating(prev => {
+      const next = new Map(prev);
+      next.delete(name);
+      return next;
+    }), 400);
+  }, []);
+
+  const toggleItem = useCallback(async (name: string, input: NewItemInput) => {
+    if (busy.has(name)) return;
+    setBusy(prev => new Set(prev).add(name));
+    try {
+      const existingId = addedItems.get(name);
+      if (existingId) {
+        triggerAnim(name, 'remove');
+        await onRemove(existingId);
+        setAddedItems(prev => { const next = new Map(prev); next.delete(name); return next; });
+      } else {
+        triggerAnim(name, 'pop');
+        const id = await onAdd(input);
+        setAddedItems(prev => new Map(prev).set(name, id));
+      }
+    } catch { /* parent handles error */ }
+    setBusy(prev => { const next = new Set(prev); next.delete(name); return next; });
+  }, [addedItems, busy, onAdd, onRemove, triggerAnim]);
+
   const submitTyped = () => {
     const name = value.trim();
     if (!name) return;
     const m = matchCategory(name);
-    onSubmit({
+    toggleItem(name, {
       name, note: '', quantity: '',
       supermarket: 'none',
       category: m.category as CategoryKey,
@@ -81,22 +113,19 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
   };
 
   const submitIcon = (item: IconItem) => {
-    if (addedNames.has(item.name)) return;
     const m = matchCategory(item.name);
-    onSubmit({
+    toggleItem(item.name, {
       name: item.name,
       note: '', quantity: '',
       supermarket: 'none',
       category: (item.category || m.category) as CategoryKey,
       category_emoji: m.emoji
     });
-    setAddedNames(prev => new Set(prev).add(item.name));
   };
 
   const submitFrequent = (f: FrequentItem) => {
-    if (addedNames.has(f.name)) return;
     const m = matchCategory(f.name);
-    onSubmit({
+    toggleItem(f.name, {
       name: f.name,
       note: f.note,
       quantity: '',
@@ -104,7 +133,6 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
       category: m.category as CategoryKey,
       category_emoji: f.category_emoji || m.emoji
     });
-    setAddedNames(prev => new Set(prev).add(f.name));
   };
 
 
@@ -191,33 +219,42 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {frequent.map(f => {
-                  const added = addedNames.has(f.name);
+                  const added = addedItems.has(f.name);
+                  const anim = animating.get(f.name);
                   const iconItem = UNIQUE_ICON_ITEMS.find(i => i.name === f.name);
                   const showIcon = iconItem && !iconErrors.has(iconItem.icon);
                   return (
                     <button
                       key={`${f.name}|${f.note}|${f.supermarket}`}
                       onClick={() => submitFrequent(f)}
-                      className="flex flex-col items-center rounded-2xl p-2 transition-all active:scale-95"
+                      className="flex flex-col items-center rounded-2xl p-2 transition-all"
                       style={{
                         background: added ? 'rgba(124,169,130,0.15)' : 'rgba(255,252,247,0.45)',
                         border: added ? '1px solid rgba(124,169,130,0.3)' : '1px solid rgba(215,205,188,0.35)',
+                        animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
                       }}
                     >
-                      <div className="w-12 h-12 mb-1 flex items-center justify-center">
+                      <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
                         {showIcon ? (
                           <img
                             src={`/icons/${iconItem!.icon}.png`}
                             alt={f.name}
                             className="w-full h-full object-contain rounded-lg"
-                            style={{ mixBlendMode: 'multiply' }}
+                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
                             onError={() => setIconErrors(prev => new Set(prev).add(iconItem!.icon))}
                           />
                         ) : (
-                          <span className="text-2xl">{f.category_emoji}</span>
+                          <span className="text-2xl" style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>{f.category_emoji}</span>
+                        )}
+                        {added && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
+                              <span className="text-white text-xs font-bold">✓</span>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <span className="text-[10px] font-medium truncate w-full text-center" style={{ color: '#5a4e3c' }}>
+                      <span className="text-[10px] font-medium truncate w-full text-center" style={{ color: added ? '#7ca982' : '#5a4e3c' }}>
                         {f.name}
                       </span>
                     </button>
@@ -242,36 +279,45 @@ export function AddSheet({ open, uid, onClose, onSubmit }: Props) {
               </div>
               <div className="grid grid-cols-3 gap-2.5">
                 {group.items.map((item) => {
-                  const added = addedNames.has(item.name);
+                  const added = addedItems.has(item.name);
+                  const anim = animating.get(item.name);
                   const hasIconFile = !iconErrors.has(item.icon);
                   return (
                     <button
                       key={item.name}
                       onClick={() => submitIcon(item)}
-                      className="flex flex-col items-center rounded-[18px] p-2.5 transition-all active:scale-95"
+                      className="flex flex-col items-center rounded-[18px] p-2.5 transition-all"
                       style={{
                         background: added ? 'rgba(124,169,130,0.15)' : 'rgba(255,252,247,0.45)',
                         border: added ? '1px solid rgba(124,169,130,0.3)' : '1px solid rgba(215,205,188,0.35)',
+                        animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
                       }}
                     >
-                      <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center">
+                      <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center relative">
                         {hasIconFile ? (
                           <img
                             src={`/icons/${item.icon}.png`}
                             alt={item.name}
                             className="w-full h-full object-contain rounded-xl"
-                            style={{ mixBlendMode: 'multiply' }}
+                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
                             onError={() => setIconErrors(prev => new Set(prev).add(item.icon))}
                           />
                         ) : (
-                          <span className="text-3xl">📦</span>
+                          <span className="text-3xl" style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>📦</span>
+                        )}
+                        {added && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
+                              <span className="text-white text-sm font-bold">✓</span>
+                            </div>
+                          </div>
                         )}
                       </div>
                       <span
                         className="text-[11px] font-medium"
                         style={{ color: added ? '#7ca982' : '#5a4e3c' }}
                       >
-                        {added ? `✓ ${item.name}` : item.name}
+                        {item.name}
                       </span>
                     </button>
                   );

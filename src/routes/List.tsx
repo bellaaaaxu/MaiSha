@@ -71,18 +71,19 @@ export default function ListRoute() {
     }
   };
 
-  const onAdd = async (input: NewItemInput) => {
-    try {
-      await addItem(list.id, uid, input);
-      recordItemUsage(uid, {
-        name: input.name,
-        note: input.note ?? '',
-        supermarket: input.supermarket ?? 'none',
-        category_emoji: input.category_emoji ?? '📦'
-      });
-    } catch {
-      alert('添加失败');
-    }
+  const onAdd = async (input: NewItemInput): Promise<string> => {
+    const item = await addItem(list.id, uid, input);
+    recordItemUsage(uid, {
+      name: input.name,
+      note: input.note ?? '',
+      supermarket: input.supermarket ?? 'none',
+      category_emoji: input.category_emoji ?? '📦'
+    });
+    return item.id;
+  };
+
+  const onRemoveAdded = async (itemId: string) => {
+    await deleteItem(itemId);
   };
 
   const onShareMenu = async () => {
@@ -236,7 +237,8 @@ export default function ListRoute() {
           open={showAdd}
           uid={uid}
           onClose={() => setShowAdd(false)}
-          onSubmit={onAdd}
+          onAdd={onAdd}
+          onRemove={onRemoveAdded}
         />
 
         <ItemMenu

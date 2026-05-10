@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { AddSheet } from '@/components/AddSheet';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { getIconPath } from '@/utils/icon-registry';
+import type { NewItemInput } from '@/types/item';
 
 const MOCK_LIST = [
-  { name: '西红柿', note: '2斤', quantity: '', category_emoji: '🥬', checked: false },
-  { name: '鸡蛋', note: '', quantity: '1盒', category_emoji: '🥩', checked: false },
-  { name: '五花肉', note: '', quantity: '500g', category_emoji: '🥩', checked: false },
-  { name: '牛奶', note: '', quantity: '2盒', category_emoji: '🥛', checked: false },
-  { name: '洋葱', note: '紫皮', quantity: '', category_emoji: '🥬', checked: true },
-  { name: '大米', note: '', quantity: '5kg', category_emoji: '🍚', checked: true },
+  { id: '1', name: '西红柿', note: '2斤', quantity: '', category_emoji: '🥬', checked: false },
+  { id: '2', name: '鸡蛋', note: '', quantity: '1盒', category_emoji: '🥩', checked: false },
+  { id: '3', name: '五花肉', note: '', quantity: '500g', category_emoji: '🥩', checked: false },
+  { id: '4', name: '牛奶', note: '', quantity: '2盒', category_emoji: '🥛', checked: false },
+  { id: '5', name: '洋葱', note: '紫皮', quantity: '', category_emoji: '🥬', checked: true },
+  { id: '6', name: '大米', note: '', quantity: '5kg', category_emoji: '🍚', checked: true },
 ];
 
 function MockItemRow({ item, onToggle }: { item: typeof MOCK_LIST[0]; onToggle: () => void }) {
@@ -184,8 +185,13 @@ export default function IconPreview() {
         open={showAdd}
         uid="preview-user"
         onClose={() => setShowAdd(false)}
-        onSubmit={(input) => {
-          setItems(prev => [...prev, { name: input.name, note: input.note || '', quantity: input.quantity || '', category_emoji: input.category_emoji || '📦', checked: false }]);
+        onAdd={async (input: NewItemInput) => {
+          const id = crypto.randomUUID();
+          setItems(prev => [...prev, { name: input.name, note: input.note || '', quantity: input.quantity || '', category_emoji: input.category_emoji || '📦', checked: false, id }]);
+          return id;
+        }}
+        onRemove={async (itemId: string) => {
+          setItems(prev => prev.filter(i => i.id !== itemId));
         }}
       />
 
