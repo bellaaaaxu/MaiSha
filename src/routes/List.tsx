@@ -236,6 +236,7 @@ export default function ListRoute() {
         <AddSheet
           open={showAdd}
           uid={uid}
+          supermarkets={list.supermarkets}
           onClose={() => setShowAdd(false)}
           onAdd={onAdd}
           onRemove={onRemoveAdded}

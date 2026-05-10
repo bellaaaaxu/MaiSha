@@ -184,6 +184,11 @@ export default function IconPreview() {
       <AddSheet
         open={showAdd}
         uid="preview-user"
+        supermarkets={[
+          { id: 'tnt', name: 'T&T 大统华', emoji: '🥬' },
+          { id: 'costco', name: 'Costco', emoji: '🏬' },
+          { id: 'none', name: '未分类', emoji: '❓' },
+        ]}
         onClose={() => setShowAdd(false)}
         onAdd={async (input: NewItemInput) => {
           const id = crypto.randomUUID();
