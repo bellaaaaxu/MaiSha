@@ -37,7 +37,15 @@ function AuthedApp() {
       </div>
     );
   }
-  if (!uid) return null;
+  if (!uid) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-sm text-center" style={{ color: '#a0937e' }}>
+          连接失败，请检查网络后刷新页面
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-mobile min-h-screen">

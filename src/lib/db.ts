@@ -31,10 +31,10 @@ export async function getOrCreateList(uid: string): Promise<List> {
   return created as List;
 }
 
-export async function joinList(listId: string): Promise<List> {
+export async function joinList(listId: string): Promise<List | null> {
   const { data, error } = await supabase.rpc('join_list', { p_list_id: listId });
   if (error) throw error;
-  return data as List;
+  return data as List | null;
 }
 
 export async function fetchItems(listId: string): Promise<Item[]> {

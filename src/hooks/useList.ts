@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { getOrCreateList, joinList } from '@/lib/db';
 import type { List } from '@/types/list';
 
+const STORAGE_KEY = 'maisha:list-id';
+
 export function useList(uid: string | null, joinListId: string | null) {
   const [list, setList] = useState<List | null>(null);
   const [loading, setLoading] = useState(true);
@@ -12,12 +14,26 @@ export function useList(uid: string | null, joinListId: string | null) {
     let cancelled = false;
     (async () => {
       try {
-        if (joinListId) {
-          const joined = await joinList(joinListId);
-          if (!cancelled) { setList(joined); setLoading(false); return; }
+        const listId = joinListId || localStorage.getItem(STORAGE_KEY);
+
+        if (listId) {
+          const joined = await joinList(listId);
+          if (cancelled) return;
+          if (joined) {
+            localStorage.setItem(STORAGE_KEY, joined.id);
+            setList(joined);
+            setLoading(false);
+            return;
+          }
+          // list_id invalid or deleted — clear stored value
+          localStorage.removeItem(STORAGE_KEY);
         }
+
         const mine = await getOrCreateList(uid);
-        if (!cancelled) { setList(mine); setLoading(false); }
+        if (cancelled) return;
+        localStorage.setItem(STORAGE_KEY, mine.id);
+        setList(mine);
+        setLoading(false);
       } catch (err) {
         if (!cancelled) { setError((err as Error).message); setLoading(false); }
       }

@@ -58,7 +58,13 @@ export default function ListRoute() {
   if (listErr) {
     return <div className="p-8 text-center text-danger text-sm">{listErr}</div>;
   }
-  if (!list || !uid) return null;
+  if (!list || !uid) {
+    return (
+      <div className="p-8 text-center text-sm" style={{ color: '#a0937e' }}>
+        找不到这个清单，请让家人重新分享链接
+      </div>
+    );
+  }
 
   const onToggle = async (item: Item) => {
     try {
