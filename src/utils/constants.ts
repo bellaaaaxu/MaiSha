@@ -26,7 +26,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   { key: '调料',   emoji: '🧂', keywords: ['盐', '糖', '酱油', '醋', '料酒', '生抽', '老抽', '味精', '鸡精', '花椒', '八角'] },
   { key: '零食',   emoji: '🍪', keywords: ['巧克力', '薯片', '糖果', '坚果', '瓜子'] },
   { key: '饮料',   emoji: '🥤', keywords: ['可乐', '雪碧', '茶', '咖啡', '果汁', '矿泉水', '汽水'] },
-  { key: '日用',   emoji: '🧻', keywords: ['纸巾', '卷纸', '洗衣液', '洗洁精', '牙膏', '牙刷', '洗发水', '沐浴露', '卫生巾'] }
+  { key: '日用',   emoji: '🧻', keywords: ['纸巾', '卷纸', '洗衣液', '洗衣球', '洗衣凝珠', '洗洁精', '牙膏', '牙刷', '洗发水', '护发素', '沐浴露', '卫生巾'] }
 ];
 
 export const FALLBACK_CATEGORY: CategoryKey = '其他';
