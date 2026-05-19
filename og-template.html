@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  .card {
+    width: 1200px;
+    height: 630px;
+    background: linear-gradient(135deg, #faf6f0 0%, #f3ede4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* subtle grid pattern */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, #e0d8cc 0.8px, transparent 0.8px);
+    background-size: 24px 24px;
+    opacity: 0.3;
+  }
+
+  /* scattered grocery icons */
+  .icons {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .icons img {
+    position: absolute;
+    mix-blend-mode: multiply;
+    opacity: 0.18;
+    filter: saturate(0.7);
+  }
+  .icons img:nth-child(1)  { width: 90px; top: 20px; left: 30px; transform: rotate(-15deg); }
+  .icons img:nth-child(2)  { width: 80px; top: 50px; left: 180px; transform: rotate(10deg); }
+  .icons img:nth-child(3)  { width: 85px; top: 10px; left: 350px; transform: rotate(-8deg); }
+  .icons img:nth-child(4)  { width: 75px; top: 60px; left: 520px; transform: rotate(20deg); }
+  .icons img:nth-child(5)  { width: 90px; top: 15px; left: 700px; transform: rotate(-12deg); }
+  .icons img:nth-child(6)  { width: 80px; top: 45px; left: 880px; transform: rotate(5deg); }
+  .icons img:nth-child(7)  { width: 85px; top: 20px; left: 1060px; transform: rotate(-18deg); }
+  .icons img:nth-child(8)  { width: 80px; bottom: 30px; left: 50px; transform: rotate(12deg); }
+  .icons img:nth-child(9)  { width: 90px; bottom: 15px; left: 220px; transform: rotate(-10deg); }
+  .icons img:nth-child(10) { width: 75px; bottom: 50px; left: 400px; transform: rotate(15deg); }
+  .icons img:nth-child(11) { width: 85px; bottom: 25px; left: 580px; transform: rotate(-7deg); }
+  .icons img:nth-child(12) { width: 80px; bottom: 40px; left: 760px; transform: rotate(22deg); }
+  .icons img:nth-child(13) { width: 90px; bottom: 10px; left: 940px; transform: rotate(-14deg); }
+  .icons img:nth-child(14) { width: 75px; bottom: 35px; left: 1100px; transform: rotate(8deg); }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    border-radius: 28px;
+    padding: 48px 72px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .logo {
+    width: 88px;
+    height: 88px;
+    background: #07c160;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(7,193,96,0.3);
+  }
+  .logo span {
+    font-size: 52px;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .title-zh {
+    font-size: 56px;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+  .title-en {
+    font-size: 28px;
+    font-weight: 600;
+    color: #07c160;
+    letter-spacing: 1px;
+  }
+
+  .tagline {
+    font-size: 22px;
+    color: #666;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .badge {
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-green {
+    background: #07c160;
+    color: white;
+  }
+  .badge-outline {
+    background: transparent;
+    border: 2px solid #07c160;
+    color: #07c160;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icons">
+    <img src="icons/tomato.png" />
+    <img src="icons/eggs.png" />
+    <img src="icons/milk.png" />
+    <img src="icons/rice.png" />
+    <img src="icons/garlic.png" />
+    <img src="icons/onion.png" />
+    <img src="icons/ginger.png" />
+    <img src="icons/pork-belly.png" />
+    <img src="icons/scallion.png" />
+    <img src="icons/daikon.png" />
+    <img src="icons/chives.png" />
+    <img src="icons/whole-chicken.png" />
+    <img src="icons/beef-short-ribs.png" />
+    <img src="icons/baby-cabbage.png" />
+  </div>
+  <div class="content">
+    <div class="logo-row">
+      <div class="logo"><span>买</span></div>
+      <div class="title">
+        <div class="title-zh">买啥</div>
+        <div class="title-en">MaiSha</div>
+      </div>
+    </div>
+    <div class="tagline">Real-Time Shared Shopping List for Households</div>
+    <div class="badges">
+      <span class="badge badge-green">PWA</span>
+      <span class="badge badge-outline">Real-Time Sync</span>
+      <span class="badge badge-outline">Collaborative</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
