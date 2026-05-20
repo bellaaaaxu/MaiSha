@@ -28,6 +28,22 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
+          // Specific: custom icons — cache-first for offline access
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/custom-icons\/.*/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'custom-icons',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // General: Supabase API — network-first
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/,
             handler: 'NetworkFirst',
@@ -35,7 +51,7 @@ export default defineConfig({
               cacheName: 'supabase-api',
               networkTimeoutSeconds: 3
             }
-          }
+          },
         ]
       }
     })
