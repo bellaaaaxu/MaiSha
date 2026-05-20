@@ -157,7 +157,12 @@ Deno.serve(async (req) => {
     const geminiPayload = {
       contents: [{ parts }],
       generationConfig: {
-        responseModalities: ['TEXT', 'IMAGE'],
+        // Use IMAGE-only to force image output; with both modalities the model
+        // sometimes returns just text (e.g. "好的，请看这张插画" with no image).
+        responseModalities: ['IMAGE'],
+        imageConfig: {
+          aspectRatio: '1:1',
+        },
       },
     };
 
