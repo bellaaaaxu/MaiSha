@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { getIconPath } from '@/utils/icon-registry';
+import { resolveIconUrl } from '@/utils/icon-registry';
+import { WatercolorFallback } from '@/components/WatercolorFallback';
 import type { Item } from '@/types/item';
 
 interface Props {
   item: Item;
+  customIconMap?: Map<string, string>;
   onToggle: (item: Item) => void;
   onMenu: (item: Item) => void;
 }
 
-export function ItemRow({ item, onToggle, onMenu }: Props) {
+export function ItemRow({ item, customIconMap, onToggle, onMenu }: Props) {
   const checked = item.checked;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: item.id,
     data: { item }
   });
-  const iconPath = getIconPath(item.name);
+  const iconUrl = resolveIconUrl(item.name, customIconMap);
   const [iconErr, setIconErr] = useState(false);
-  const hasIcon = iconPath && !iconErr;
+  const hasIcon = iconUrl && !iconErr;
 
   return (
     <div
@@ -31,28 +33,28 @@ export function ItemRow({ item, onToggle, onMenu }: Props) {
       }`}
       role="button"
     >
-      {/* icon or emoji */}
+      {/* icon or watercolor fallback */}
       <div
         className={`shrink-0 flex items-center justify-center rounded-xl ${
           checked ? 'opacity-40 grayscale' : ''
         }`}
         style={{
-          width: hasIcon ? 56 : 44,
-          height: hasIcon ? 56 : 44,
-          background: 'rgba(255,252,247,0.5)',
-          border: '1px solid rgba(215,205,188,0.3)',
+          width: hasIcon ? 56 : 48,
+          height: hasIcon ? 56 : 48,
+          background: hasIcon ? 'rgba(255,252,247,0.5)' : 'transparent',
+          border: hasIcon ? '1px solid rgba(215,205,188,0.3)' : 'none',
         }}
       >
         {hasIcon ? (
           <img
-            src={iconPath}
+            src={iconUrl}
             alt=""
             className="w-full h-full object-contain rounded-xl p-1"
             style={{ mixBlendMode: 'multiply' }}
             onError={() => setIconErr(true)}
           />
         ) : (
-          <span className="text-xl">{item.category_emoji}</span>
+          <WatercolorFallback name={item.name} category={item.category} size={48} />
         )}
       </div>
 

@@ -86,6 +86,28 @@ export function getIconPath(name: string): string | null {
   return null;
 }
 
+/**
+ * Resolve icon URL with custom icon support.
+ * Priority: preset icon → custom icon → null (caller renders WatercolorFallback)
+ */
+export function resolveIconUrl(
+  name: string,
+  customIconMap?: Map<string, string>
+): string | null {
+  // 1. Preset icon
+  const preset = getIconPath(name);
+  if (preset) return preset;
+
+  // 2. Custom icon
+  if (customIconMap) {
+    const custom = customIconMap.get(name);
+    if (custom) return custom;
+  }
+
+  // 3. No match — caller should render WatercolorFallback
+  return null;
+}
+
 export function iconExists(icon: string): boolean {
   try {
     const img = new Image();
