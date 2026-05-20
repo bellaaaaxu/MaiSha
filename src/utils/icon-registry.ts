@@ -80,9 +80,9 @@ export const UNIQUE_ICON_ITEMS = ICON_ITEMS;
 
 export function getIconPath(name: string): string | null {
   const exact = ICON_ITEMS.find(i => i.name === name || i.aliases?.includes(name));
-  if (exact) return `/icons/${exact.icon}.png`;
+  if (exact) return `/icons/${exact.icon}.webp`;
   const partial = ICON_ITEMS.find(i => name.includes(i.name) || i.name.includes(name));
-  if (partial) return `/icons/${partial.icon}.png`;
+  if (partial) return `/icons/${partial.icon}.webp`;
   return null;
 }
 

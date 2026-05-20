@@ -457,7 +457,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                       <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
                         {showIcon ? (
                           <img
-                            src={`/icons/${iconItem!.icon}.png`}
+                            src={`/icons/${iconItem!.icon}.webp`}
                             alt={f.name}
                             className="w-full h-full object-contain rounded-lg"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
@@ -518,7 +518,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                       <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center relative">
                         {hasIconFile ? (
                           <img
-                            src={`/icons/${item.icon}.png`}
+                            src={`/icons/${item.icon}.webp`}
                             alt={item.name}
                             className="w-full h-full object-contain rounded-xl"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
