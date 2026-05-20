@@ -90,6 +90,11 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'invalid_input', message: 'Invalid item name' }, 400);
     }
 
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(list_id)) {
+      return jsonResponse({ error: 'invalid_input', message: 'Invalid list_id' }, 400);
+    }
+
     // 3. Verify user is member of list
     const { data: list } = await supabaseService
       .from('lists')

@@ -62,3 +62,35 @@ ALTER TABLE ai_generation_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users read own generation log"
   ON ai_generation_log FOR SELECT
   USING (user_uid = auth.uid()::text);
+
+-- Storage bucket and policies for custom icons
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('custom-icons', 'custom-icons', true, 2097152, ARRAY['image/webp', 'image/jpeg', 'image/png'])
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "list members read custom icons"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'custom-icons'
+    AND (storage.foldername(name))[1] IN (
+      SELECT id::text FROM lists WHERE auth.uid() = ANY(member_uids)
+    )
+  );
+
+CREATE POLICY "list members upload custom icons"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'custom-icons'
+    AND (storage.foldername(name))[1] IN (
+      SELECT id::text FROM lists WHERE auth.uid() = ANY(member_uids)
+    )
+  );
+
+CREATE POLICY "list members delete custom icons"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'custom-icons'
+    AND (storage.foldername(name))[1] IN (
+      SELECT id::text FROM lists WHERE auth.uid() = ANY(member_uids)
+    )
+  );

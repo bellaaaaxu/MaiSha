@@ -19,7 +19,7 @@ interface Props {
   onClose: () => void;
   onAdd: (input: NewItemInput) => Promise<string>;
   onRemove: (itemId: string) => Promise<void>;
-  onIconsChanged: () => void;
+  onIconsChanged: () => void | Promise<void>;
 }
 
 const CATEGORY_ORDER = ['蔬菜', '肉蛋', '乳制品', '主食', '调料', '日用', '烘焙', '饮料'];
@@ -182,7 +182,8 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const handleUploadPhoto = () => {
-    const itemName = pendingItemName; // capture at call time to avoid stale closure
+    const itemName = sanitizeItemName(pendingItemName); // capture and sanitize
+    if (!itemName) return; // refuse to proceed with empty name
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/jpeg,image/png,image/webp';
@@ -206,7 +207,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
         }
 
         await uploadCustomIcon(listId, itemName, compressed, 'upload', uid);
-        onIconsChanged();
+        await onIconsChanged();
 
         // Show preview with stylize option
         setUploadedPreviewUrl(URL.createObjectURL(compressed));
@@ -246,11 +247,11 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     }
   };
 
-  const handleAiAccept = () => {
+  const handleAiAccept = async () => {
     if (!pendingItemName) return; // guard
     // Icon already saved by Edge Function, just add the item
     const m = matchCategory(pendingItemName);
-    onIconsChanged();
+    await onIconsChanged();
     toggleItem(pendingItemName, {
       name: pendingItemName, note: '', quantity: '',
       supermarket: selectedMarket,
