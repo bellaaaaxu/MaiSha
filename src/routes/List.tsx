@@ -198,9 +198,43 @@ export default function ListRoute() {
               共享 · {uncheckedCount}项待买
             </div>
           </div>
-          <div className="flex gap-4">
-            <button onClick={onShareMenu} className="text-xl active:opacity-60" aria-label="分享">📤</button>
-            <button onClick={() => setShowMore(true)} className="text-xl active:opacity-60" style={{ color: '#a0937e' }} aria-label="更多">⋯</button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => nav('/icons')}
+              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
+              style={{
+                minWidth: 40,
+                minHeight: 40,
+                padding: '6px 10px',
+                background: 'rgba(255,252,247,0.7)',
+                border: '1px solid rgba(215,205,188,0.4)',
+              }}
+              aria-label="图标管理"
+            >🎨</button>
+            <button
+              onClick={onShareMenu}
+              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
+              style={{
+                minWidth: 40,
+                minHeight: 40,
+                padding: '6px 10px',
+                background: 'rgba(255,252,247,0.7)',
+                border: '1px solid rgba(215,205,188,0.4)',
+              }}
+              aria-label="分享"
+            >📤</button>
+            <button
+              onClick={() => setShowMore(true)}
+              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
+              style={{
+                minWidth: 40,
+                minHeight: 40,
+                padding: '6px 10px',
+                background: 'rgba(255,252,247,0.7)',
+                border: '1px solid rgba(215,205,188,0.4)',
+              }}
+              aria-label="更多"
+            >⚙️</button>
           </div>
         </header>
 
