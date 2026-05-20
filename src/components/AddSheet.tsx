@@ -9,6 +9,8 @@ import { AiPreviewModal } from '@/components/AiPreviewModal';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/image-utils';
 import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits } from '@/lib/custom-icons';
+import { useLongPress } from '@/hooks/useLongPress';
+import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
 
 interface Props {
   open: boolean;
@@ -52,6 +54,61 @@ function groupByCategory(items: IconItem[]) {
   return groups;
 }
 
+interface IconButtonProps {
+  iconUrl: string | null;
+  itemName: string;
+  category: string;
+  added: boolean;
+  anim: 'pop' | 'remove' | undefined;
+  onTap: () => void;
+  onLongPress: (preview: { url: string; name: string; subtitle: string }) => void;
+  size: 'frequent' | 'grid';
+  children: React.ReactNode;
+}
+
+function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPress, size, children }: IconButtonProps) {
+  const { handlers, isPressing, isLongPressed } = useLongPress(() => {
+    onLongPress({
+      url: iconUrl ?? '',
+      name: itemName,
+      subtitle: iconUrl ? `${category} · 预设图标` : `${category} · 水彩兜底`,
+    });
+  });
+
+  const isFrequent = size === 'frequent';
+
+  return (
+    <button
+      {...handlers}
+      onClick={(e) => {
+        if (isLongPressed) {
+          e.preventDefault();
+          return;
+        }
+        onTap();
+      }}
+      className={`flex flex-col items-center transition-all ${
+        isFrequent ? 'rounded-2xl p-2' : 'rounded-[18px] p-2.5'
+      }`}
+      style={{
+        background: added ? 'rgba(124,169,130,0.15)' : 'rgba(255,252,247,0.45)',
+        border: added ? '1px solid rgba(124,169,130,0.3)' : '1px solid rgba(215,205,188,0.35)',
+        transform: isPressing ? 'scale(0.95)' : 'scale(1)',
+        transition: 'transform 200ms ease, background 200ms ease',
+        animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
+      }}
+    >
+      {children}
+      <span
+        className={`font-medium ${isFrequent ? 'text-[10px] truncate w-full text-center' : 'text-[11px]'}`}
+        style={{ color: added ? '#7ca982' : '#5a4e3c' }}
+      >
+        {itemName}
+      </span>
+    </button>
+  );
+}
+
 export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged }: Props) {
   const [value, setValue] = useState('');
   const [frequent, setFrequent] = useState<FrequentItem[]>([]);
@@ -70,6 +127,8 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const [aiError, setAiError] = useState<string | null>(null);
   const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
   const [showStylize, setShowStylize] = useState(false);
+  const [previewIcon, setPreviewIcon] = useState<{ url: string; name: string; subtitle: string } | null>(null);
+  const [showPreviewHint, setShowPreviewHint] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -100,6 +159,30 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       setShowStylize(false);
     }
   }, [open]);
+
+  // First-time long-press hint
+  useEffect(() => {
+    if (open && !localStorage.getItem('maisha:preview-hint-seen')) {
+      setShowPreviewHint(true);
+      const t = window.setTimeout(() => {
+        setShowPreviewHint(false);
+        localStorage.setItem('maisha:preview-hint-seen', '1');
+      }, 4000);
+      return () => window.clearTimeout(t);
+    }
+  }, [open]);
+
+  // Dismiss preview on global pointer release
+  useEffect(() => {
+    if (!previewIcon) return;
+    const handler = () => setPreviewIcon(null);
+    window.addEventListener('pointerup', handler);
+    window.addEventListener('pointercancel', handler);
+    return () => {
+      window.removeEventListener('pointerup', handler);
+      window.removeEventListener('pointercancel', handler);
+    };
+  }, [previewIcon]);
 
   const filtered = useMemo(() => {
     const q = value.trim();
@@ -443,21 +526,23 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                   const anim = animating.get(f.name);
                   const iconItem = UNIQUE_ICON_ITEMS.find(i => i.name === f.name);
                   const showIcon = iconItem && !iconErrors.has(iconItem.icon);
+                  const iconUrl = showIcon ? `/icons/${iconItem!.icon}.webp` : null;
                   return (
-                    <button
+                    <IconButton
                       key={`${f.name}|${f.note}|${f.supermarket}`}
-                      onClick={() => submitFrequent(f)}
-                      className="flex flex-col items-center rounded-2xl p-2 transition-all"
-                      style={{
-                        background: added ? 'rgba(124,169,130,0.15)' : 'rgba(255,252,247,0.45)',
-                        border: added ? '1px solid rgba(124,169,130,0.3)' : '1px solid rgba(215,205,188,0.35)',
-                        animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
-                      }}
+                      iconUrl={iconUrl}
+                      itemName={f.name}
+                      category="其他"
+                      added={added}
+                      anim={anim}
+                      size="frequent"
+                      onTap={() => submitFrequent(f)}
+                      onLongPress={setPreviewIcon}
                     >
                       <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
                         {showIcon ? (
                           <img
-                            src={`/icons/${iconItem!.icon}.webp`}
+                            src={iconUrl!}
                             alt={f.name}
                             className="w-full h-full object-contain rounded-lg"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
@@ -476,10 +561,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                           </div>
                         )}
                       </div>
-                      <span className="text-[10px] font-medium truncate w-full text-center" style={{ color: added ? '#7ca982' : '#5a4e3c' }}>
-                        {f.name}
-                      </span>
-                    </button>
+                    </IconButton>
                   );
                 })}
               </div>
@@ -504,21 +586,23 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                   const added = addedItems.has(item.name);
                   const anim = animating.get(item.name);
                   const hasIconFile = !iconErrors.has(item.icon);
+                  const iconUrl = hasIconFile ? `/icons/${item.icon}.webp` : null;
                   return (
-                    <button
+                    <IconButton
                       key={item.name}
-                      onClick={() => submitIcon(item)}
-                      className="flex flex-col items-center rounded-[18px] p-2.5 transition-all"
-                      style={{
-                        background: added ? 'rgba(124,169,130,0.15)' : 'rgba(255,252,247,0.45)',
-                        border: added ? '1px solid rgba(124,169,130,0.3)' : '1px solid rgba(215,205,188,0.35)',
-                        animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
-                      }}
+                      iconUrl={iconUrl}
+                      itemName={item.name}
+                      category={item.category}
+                      added={added}
+                      anim={anim}
+                      size="grid"
+                      onTap={() => submitIcon(item)}
+                      onLongPress={setPreviewIcon}
                     >
                       <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center relative">
                         {hasIconFile ? (
                           <img
-                            src={`/icons/${item.icon}.webp`}
+                            src={iconUrl!}
                             alt={item.name}
                             className="w-full h-full object-contain rounded-xl"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
@@ -537,13 +621,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                           </div>
                         )}
                       </div>
-                      <span
-                        className="text-[11px] font-medium"
-                        style={{ color: added ? '#7ca982' : '#5a4e3c' }}
-                      >
-                        {item.name}
-                      </span>
-                    </button>
+                    </IconButton>
                   );
                 })}
               </div>
@@ -574,6 +652,21 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
             </div>
           )}
         </div>
+
+        {/* First-time long-press hint */}
+        {showPreviewHint && (
+          <div
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-2 rounded-full text-xs whitespace-nowrap"
+            style={{
+              background: 'rgba(0,0,0,0.7)',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              animation: 'fadeInOut 4s ease',
+            }}
+          >
+            💡 长按图标可预览大图
+          </div>
+        )}
       </div>
 
       {/* AI preview modal */}
@@ -589,6 +682,13 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
         onSkip={handleAiSkip}
         showStylize={showStylize}
         onStylize={handleStylize}
+      />
+
+      {/* Long-press icon preview overlay */}
+      <IconPreviewOverlay
+        iconUrl={previewIcon?.url || null}
+        itemName={previewIcon?.name || ''}
+        subtitle={previewIcon?.subtitle}
       />
     </div>
   );
