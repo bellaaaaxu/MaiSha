@@ -17,6 +17,7 @@ import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { SupermarketCard } from '@/components/SupermarketCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
+import { SetIconSheet } from '@/components/SetIconSheet';
 import { MoreMenu } from '@/components/MoreMenu';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { groupItemsByMarketAndCategory } from '@/utils/group-items';
@@ -38,6 +39,7 @@ export default function ListRoute() {
   const [showAdd, setShowAdd] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [menuItem, setMenuItem] = useState<Item | null>(null);
+  const [setIconItem, setSetIconItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
 
@@ -140,6 +142,10 @@ export default function ListRoute() {
 
   const onMenuEdit = (item: Item) => {
     nav(`/edit-item/${item.id}`);
+  };
+
+  const onMenuSetIcon = (item: Item) => {
+    setSetIconItem(item);
   };
 
   const onDragStart = (e: DragStartEvent) => {
@@ -260,6 +266,15 @@ export default function ListRoute() {
           onEdit={onMenuEdit}
           onDelete={onMenuDelete}
           onDuplicate={onMenuDuplicate}
+          onSetIcon={onMenuSetIcon}
+        />
+
+        <SetIconSheet
+          item={setIconItem}
+          uid={uid}
+          listId={list.id}
+          onClose={() => setSetIconItem(null)}
+          onIconsChanged={refreshIcons}
         />
 
         <MoreMenu
