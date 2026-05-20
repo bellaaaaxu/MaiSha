@@ -140,22 +140,28 @@ Deno.serve(async (req) => {
       }, 429);
     }
 
-    // 5. Build prompt and call Gemini Imagen API
+    // 5. Build prompt and call Gemini Image API
     const promptTemplate = reference_image ? PROMPT_WITH_REF : PROMPT_WITHOUT_REF;
     const prompt = promptTemplate.replace('{item_name}', sanitizedName);
 
-    const geminiPayload: Record<string, unknown> = {
-      instances: [{ prompt }],
-      parameters: { sampleCount: 1, aspectRatio: '1:1' },
-    };
-
+    const parts: Record<string, unknown>[] = [{ text: prompt }];
     if (reference_image) {
-      (geminiPayload.instances as Record<string, unknown>[])[0].image = {
-        bytesBase64Encoded: reference_image,
-      };
+      parts.push({
+        inline_data: {
+          mime_type: 'image/jpeg',
+          data: reference_image,
+        },
+      });
     }
 
-    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`;
+    const geminiPayload = {
+      contents: [{ parts }],
+      generationConfig: {
+        responseModalities: ['TEXT', 'IMAGE'],
+      },
+    };
+
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`;
 
     const geminiRes = await fetch(geminiEndpoint, {
       method: 'POST',
@@ -170,8 +176,15 @@ Deno.serve(async (req) => {
     }
 
     const geminiData = await geminiRes.json();
-    const imageBase64 = geminiData.predictions?.[0]?.bytesBase64Encoded;
+    const responseParts = geminiData.candidates?.[0]?.content?.parts ?? [];
+    // The response may have a mix of text and image parts; find the image part.
+    // Google APIs may return snake_case (inline_data) or camelCase (inlineData).
+    const imagePart = responseParts.find((p: Record<string, any>) =>
+      p.inline_data?.data || p.inlineData?.data
+    );
+    const imageBase64 = imagePart?.inline_data?.data ?? imagePart?.inlineData?.data;
     if (!imageBase64) {
+      console.error('No image in Gemini response:', JSON.stringify(geminiData).slice(0, 500));
       return jsonResponse({ error: 'generation_failed', message: 'No image returned' }, 502);
     }
 
