@@ -5,6 +5,7 @@ import EditItem from './routes/EditItem';
 import ManageMarkets from './routes/ManageMarkets';
 import Settings from './routes/Settings';
 import IconPreview from './routes/IconPreview';
+import IconLibrary from './routes/IconLibrary';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAuth } from './hooks/useAuth';
 
@@ -56,6 +57,7 @@ function AuthedApp() {
         <Route path="/edit-item/:id" element={<EditItem />} />
         <Route path="/manage-markets" element={<ManageMarkets />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/icons" element={<IconLibrary />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>
