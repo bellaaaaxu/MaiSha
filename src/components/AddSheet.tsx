@@ -80,10 +80,26 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       setIconErrors(new Set());
       setSelectedMarket('none');
       getRemainingCredits(uid).then(setRemainingCredits).catch(() => {});
-    } else {
-      setValue('');
     }
   }, [open, uid]);
+
+  // Reset custom-icon state when sheet closes
+  useEffect(() => {
+    if (!open) {
+      setValue('');
+      setShowIconPicker(false);
+      setPendingItemName('');
+      setAiModalOpen(false);
+      setAiLoading(false);
+      setAiError(null);
+      setAiImageUrl(null);
+      setUploadedPreviewUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setShowStylize(false);
+    }
+  }, [open]);
 
   const filtered = useMemo(() => {
     const q = value.trim();
@@ -129,7 +145,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
 
     // Check if preset or custom icon exists
     const hasPreset = UNIQUE_ICON_ITEMS.some(
-      i => i.name === name || i.aliases?.includes(name) || name.includes(i.name) || i.name.includes(name)
+      i => i.name === name || i.aliases?.includes(name)
     );
     const hasCustom = customIconMap.has(name);
 
@@ -152,6 +168,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const handleSkipIcon = () => {
+    if (!pendingItemName) return; // guard
     const m = matchCategory(pendingItemName);
     toggleItem(pendingItemName, {
       name: pendingItemName, note: '', quantity: '',
@@ -165,6 +182,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const handleUploadPhoto = () => {
+    const itemName = pendingItemName; // capture at call time to avoid stale closure
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/jpeg,image/png,image/webp';
@@ -179,14 +197,15 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
         const cropped = await cropToSquare(file);
         const compressed = await processImageForUpload(cropped);
 
-        // Check for existing icon with same name
-        const existing = await findExistingIcon(listId, pendingItemName);
+        // Note: findExistingIcon is also called inside uploadCustomIcon for storage cleanup.
+        // We do this query separately here to show the confirmation prompt before any work.
+        const existing = await findExistingIcon(listId, itemName);
         if (existing) {
-          const confirmReplace = window.confirm(`「${pendingItemName}」已有自定义图标，要替换吗？`);
+          const confirmReplace = window.confirm(`「${itemName}」已有自定义图标，要替换吗？`);
           if (!confirmReplace) return;
         }
 
-        await uploadCustomIcon(listId, pendingItemName, compressed, 'upload', uid);
+        await uploadCustomIcon(listId, itemName, compressed, 'upload', uid);
         onIconsChanged();
 
         // Show preview with stylize option
@@ -228,6 +247,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const handleAiAccept = () => {
+    if (!pendingItemName) return; // guard
     // Icon already saved by Edge Function, just add the item
     const m = matchCategory(pendingItemName);
     onIconsChanged();
@@ -243,6 +263,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const handleUploadAccept = () => {
+    if (!pendingItemName) return; // guard
     // Photo already uploaded, just add the item
     const m = matchCategory(pendingItemName);
     toggleItem(pendingItemName, {
@@ -252,6 +273,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       category_emoji: m.emoji
     });
     setAiModalOpen(false);
+    if (uploadedPreviewUrl) URL.revokeObjectURL(uploadedPreviewUrl);
     setUploadedPreviewUrl(null);
     setShowStylize(false);
     setPendingItemName('');
@@ -266,6 +288,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = (reader.result as string).split(',')[1];
+        if (uploadedPreviewUrl) URL.revokeObjectURL(uploadedPreviewUrl);
         setUploadedPreviewUrl(null);
         setShowStylize(false);
         handleAiGenerate(base64);

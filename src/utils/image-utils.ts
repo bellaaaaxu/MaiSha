@@ -30,6 +30,7 @@ export async function cropToSquare(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
+      URL.revokeObjectURL(img.src);
       const size = Math.min(img.width, img.height);
       const x = (img.width - size) / 2;
       const y = (img.height - size) / 2;
