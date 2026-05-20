@@ -184,6 +184,7 @@ export default function IconPreview() {
       <AddSheet
         open={showAdd}
         uid="preview-user"
+        listId="preview-list"
         supermarkets={[
           { id: 'tnt', name: 'T&T 大统华', emoji: '🥬' },
           { id: 'yc', name: '元初', emoji: '🛒' },
@@ -191,6 +192,7 @@ export default function IconPreview() {
           { id: 'wholefoods', name: 'Whole Foods', emoji: '🥗' },
           { id: 'none', name: '未分类', emoji: '❓' },
         ]}
+        customIconMap={new Map()}
         onClose={() => setShowAdd(false)}
         onAdd={async (input: NewItemInput) => {
           const id = crypto.randomUUID();
@@ -200,6 +202,7 @@ export default function IconPreview() {
         onRemove={async (itemId: string) => {
           setItems(prev => prev.filter(i => i.id !== itemId));
         }}
+        onIconsChanged={() => {}}
       />
 
       <ConfirmModal

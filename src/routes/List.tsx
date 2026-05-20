@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { useItems } from '@/hooks/useItems';
+import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { SupermarketCard } from '@/components/SupermarketCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
@@ -32,6 +33,7 @@ export default function ListRoute() {
   const { uid } = useAuth();
   const { list, loading: listLoading, error: listErr } = useList(uid, joinListId);
   const { items, loading: itemsLoading } = useItems(list?.id ?? null);
+  const { iconMap: customIconMap, refresh: refreshIcons } = useCustomIcons(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -208,6 +210,7 @@ export default function ListRoute() {
               <SupermarketCard
                 key={g.supermarket.id}
                 group={g}
+                customIconMap={customIconMap}
                 onToggle={onToggle}
                 onMenu={setMenuItem}
               />
@@ -242,10 +245,13 @@ export default function ListRoute() {
         <AddSheet
           open={showAdd}
           uid={uid}
+          listId={list.id}
           supermarkets={list.supermarkets}
+          customIconMap={customIconMap}
           onClose={() => setShowAdd(false)}
           onAdd={onAdd}
           onRemove={onRemoveAdded}
+          onIconsChanged={refreshIcons}
         />
 
         <ItemMenu

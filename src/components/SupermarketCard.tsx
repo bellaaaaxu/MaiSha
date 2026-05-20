@@ -6,6 +6,7 @@ import type { Item } from '@/types/item';
 
 interface Props {
   group: MarketGroup;
+  customIconMap?: Map<string, string>;
   onToggle: (item: Item) => void;
   onMenu: (item: Item) => void;
 }
@@ -24,7 +25,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   '其他': '#999',
 };
 
-export function SupermarketCard({ group, onToggle, onMenu }: Props) {
+export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const { isOver, setNodeRef } = useDroppable({ id: group.supermarket.id });
   const isEmpty = group.totalCount === 0;
@@ -84,7 +85,7 @@ export function SupermarketCard({ group, onToggle, onMenu }: Props) {
                 </span>
               </div>
               {cat.items.map(item => (
-                <ItemRow key={item.id} item={item} onToggle={onToggle} onMenu={onMenu} />
+                <ItemRow key={item.id} item={item} customIconMap={customIconMap} onToggle={onToggle} onMenu={onMenu} />
               ))}
             </div>
           ))}

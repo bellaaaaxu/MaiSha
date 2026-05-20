@@ -4,14 +4,22 @@ import { matchCategory } from '@/utils/category-matcher';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput, CategoryKey } from '@/types/item';
 import type { Supermarket } from '@/types/supermarket';
+import { IconPickerPanel } from '@/components/IconPickerPanel';
+import { AiPreviewModal } from '@/components/AiPreviewModal';
+import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/image-utils';
+import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits } from '@/lib/custom-icons';
 
 interface Props {
   open: boolean;
   uid: string;
+  listId: string;
   supermarkets: Supermarket[];
+  customIconMap: Map<string, string>;
   onClose: () => void;
   onAdd: (input: NewItemInput) => Promise<string>;
   onRemove: (itemId: string) => Promise<void>;
+  onIconsChanged: () => void;
 }
 
 const CATEGORY_ORDER = ['蔬菜', '肉蛋', '乳制品', '主食', '调料', '日用', '烘焙', '饮料'];
@@ -44,7 +52,7 @@ function groupByCategory(items: IconItem[]) {
   return groups;
 }
 
-export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: Props) {
+export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged }: Props) {
   const [value, setValue] = useState('');
   const [frequent, setFrequent] = useState<FrequentItem[]>([]);
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
@@ -52,6 +60,16 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
   const [busy, setBusy] = useState<Set<string>>(new Set());
   const [iconErrors, setIconErrors] = useState<Set<string>>(new Set());
   const [selectedMarket, setSelectedMarket] = useState<string>('none');
+  const [showIconPicker, setShowIconPicker] = useState(false);
+  const [pendingItemName, setPendingItemName] = useState('');
+  const [pendingCategory, setPendingCategory] = useState<CategoryKey>('其他');
+  const [remainingCredits, setRemainingCredits] = useState(5);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
+  const [showStylize, setShowStylize] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -61,6 +79,7 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
       setBusy(new Set());
       setIconErrors(new Set());
       setSelectedMarket('none');
+      getRemainingCredits(uid).then(setRemainingCredits).catch(() => {});
     } else {
       setValue('');
     }
@@ -107,6 +126,22 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
     const name = value.trim();
     if (!name) return;
     const m = matchCategory(name);
+
+    // Check if preset or custom icon exists
+    const hasPreset = UNIQUE_ICON_ITEMS.some(
+      i => i.name === name || i.aliases?.includes(name) || name.includes(i.name) || i.name.includes(name)
+    );
+    const hasCustom = customIconMap.has(name);
+
+    if (!hasPreset && !hasCustom) {
+      // Show icon picker panel
+      setPendingItemName(name);
+      setPendingCategory(m.category as CategoryKey);
+      setShowIconPicker(true);
+      return;
+    }
+
+    // Has icon — add directly
     toggleItem(name, {
       name, note: '', quantity: '',
       supermarket: selectedMarket,
@@ -114,6 +149,136 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
       category_emoji: m.emoji
     });
     setValue('');
+  };
+
+  const handleSkipIcon = () => {
+    const m = matchCategory(pendingItemName);
+    toggleItem(pendingItemName, {
+      name: pendingItemName, note: '', quantity: '',
+      supermarket: selectedMarket,
+      category: pendingCategory,
+      category_emoji: m.emoji
+    });
+    setShowIconPicker(false);
+    setPendingItemName('');
+    setValue('');
+  };
+
+  const handleUploadPhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        alert('图片大小不能超过 2MB');
+        return;
+      }
+      try {
+        const cropped = await cropToSquare(file);
+        const compressed = await processImageForUpload(cropped);
+
+        // Check for existing icon with same name
+        const existing = await findExistingIcon(listId, pendingItemName);
+        if (existing) {
+          const confirmReplace = window.confirm(`「${pendingItemName}」已有自定义图标，要替换吗？`);
+          if (!confirmReplace) return;
+        }
+
+        await uploadCustomIcon(listId, pendingItemName, compressed, 'upload', uid);
+        onIconsChanged();
+
+        // Show preview with stylize option
+        setUploadedPreviewUrl(URL.createObjectURL(compressed));
+        setShowStylize(true);
+        setAiModalOpen(true);
+        setShowIconPicker(false);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        alert('上传失败，请重试');
+      }
+    };
+    input.click();
+  };
+
+  const handleAiGenerate = async (referenceImageBase64?: string) => {
+    setAiModalOpen(true);
+    setShowIconPicker(false);
+    setAiLoading(true);
+    setAiError(null);
+    setAiImageUrl(null);
+    setShowStylize(false);
+
+    try {
+      const sanitized = sanitizeItemName(pendingItemName);
+      const result = await generateIcon(sanitized, listId, referenceImageBase64);
+      setAiImageUrl(result.image_url);
+      setRemainingCredits(result.remaining_today);
+    } catch (err: any) {
+      if (err.code === 'RATE_LIMIT') {
+        setAiError('今日生成额度已用完');
+        setRemainingCredits(0);
+      } else {
+        setAiError('生成失败，请稍后重试');
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAiAccept = () => {
+    // Icon already saved by Edge Function, just add the item
+    const m = matchCategory(pendingItemName);
+    onIconsChanged();
+    toggleItem(pendingItemName, {
+      name: pendingItemName, note: '', quantity: '',
+      supermarket: selectedMarket,
+      category: pendingCategory,
+      category_emoji: m.emoji
+    });
+    setAiModalOpen(false);
+    setPendingItemName('');
+    setValue('');
+  };
+
+  const handleUploadAccept = () => {
+    // Photo already uploaded, just add the item
+    const m = matchCategory(pendingItemName);
+    toggleItem(pendingItemName, {
+      name: pendingItemName, note: '', quantity: '',
+      supermarket: selectedMarket,
+      category: pendingCategory,
+      category_emoji: m.emoji
+    });
+    setAiModalOpen(false);
+    setUploadedPreviewUrl(null);
+    setShowStylize(false);
+    setPendingItemName('');
+    setValue('');
+  };
+
+  const handleStylize = async () => {
+    if (!uploadedPreviewUrl) return;
+    try {
+      const response = await fetch(uploadedPreviewUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        setUploadedPreviewUrl(null);
+        setShowStylize(false);
+        handleAiGenerate(base64);
+      };
+      reader.readAsDataURL(blob);
+    } catch {
+      alert('转换失败，请重试');
+    }
+  };
+
+  const handleAiSkip = () => {
+    handleSkipIcon();
+    setAiModalOpen(false);
   };
 
   const submitIcon = (item: IconItem) => {
@@ -275,7 +440,9 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
                             onError={() => setIconErrors(prev => new Set(prev).add(iconItem!.icon))}
                           />
                         ) : (
-                          <span className="text-2xl" style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>{f.category_emoji}</span>
+                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
+                            <WatercolorFallback name={f.name} category="其他" size={40} />
+                          </div>
                         )}
                         {added && (
                           <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
@@ -334,7 +501,9 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
                             onError={() => setIconErrors(prev => new Set(prev).add(item.icon))}
                           />
                         ) : (
-                          <span className="text-3xl" style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>📦</span>
+                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
+                            <WatercolorFallback name={item.name} category={item.category} size={56} />
+                          </div>
                         )}
                         {added && (
                           <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
@@ -357,6 +526,18 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
             </div>
           ))}
 
+          {/* custom icon picker */}
+          {showIconPicker && pendingItemName && (
+            <IconPickerPanel
+              itemName={pendingItemName}
+              category={pendingCategory}
+              remainingCredits={remainingCredits}
+              onUpload={handleUploadPhoto}
+              onAiGenerate={() => handleAiGenerate()}
+              onSkip={handleSkipIcon}
+            />
+          )}
+
           {/* no results */}
           {value && groups.length === 0 && (
             <div className="py-8 text-center">
@@ -370,6 +551,21 @@ export function AddSheet({ open, uid, supermarkets, onClose, onAdd, onRemove }: 
           )}
         </div>
       </div>
+
+      {/* AI preview modal */}
+      <AiPreviewModal
+        open={aiModalOpen}
+        itemName={pendingItemName}
+        imageUrl={uploadedPreviewUrl ?? aiImageUrl}
+        loading={aiLoading}
+        error={aiError}
+        remainingCredits={remainingCredits}
+        onAccept={uploadedPreviewUrl ? handleUploadAccept : handleAiAccept}
+        onRetry={() => handleAiGenerate()}
+        onSkip={handleAiSkip}
+        showStylize={showStylize}
+        onStylize={handleStylize}
+      />
     </div>
   );
 }
