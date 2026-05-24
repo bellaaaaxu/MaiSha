@@ -188,13 +188,29 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     };
   }, [previewIcon]);
 
+  const allIcons = useMemo<IconItem[]>(() => {
+    const customNames = new Set(customIconMap.keys());
+    // Custom icons as synthetic IconItems
+    const customIcons: IconItem[] = Array.from(customIconMap.entries()).map(([name, url]) => ({
+      name,
+      icon: '',         // unused when iconUrl is set
+      iconUrl: url,
+      category: matchCategory(name).category,
+    }));
+    // Preset icons, excluding any whose names are overridden by custom
+    const presets = UNIQUE_ICON_ITEMS.filter(i =>
+      !customNames.has(i.name) && !i.aliases?.some(a => customNames.has(a))
+    );
+    return [...customIcons, ...presets];
+  }, [customIconMap]);
+
   const filtered = useMemo(() => {
     const q = value.trim();
-    if (!q) return UNIQUE_ICON_ITEMS;
-    return UNIQUE_ICON_ITEMS.filter(i =>
+    if (!q) return allIcons;
+    return allIcons.filter(i =>
       i.name.includes(q) || i.aliases?.some(a => a.includes(q))
     );
-  }, [value]);
+  }, [value, allIcons]);
 
   const groups = useMemo(() => groupByCategory(filtered), [filtered]);
 
@@ -528,9 +544,13 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                 {frequent.map(f => {
                   const added = addedItems.has(f.name);
                   const anim = animating.get(f.name);
-                  const iconItem = UNIQUE_ICON_ITEMS.find(i => i.name === f.name);
-                  const showIcon = iconItem && !iconErrors.has(iconItem.icon);
-                  const iconUrl = showIcon ? `/icons/${iconItem!.icon}.webp` : null;
+                  // Check custom first, then preset
+                  const customUrl = customIconMap.get(f.name);
+                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === f.name || i.aliases?.includes(f.name)) : null;
+                  const freqErrorKey = customUrl ? `custom:${f.name}` : presetItem?.icon ?? '';
+                  const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
+                  const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
+                  const iconUrl = showIcon ? iconSrc : null;
                   return (
                     <IconButton
                       key={`${f.name}|${f.note}|${f.supermarket}`}
@@ -551,7 +571,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                             draggable={false}
                             className="w-full h-full object-contain rounded-lg pointer-events-none"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                            onError={() => setIconErrors(prev => new Set(prev).add(iconItem!.icon))}
+                            onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
                           />
                         ) : (
                           <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
@@ -590,8 +610,11 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                 {group.items.map((item) => {
                   const added = addedItems.has(item.name);
                   const anim = animating.get(item.name);
-                  const hasIconFile = !iconErrors.has(item.icon);
-                  const iconUrl = hasIconFile ? `/icons/${item.icon}.webp` : null;
+                  // Custom icons use iconUrl directly; preset icons build path from filename stem.
+                  // Error tracking key is the icon stem (preset) or name (custom) to distinguish.
+                  const errorKey = item.iconUrl ? `custom:${item.name}` : item.icon;
+                  const hasIconFile = !iconErrors.has(errorKey);
+                  const iconUrl = item.iconUrl ?? (hasIconFile ? `/icons/${item.icon}.webp` : null);
                   return (
                     <IconButton
                       key={item.name}
@@ -612,7 +635,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                             draggable={false}
                             className="w-full h-full object-contain rounded-xl pointer-events-none"
                             style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                            onError={() => setIconErrors(prev => new Set(prev).add(item.icon))}
+                            onError={() => setIconErrors(prev => new Set(prev).add(errorKey))}
                           />
                         ) : (
                           <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>

@@ -1,6 +1,7 @@
 export interface IconItem {
   name: string;
-  icon: string;
+  icon: string;              // filename stem for /icons/{icon}.webp
+  iconUrl?: string;          // full URL (custom icons); takes precedence when present
   category: string;
   aliases?: string[];
 }
@@ -88,22 +89,20 @@ export function getIconPath(name: string): string | null {
 
 /**
  * Resolve icon URL with custom icon support.
- * Priority: preset icon → custom icon → null (caller renders WatercolorFallback)
+ * Priority: custom icon → preset icon → null (caller renders WatercolorFallback)
  */
 export function resolveIconUrl(
   name: string,
   customIconMap?: Map<string, string>
 ): string | null {
-  // 1. Preset icon
-  const preset = getIconPath(name);
-  if (preset) return preset;
-
-  // 2. Custom icon
+  // 1. Custom icon (user's explicit choice for this list, may override preset)
   if (customIconMap) {
     const custom = customIconMap.get(name);
     if (custom) return custom;
   }
-
+  // 2. Preset icon
+  const preset = getIconPath(name);
+  if (preset) return preset;
   // 3. No match — caller should render WatercolorFallback
   return null;
 }
