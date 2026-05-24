@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
 import { matchCategory } from '@/utils/category-matcher';
+import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
+import { calculateFrequentlyBought } from '@/utils/frequently-bought';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput, CategoryKey } from '@/types/item';
 import type { Supermarket } from '@/types/supermarket';
@@ -135,6 +137,12 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const [showStylize, setShowStylize] = useState(false);
   const [previewIcon, setPreviewIcon] = useState<{ url: string; name: string; subtitle: string } | null>(null);
   const [showPreviewHint, setShowPreviewHint] = useState(false);
+
+  const { history } = usePurchaseHistory(listId);
+  const frequentlyBought = useMemo(
+    () => calculateFrequentlyBought(history, 8),
+    [history]
+  );
 
   useEffect(() => {
     if (open) {
@@ -537,7 +545,97 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
 
         {/* scrollable content */}
         <div className="flex-1 overflow-y-auto px-5 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {/* frequent items */}
+          {/* frequently bought (history-based) */}
+          {!value && frequentlyBought.length > 0 && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
+                  <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
+                    常买
+                  </span>
+                </div>
+                <button
+                  onClick={async () => {
+                    for (const item of frequentlyBought) {
+                      if (!addedItems.has(item.name)) {
+                        const cat = matchCategory(item.name);
+                        await onAdd({
+                          name: item.name,
+                          category: cat.category,
+                          category_emoji: item.category_emoji,
+                          supermarket: selectedMarket,
+                        });
+                      }
+                    }
+                  }}
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(124,169,130,0.1)', color: '#7ca982' }}
+                >
+                  全部加上
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {frequentlyBought.map(item => {
+                  const added = addedItems.has(item.name);
+                  const anim = animating.get(item.name);
+                  const customUrl = customIconMap.get(item.name);
+                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === item.name || i.aliases?.includes(item.name)) : null;
+                  const freqErrorKey = customUrl ? `custom:${item.name}` : presetItem?.icon ?? '';
+                  const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
+                  const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
+                  const iconUrl = showIcon ? iconSrc : null;
+                  return (
+                    <IconButton
+                      key={`fb-${item.name}`}
+                      iconUrl={iconUrl}
+                      itemName={item.name}
+                      category={item.category}
+                      added={added}
+                      anim={anim}
+                      size="frequent"
+                      onTap={() => {
+                        const cat = matchCategory(item.name);
+                        toggleItem(item.name, {
+                          name: item.name,
+                          note: '',
+                          quantity: '',
+                          supermarket: selectedMarket,
+                          category: cat.category as CategoryKey,
+                          category_emoji: item.category_emoji,
+                        });
+                      }}
+                      onLongPress={setPreviewIcon}
+                    >
+                      <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
+                        {showIcon ? (
+                          <img
+                            src={iconUrl!}
+                            alt={item.name}
+                            draggable={false}
+                            className="w-full h-full object-contain rounded-lg pointer-events-none"
+                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
+                            onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
+                          />
+                        ) : (
+                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
+                            <WatercolorFallback name={item.name} category={item.category} size={40} />
+                          </div>
+                        )}
+                        {added && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
+                            <span style={{ color: '#7ca982', fontSize: 20 }}>✓</span>
+                          </div>
+                        )}
+                      </div>
+                    </IconButton>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* frequent items (local usage history) */}
           {!value && frequent.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2.5 px-1">
