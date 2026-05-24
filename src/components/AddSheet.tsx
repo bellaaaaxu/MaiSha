@@ -87,6 +87,7 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
         }
         onTap();
       }}
+      onContextMenu={(e) => e.preventDefault()}
       className={`flex flex-col items-center transition-all ${
         isFrequent ? 'rounded-2xl p-2' : 'rounded-[18px] p-2.5'
       }`}
@@ -96,6 +97,9 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
         transform: isPressing ? 'scale(0.95)' : 'scale(1)',
         transition: 'transform 200ms ease, background 200ms ease',
         animation: anim === 'pop' ? 'addPop 0.4s ease' : anim === 'remove' ? 'addShake 0.3s ease' : 'none',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
       }}
     >
       {children}
@@ -544,8 +548,9 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                           <img
                             src={iconUrl!}
                             alt={f.name}
-                            className="w-full h-full object-contain rounded-lg"
-                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
+                            draggable={false}
+                            className="w-full h-full object-contain rounded-lg pointer-events-none"
+                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
                             onError={() => setIconErrors(prev => new Set(prev).add(iconItem!.icon))}
                           />
                         ) : (
@@ -604,8 +609,9 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                           <img
                             src={iconUrl!}
                             alt={item.name}
-                            className="w-full h-full object-contain rounded-xl"
-                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
+                            draggable={false}
+                            className="w-full h-full object-contain rounded-xl pointer-events-none"
+                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
                             onError={() => setIconErrors(prev => new Set(prev).add(item.icon))}
                           />
                         ) : (

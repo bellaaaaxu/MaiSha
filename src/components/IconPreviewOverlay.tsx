@@ -56,8 +56,9 @@ export function IconPreviewOverlay({ iconUrl, itemName, subtitle }: Props) {
             <img
               src={iconUrl}
               alt={itemName}
+              draggable={false}
               className="w-full h-full object-contain p-3"
-              style={{ mixBlendMode: 'multiply' }}
+              style={{ mixBlendMode: 'multiply', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none', pointerEvents: 'none' }}
             />
           )}
         </div>
