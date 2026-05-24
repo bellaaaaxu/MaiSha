@@ -7,6 +7,8 @@ import Settings from './routes/Settings';
 import IconPreview from './routes/IconPreview';
 import IconLibrary from './routes/IconLibrary';
 import ShoppingMode from '@/routes/ShoppingMode';
+import PurchaseHistory from '@/routes/PurchaseHistory';
+import PurchaseHistoryDetail from '@/routes/PurchaseHistoryDetail';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAuth } from './hooks/useAuth';
 
@@ -60,6 +62,8 @@ function AuthedApp() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/icons" element={<IconLibrary />} />
         <Route path="/shopping/:marketId" element={<ShoppingMode />} />
+        <Route path="/history" element={<PurchaseHistory />} />
+        <Route path="/history/:id" element={<PurchaseHistoryDetail />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>
