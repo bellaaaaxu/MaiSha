@@ -14,14 +14,14 @@ alter table public.purchase_history enable row level security;
 create policy "Members can read history" on public.purchase_history
   for select using (
     list_id in (
-      select id from public.lists where member_uids @> array[auth.uid()]
+      select id from public.lists where auth.uid() = ANY(member_uids)
     )
   );
 
 create policy "Members can insert history" on public.purchase_history
   for insert with check (
     list_id in (
-      select id from public.lists where member_uids @> array[auth.uid()]
+      select id from public.lists where auth.uid() = ANY(member_uids)
     )
   );
 

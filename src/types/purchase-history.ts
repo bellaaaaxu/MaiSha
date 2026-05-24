@@ -1,11 +1,6 @@
-export interface HistoryItemSnapshot {
-  name: string;
-  quantity: string;
-  note: string;
-  category: string;
-  category_emoji: string;
-  checked: boolean;
-}
+import type { Item } from './item';
+
+export type HistoryItemSnapshot = Pick<Item, 'name' | 'quantity' | 'note' | 'category' | 'category_emoji' | 'checked'>;
 
 export interface PurchaseHistory {
   id: string;
