@@ -87,7 +87,7 @@ export default function ShoppingMode() {
   };
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: '#faf6f0' }}>
+    <div className="min-h-screen pb-8 page-enter" style={{ background: '#faf6f0' }}>
       {/* Top bar */}
       <div
         className="sticky top-0 z-10 px-4 pt-5 pb-3"
@@ -198,11 +198,17 @@ function ItemCard({
 }) {
   const iconUrl = resolveIconUrl(item.name, customIconMap);
   const [iconErr, setIconErr] = useState(false);
+  const [justChecked, setJustChecked] = useState(false);
   const hasIcon = iconUrl && !iconErr;
+
+  const handleToggle = () => {
+    if (!item.checked) setJustChecked(true);
+    onToggle(item);
+  };
 
   return (
     <button
-      onClick={() => onToggle(item)}
+      onClick={handleToggle}
       className="relative rounded-2xl p-2 text-center active:scale-95 transition-transform"
       style={{
         background: dimmed ? 'rgba(255,252,247,0.4)' : 'rgba(255,252,247,0.7)',
@@ -223,8 +229,12 @@ function ItemCard({
         ) : (
           <WatercolorFallback name={item.name} category={item.category} size={72} />
         )}
-        {checked && (
-          <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,169,130,0.35)' }}>
+        {(checked || justChecked) && (
+          <div
+            className={`absolute inset-0 rounded-xl flex items-center justify-center ${justChecked ? 'animate-ink-spread' : ''}`}
+            style={{ background: 'rgba(124,169,130,0.35)' }}
+            onAnimationEnd={() => setJustChecked(false)}
+          >
             <span className="text-2xl text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>✓</span>
           </div>
         )}

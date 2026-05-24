@@ -61,7 +61,7 @@ export function ShoppingEndModal({
       >
         {allDone ? (
           <>
-            <div className="text-5xl mb-3">{celebration.emoji}</div>
+            <div className="text-5xl mb-3 animate-celebration">{celebration.emoji}</div>
             <h3 className="text-lg font-bold mb-1" style={{ color: '#5a4e3c' }}>购物完成</h3>
             <p className="text-sm mb-6" style={{ color: '#a0937e' }}>
               {celebration.text}
