@@ -12,6 +12,7 @@ import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits }
 import { useLongPress } from '@/hooks/useLongPress';
 import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
 import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
+import { getAddSheetTitle } from '@/utils/warm-copy';
 
 interface Props {
   open: boolean;
@@ -466,7 +467,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
         {/* header */}
         <div className="flex justify-between items-center px-5 pb-2">
           <div className="text-base font-semibold" style={{ color: '#5a4e3c' }}>
-            添加物品
+            {getAddSheetTitle()}
           </div>
           <button
             onClick={onClose}

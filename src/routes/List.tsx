@@ -24,6 +24,7 @@ import { groupItemsByMarketAndCategory } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { generateShareText } from '@/utils/share-text';
+import { getEmptyListText, getEmptyListSubtext, getHeaderSubtext, getFinishShoppingText } from '@/utils/warm-copy';
 import type { Item, NewItemInput } from '@/types/item';
 
 export default function ListRoute() {
@@ -195,7 +196,7 @@ export default function ListRoute() {
           <div className="flex-1">
             <div className="text-lg font-semibold" style={{ color: '#5a4e3c' }}>买啥</div>
             <div className="text-xs" style={{ color: '#a0937e' }}>
-              共享 · {uncheckedCount}项待买
+              {getHeaderSubtext(uncheckedCount)}
             </div>
           </div>
           <div className="flex gap-2">
@@ -242,8 +243,8 @@ export default function ListRoute() {
           {groups.length === 0 ? (
             <div className="py-24 text-center">
               <div className="text-6xl mb-4">🛒</div>
-              <div className="text-base" style={{ color: '#a0937e' }}>清单是空的</div>
-              <div className="text-xs mt-1" style={{ color: '#c4b49a' }}>点底部 + 添加第一项</div>
+              <div className="text-base" style={{ color: '#a0937e' }}>{getEmptyListText()}</div>
+              <div className="text-xs mt-1" style={{ color: '#c4b49a' }}>{getEmptyListSubtext()}</div>
             </div>
           ) : (
             groups.map(g => (
@@ -270,7 +271,7 @@ export default function ListRoute() {
               className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
               style={{ background: 'rgba(255,252,247,0.7)', color: '#7a6e5d', border: '1px solid rgba(215,205,188,0.4)' }}
             >
-              🛍️ 完成采购，清掉 {checkedCount} 项
+              {getFinishShoppingText(checkedCount)}
             </button>
           )}
           <button
@@ -317,6 +318,7 @@ export default function ListRoute() {
           onCopyShareText={onCopyShareText}
           onManageMarkets={() => nav('/manage-markets')}
           onSettings={() => nav('/settings')}
+          onHistory={() => nav('/history')}
         />
 
         <ConfirmModal
