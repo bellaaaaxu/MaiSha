@@ -50,10 +50,10 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
         ...(isOver ? { ringColor: '#7ca982' } : {}),
       }}
     >
-      <button
+      <div
         onClick={() => !isEmpty && setCollapsed(c => !c)}
         className={`w-full flex items-center gap-2 ${
-          isEmpty ? '' : 'pb-2 mb-2'
+          isEmpty ? '' : 'pb-2 mb-2 cursor-pointer'
         }`}
         style={isEmpty ? {} : { borderBottom: '1px solid rgba(215,205,188,0.3)' }}
       >
@@ -83,7 +83,7 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
             </span>
           </>
         )}
-      </button>
+      </div>
       {!collapsed && !isEmpty && (
         <div>
           {group.categories.map(cat => (
