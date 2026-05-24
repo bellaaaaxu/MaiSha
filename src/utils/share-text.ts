@@ -26,7 +26,7 @@ export function generateShareText(
   const groups = groupItemsByMarketAndCategory(unchecked, supermarkets);
   const lines: string[] = [`🛒 买啥 · ${fmtDate(now)} 购物清单`, ''];
   for (const g of groups) {
-    lines.push(`${g.supermarket.emoji} ${g.supermarket.name}`);
+    lines.push(`【${g.supermarket.name}】`);
     for (const c of g.categories) {
       for (const it of c.items) {
         lines.push(`  • ${fmtItem(it)}`);

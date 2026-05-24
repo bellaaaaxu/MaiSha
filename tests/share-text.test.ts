@@ -31,7 +31,7 @@ describe('generateShareText', () => {
     const t = generateShareText(items, markets, new Date(2026, 3, 23));
     expect(t).toContain('买啥');
     expect(t).toContain('4/23');
-    expect(t).toContain('🥬 菜场');
+    expect(t).toContain('【菜场】');
     expect(t).toContain('青菜');
   });
 
@@ -57,6 +57,6 @@ describe('generateShareText', () => {
       mk({ id: '2', name: '牛奶', supermarket: 'hm' })
     ];
     const t = generateShareText(items, markets, new Date(2026, 3, 23));
-    expect(t.indexOf('🛒 盒马')).toBeLessThan(t.indexOf('🥬 菜场'));
+    expect(t.indexOf('【盒马】')).toBeLessThan(t.indexOf('【菜场】'));
   });
 });

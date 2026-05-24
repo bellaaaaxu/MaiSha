@@ -55,7 +55,6 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
         }`}
         style={isEmpty ? {} : { borderBottom: '1px solid rgba(215,205,188,0.3)' }}
       >
-        <span className="text-base">{group.supermarket.emoji}</span>
         <span
           className="text-base font-semibold"
           style={{ color: isEmpty ? '#a0937e' : '#5a4e3c' }}

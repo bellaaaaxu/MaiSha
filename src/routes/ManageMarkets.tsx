@@ -1,5 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { updateListSupermarkets } from '@/lib/db';
@@ -13,102 +29,228 @@ export default function ManageMarkets() {
 
   const [items, setItems] = useState<Supermarket[]>([]);
   const [newName, setNewName] = useState('');
-  const [newEmoji, setNewEmoji] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (list) setItems(JSON.parse(JSON.stringify(list.supermarkets)));
   }, [list]);
 
+  // Custom markets are sortable; "未分类" is pinned at the bottom
+  const customMarkets = useMemo(
+    () => items.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
+    [items]
+  );
+  const fallbackMarket = useMemo(
+    () => items.find(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+    [items]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } })
+  );
+
   if (!list) return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
 
-  const rename = (idx: number, val: string) => {
-    const next = items.slice();
-    next[idx] = { ...next[idx], name: val };
-    setItems(next);
+  const rename = (id: string, val: string) => {
+    setItems(items.map(s => s.id === id ? { ...s, name: val } : s));
   };
 
-  const remove = (idx: number) => {
-    if (items[idx].id === UNDELETABLE_SUPERMARKET_ID) {
+  const remove = (id: string) => {
+    if (id === UNDELETABLE_SUPERMARKET_ID) {
       alert('"未分类"不可删');
       return;
     }
-    const next = items.slice();
-    next.splice(idx, 1);
-    setItems(next);
+    if (!confirm('删除这个超市？已分配到这里的物品会回到"未分类"。')) return;
+    setItems(items.filter(s => s.id !== id));
   };
 
   const add = () => {
     if (!newName.trim()) return;
-    setItems([...items, {
+    const newMarket: Supermarket = {
       id: 'sm_' + Date.now().toString(36),
       name: newName.trim(),
-      emoji: newEmoji.trim() || '🏪'
-    }]);
+      emoji: '🏪',  // kept in data model for backward compat, not displayed
+    };
+    // Insert before "未分类"
+    setItems([...customMarkets, newMarket, ...(fallbackMarket ? [fallbackMarket] : [])]);
     setNewName('');
-    setNewEmoji('');
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIndex = customMarkets.findIndex(s => s.id === active.id);
+    const newIndex = customMarkets.findIndex(s => s.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(customMarkets, oldIndex, newIndex);
+    setItems([...reordered, ...(fallbackMarket ? [fallbackMarket] : [])]);
   };
 
   const save = async () => {
+    setSaving(true);
     try {
-      await updateListSupermarkets(list.id, items);
-      alert('已保存');
+      // Persist: custom markets in their reordered sequence, "未分类" at the end
+      const toSave = [...customMarkets, ...(fallbackMarket ? [fallbackMarket] : [])];
+      await updateListSupermarkets(list.id, toSave);
       nav(-1);
     } catch {
       alert('保存失败');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="p-4 min-h-screen pb-24">
-      <header className="flex items-center mb-4">
-        <button onClick={() => nav(-1)} className="text-primary text-sm mr-3">‹ 返回</button>
-        <div className="text-base font-semibold">管理超市</div>
+    <div
+      className="min-h-screen pb-24"
+      style={{ background: 'linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%)' }}
+    >
+      <header
+        className="px-4 py-3 flex items-center sticky top-0 z-10 gap-3"
+        style={{
+          background: 'rgba(250,246,240,0.9)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(215,205,188,0.3)',
+        }}
+      >
+        <button
+          onClick={() => nav(-1)}
+          className="text-xl active:opacity-60"
+          style={{ color: '#a0937e' }}
+          aria-label="返回"
+        >
+          ←
+        </button>
+        <div className="flex-1 text-base font-semibold" style={{ color: '#5a4e3c' }}>
+          管理超市
+        </div>
       </header>
 
-      {items.map((s, idx) => (
-        <div key={s.id} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 mb-1.5">
-          <span className="text-xl">{s.emoji}</span>
-          <input
-            className="flex-1 bg-transparent text-sm outline-none"
-            value={s.name}
-            onChange={(e) => rename(idx, e.target.value)}
-            disabled={s.id === UNDELETABLE_SUPERMARKET_ID}
-          />
-          {s.id === UNDELETABLE_SUPERMARKET_ID ? (
-            <span className="text-xs text-gray-400">系统</span>
-          ) : (
-            <button onClick={() => remove(idx)} className="text-xs text-danger">删除</button>
-          )}
+      <main className="p-4">
+        <div className="text-xs mb-3 px-1" style={{ color: '#a0937e' }}>
+          长按 <span style={{ color: '#7ca982' }}>⋮⋮</span> 拖动排序，"未分类"固定在底部
         </div>
-      ))}
 
-      <div className="flex gap-2 mt-4 mb-6">
-        <input
-          className="flex-1 px-3 py-2.5 bg-white rounded-xl text-sm outline-none"
-          placeholder="新超市名（如：Walmart）"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-        />
-        <input
-          className="w-20 px-2 py-2.5 bg-white rounded-xl text-sm text-center outline-none"
-          placeholder="emoji"
-          maxLength={2}
-          value={newEmoji}
-          onChange={(e) => setNewEmoji(e.target.value)}
-        />
-        <button
-          onClick={add}
-          className="px-4 bg-green-50 text-primary-dark rounded-xl text-sm font-medium"
-        >
-          添加
-        </button>
-      </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={customMarkets.map(s => s.id)} strategy={verticalListSortingStrategy}>
+            {customMarkets.map(s => (
+              <SortableRow
+                key={s.id}
+                market={s}
+                onRename={(v) => rename(s.id, v)}
+                onRemove={() => remove(s.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
 
-      <button
-        onClick={save}
-        className="w-full h-12 bg-primary text-white rounded-xl font-semibold text-sm"
+        {/* Fallback "未分类" row (not draggable, pinned at bottom) */}
+        {fallbackMarket && (
+          <div
+            className="flex items-center gap-3 rounded-2xl p-3 mb-2"
+            style={{
+              background: 'rgba(245,238,228,0.6)',
+              border: '1px dashed rgba(215,205,188,0.5)',
+            }}
+          >
+            <span style={{ color: '#c4b49a' }}>🔒</span>
+            <span className="flex-1 text-sm" style={{ color: '#a0937e' }}>
+              {fallbackMarket.name}
+            </span>
+            <span className="text-[10px]" style={{ color: '#c4b49a' }}>系统 · 固定底部</span>
+          </div>
+        )}
+
+        {/* Add new */}
+        <div className="flex gap-2 mt-5 mb-3">
+          <input
+            className="flex-1 px-3 py-3 rounded-xl text-sm outline-none"
+            style={{
+              background: 'rgba(255,252,247,0.8)',
+              border: '1px solid rgba(215,205,188,0.4)',
+              color: '#5a4e3c',
+            }}
+            placeholder="新超市名（如：Walmart）"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
+          />
+          <button
+            onClick={add}
+            disabled={!newName.trim()}
+            className="px-4 rounded-xl text-sm font-medium text-white active:opacity-80 disabled:opacity-40"
+            style={{ background: '#7ca982' }}
+          >
+            添加
+          </button>
+        </div>
+      </main>
+
+      <footer
+        className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3"
+        style={{ background: 'linear-gradient(to top, #f3ede4 60%, transparent)' }}
       >
-        保存
+        <button
+          onClick={save}
+          disabled={saving}
+          className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90 disabled:opacity-50"
+          style={{ background: '#7ca982' }}
+        >
+          {saving ? '保存中…' : '保存'}
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+interface SortableRowProps {
+  market: Supermarket;
+  onRename: (val: string) => void;
+  onRemove: () => void;
+}
+
+function SortableRow({ market, onRename, onRemove }: SortableRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: market.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    background: 'rgba(255,252,247,0.7)',
+    border: '1px solid rgba(215,205,188,0.4)',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 rounded-2xl p-3 mb-2"
+    >
+      {/* Drag handle (only this area triggers drag, so input stays editable) */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing select-none touch-none px-1"
+        style={{ color: '#c4b49a' }}
+        aria-label="拖动排序"
+      >
+        ⋮⋮
+      </button>
+      <input
+        className="flex-1 bg-transparent text-sm outline-none"
+        style={{ color: '#5a4e3c' }}
+        value={market.name}
+        onChange={(e) => onRename(e.target.value)}
+      />
+      <button
+        onClick={onRemove}
+        className="text-xs px-2 py-1 rounded-lg active:opacity-60"
+        style={{ color: '#c97b63' }}
+      >
+        删除
       </button>
     </div>
   );

@@ -97,7 +97,7 @@ export default function EditItem() {
           onChange={(e) => setItem({ ...item, supermarket: e.target.value })}
         >
           {list.supermarkets.map(s => (
-            <option key={s.id} value={s.id}>{s.emoji} {s.name}</option>
+            <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
       </Field>

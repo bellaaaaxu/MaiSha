@@ -21,9 +21,14 @@ export function groupItemsByMarketAndCategory(
 ): MarketGroup[] {
   if (!items.length && !includeEmpty) return [];
 
-  const validIds = new Set(supermarkets.map(s => s.id));
+  // Always render "未分类" (fallback) at the bottom regardless of stored order
+  const sortedMarkets = [
+    ...supermarkets.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
+    ...supermarkets.filter(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+  ];
+  const validIds = new Set(sortedMarkets.map(s => s.id));
   const fallbackId = UNDELETABLE_SUPERMARKET_ID;
-  const marketMap = new Map(supermarkets.map(s => [s.id, s]));
+  const marketMap = new Map(sortedMarkets.map(s => [s.id, s]));
 
   const byMarket = new Map<string, Item[]>();
   for (const it of items) {
@@ -33,7 +38,7 @@ export function groupItemsByMarketAndCategory(
   }
 
   const out: MarketGroup[] = [];
-  for (const s of supermarkets) {
+  for (const s of sortedMarkets) {
     const bucket = byMarket.get(s.id);
     if (!bucket || !bucket.length) {
       if (includeEmpty) {

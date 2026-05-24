@@ -11,6 +11,7 @@ import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/i
 import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits } from '@/lib/custom-icons';
 import { useLongPress } from '@/hooks/useLongPress';
 import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
+import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
 
 interface Props {
   open: boolean;
@@ -187,6 +188,12 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       window.removeEventListener('pointercancel', handler);
     };
   }, [previewIcon]);
+
+  // "未分类" always pinned to the end of the supermarket selector
+  const sortedSupermarkets = useMemo(() => [
+    ...supermarkets.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
+    ...supermarkets.filter(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+  ], [supermarkets]);
 
   const allIcons = useMemo<IconItem[]>(() => {
     const customNames = new Set(customIconMap.keys());
@@ -476,7 +483,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
             添加到
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {supermarkets.map(m => {
+            {sortedSupermarkets.map(m => {
               const active = selectedMarket === m.id;
               return (
                 <button
@@ -489,7 +496,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                     border: active ? '1px solid #7ca982' : '1px solid rgba(215,205,188,0.4)',
                   }}
                 >
-                  <span>{m.emoji}</span>
                   <span>{m.name}</span>
                 </button>
               );
