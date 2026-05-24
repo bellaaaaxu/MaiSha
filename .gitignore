@@ -9,6 +9,6 @@ dist-ssr/
 .vscode/
 *.log
 .superpowers/
-.claude/settings.local.json
+.claude/
 *.tsbuildinfo
 supabase/.temp/
