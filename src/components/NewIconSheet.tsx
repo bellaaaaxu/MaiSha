@@ -11,13 +11,14 @@ interface Props {
   open: boolean;
   uid: string;
   listId: string;
+  initialName?: string;
   onClose: () => void;
   onIconCreated: () => void | Promise<void>;
 }
 
 type Stage = 'name' | 'preset_warn' | 'picker';
 
-export function NewIconSheet({ open, uid, listId, onClose, onIconCreated }: Props) {
+export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCreated }: Props) {
   const [stage, setStage] = useState<Stage>('name');
   const [name, setName] = useState('');
   const [category, setCategory] = useState<CategoryKey>('其他');
@@ -31,8 +32,21 @@ export function NewIconSheet({ open, uid, listId, onClose, onIconCreated }: Prop
 
   useEffect(() => {
     if (open) {
-      setStage('name');
-      setName('');
+      const startName = initialName ?? '';
+      setName(startName);
+      if (startName) {
+        const trimmed = sanitizeItemName(startName);
+        const m = matchCategory(trimmed);
+        setCategory(m.category as CategoryKey);
+        // If preset exists, go to warn stage; otherwise straight to picker
+        if (getIconPath(trimmed)) {
+          setStage('preset_warn');
+        } else {
+          setStage('picker');
+        }
+      } else {
+        setStage('name');
+      }
       getRemainingCredits(uid).then(setRemainingCredits).catch(() => {});
     } else {
       // Cleanup on close
@@ -46,7 +60,7 @@ export function NewIconSheet({ open, uid, listId, onClose, onIconCreated }: Prop
       });
       setShowStylize(false);
     }
-  }, [open, uid]);
+  }, [open, uid, initialName]);
 
   if (!open) return null;
 

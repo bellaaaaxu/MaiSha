@@ -6,6 +6,7 @@ import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { NewIconSheet } from '@/components/NewIconSheet';
 import { deleteCustomIcon, getPublicIconUrl, generateIcon, type CustomIcon } from '@/lib/custom-icons';
 import { formatRelativeDate, formatSourceLabel } from '@/utils/date-format';
+import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 
 export default function IconLibrary() {
   const nav = useNavigate();
@@ -14,8 +15,11 @@ export default function IconLibrary() {
   const { icons, refresh, loading: iconsLoading } = useCustomIcons(list?.id ?? null);
 
   const [showNewSheet, setShowNewSheet] = useState(false);
+  const [newSheetInitialName, setNewSheetInitialName] = useState<string | undefined>(undefined);
   const [menuIcon, setMenuIcon] = useState<CustomIcon | null>(null);
   const [previewIcon, setPreviewIcon] = useState<CustomIcon | null>(null);
+  const [presetMenuItem, setPresetMenuItem] = useState<IconItem | null>(null);
+  const [presetPreview, setPresetPreview] = useState<IconItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   if (listLoading || iconsLoading) {
@@ -31,6 +35,12 @@ export default function IconLibrary() {
 
   const sortedIcons = [...icons].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  // Hide preset icons that have been overridden by a custom icon
+  const customNames = new Set(icons.map(i => i.name));
+  const visiblePresets = UNIQUE_ICON_ITEMS.filter(
+    p => !customNames.has(p.name) && !p.aliases?.some(a => customNames.has(a))
   );
 
   const onRegenerate = async (icon: CustomIcon) => {
@@ -65,6 +75,17 @@ export default function IconLibrary() {
     }
   };
 
+  const onReplacePreset = (item: IconItem) => {
+    setPresetMenuItem(null);
+    setNewSheetInitialName(item.name);
+    setShowNewSheet(true);
+  };
+
+  const openNewSheetFresh = () => {
+    setNewSheetInitialName(undefined);
+    setShowNewSheet(true);
+  };
+
   return (
     <div
       className="min-h-screen pb-8"
@@ -88,10 +109,10 @@ export default function IconLibrary() {
           ←
         </button>
         <div className="flex-1 text-base font-semibold" style={{ color: '#5a4e3c' }}>
-          我的图标
+          图标库
         </div>
         <button
-          onClick={() => setShowNewSheet(true)}
+          onClick={openNewSheetFresh}
           className="rounded-xl px-3 py-1.5 text-xs font-semibold text-white active:opacity-80"
           style={{ background: '#7ca982' }}
         >
@@ -100,32 +121,83 @@ export default function IconLibrary() {
       </header>
 
       <main className="p-4">
-        {sortedIcons.length === 0 ? (
-          <div className="py-24 text-center">
-            <div className="text-6xl mb-4">🎨</div>
-            <div className="text-base mb-1" style={{ color: '#a0937e' }}>还没有自定义图标</div>
-            <div className="text-xs mb-6" style={{ color: '#c4b49a' }}>
-              点右上角 + 新增，上传照片或用 AI 生成
+        {/* Custom icons section */}
+        {sortedIcons.length > 0 && (
+          <section className="mb-6">
+            <div className="flex items-center gap-2 mb-2.5 px-1">
+              <div className="w-1.5 h-4 rounded-full" style={{ background: '#7ca982' }} />
+              <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
+                自定义 · {sortedIcons.length}
+              </span>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
             </div>
-            <button
-              onClick={() => setShowNewSheet(true)}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium text-white active:opacity-80"
-              style={{ background: '#7ca982' }}
-            >
-              新增第一个
-            </button>
+            {sortedIcons.map(icon => (
+              <button
+                key={icon.id}
+                onClick={() => setPreviewIcon(icon)}
+                disabled={busyId === icon.id}
+                className="w-full flex items-center gap-3 p-2.5 mb-2 rounded-2xl active:opacity-80 transition-all"
+                style={{
+                  background: 'rgba(255,252,247,0.6)',
+                  border: '1px solid rgba(215,205,188,0.35)',
+                  opacity: busyId === icon.id ? 0.5 : 1,
+                }}
+              >
+                <div
+                  className="shrink-0 flex items-center justify-center rounded-xl"
+                  style={{
+                    width: 56, height: 56,
+                    background: 'rgba(255,252,247,0.5)',
+                    border: '1px solid rgba(215,205,188,0.3)',
+                  }}
+                >
+                  <img
+                    src={getPublicIconUrl(icon.image_path)}
+                    alt={icon.name}
+                    draggable={false}
+                    className="w-full h-full object-contain rounded-xl p-1 pointer-events-none"
+                    style={{ mixBlendMode: 'multiply' }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="text-sm font-medium" style={{ color: '#5a4e3c' }}>
+                    {icon.name}
+                  </div>
+                  <div className="text-xs mt-0.5" style={{ color: '#a0937e' }}>
+                    {formatSourceLabel(icon.source)} · {formatRelativeDate(icon.created_at)}
+                  </div>
+                </div>
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); setMenuIcon(icon); }}
+                  className="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg active:opacity-50"
+                  style={{ color: '#c4b49a' }}
+                  aria-label="更多操作"
+                >
+                  ⋮
+                </button>
+              </button>
+            ))}
+          </section>
+        )}
+
+        {/* Preset icons section */}
+        <section>
+          <div className="flex items-center gap-2 mb-2.5 px-1">
+            <div className="w-1.5 h-4 rounded-full" style={{ background: '#c4b49a' }} />
+            <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
+              预设 · {visiblePresets.length}
+            </span>
+            <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
           </div>
-        ) : (
-          sortedIcons.map(icon => (
+          {visiblePresets.map(item => (
             <button
-              key={icon.id}
-              onClick={() => setPreviewIcon(icon)}
-              disabled={busyId === icon.id}
+              key={item.icon}
+              onClick={() => setPresetPreview(item)}
               className="w-full flex items-center gap-3 p-2.5 mb-2 rounded-2xl active:opacity-80 transition-all"
               style={{
-                background: 'rgba(255,252,247,0.6)',
-                border: '1px solid rgba(215,205,188,0.35)',
-                opacity: busyId === icon.id ? 0.5 : 1,
+                background: 'rgba(255,252,247,0.4)',
+                border: '1px solid rgba(215,205,188,0.25)',
               }}
             >
               <div
@@ -137,23 +209,24 @@ export default function IconLibrary() {
                 }}
               >
                 <img
-                  src={getPublicIconUrl(icon.image_path)}
-                  alt={icon.name}
-                  className="w-full h-full object-contain rounded-xl p-1"
+                  src={`/icons/${item.icon}.webp`}
+                  alt={item.name}
+                  draggable={false}
+                  className="w-full h-full object-contain rounded-xl p-1 pointer-events-none"
                   style={{ mixBlendMode: 'multiply' }}
                 />
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <div className="text-sm font-medium" style={{ color: '#5a4e3c' }}>
-                  {icon.name}
+                  {item.name}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: '#a0937e' }}>
-                  {formatSourceLabel(icon.source)} · {formatRelativeDate(icon.created_at)}
+                  {item.category} · 预设
                 </div>
               </div>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); setMenuIcon(icon); }}
+                onClick={(e) => { e.stopPropagation(); setPresetMenuItem(item); }}
                 className="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg active:opacity-50"
                 style={{ color: '#c4b49a' }}
                 aria-label="更多操作"
@@ -161,11 +234,11 @@ export default function IconLibrary() {
                 ⋮
               </button>
             </button>
-          ))
-        )}
+          ))}
+        </section>
       </main>
 
-      {/* Row ⋮ menu */}
+      {/* Custom row ⋮ menu */}
       {menuIcon && (
         <div
           className="fixed inset-0 z-50 bg-black/40 flex items-end"
@@ -200,7 +273,36 @@ export default function IconLibrary() {
         </div>
       )}
 
-      {/* Preview overlay */}
+      {/* Preset row ⋮ menu */}
+      {presetMenuItem && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-end"
+          onClick={() => setPresetMenuItem(null)}
+        >
+          <div
+            className="w-full bg-white rounded-t-2xl pb-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="py-3 text-center text-sm text-gray-500 border-b border-gray-100">
+              {presetMenuItem.name}
+            </div>
+            <button
+              onClick={() => onReplacePreset(presetMenuItem)}
+              className="w-full py-4 text-center text-sm border-b border-gray-100 active:bg-gray-50"
+            >
+              🎨 用自定义替换
+            </button>
+            <button
+              onClick={() => setPresetMenuItem(null)}
+              className="w-full py-4 text-center text-sm text-gray-500 mt-2 bg-gray-50"
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom preview overlay */}
       {previewIcon && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -228,7 +330,8 @@ export default function IconLibrary() {
               <img
                 src={getPublicIconUrl(previewIcon.image_path)}
                 alt={previewIcon.name}
-                className="w-full h-full object-contain p-3"
+                draggable={false}
+                className="w-full h-full object-contain p-3 pointer-events-none"
                 style={{ mixBlendMode: 'multiply' }}
               />
             </div>
@@ -253,11 +356,69 @@ export default function IconLibrary() {
         </div>
       )}
 
+      {/* Preset preview overlay */}
+      {presetPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setPresetPreview(null)}
+        >
+          <div
+            className="rounded-2xl p-5 text-center mx-6"
+            style={{
+              background: 'white',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+              minWidth: 240,
+              maxWidth: 320,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="mx-auto mb-3 rounded-2xl flex items-center justify-center"
+              style={{
+                width: 200,
+                height: 200,
+                background: 'rgba(255,252,247,0.8)',
+                border: '1px solid rgba(215,205,188,0.3)',
+              }}
+            >
+              <img
+                src={`/icons/${presetPreview.icon}.webp`}
+                alt={presetPreview.name}
+                draggable={false}
+                className="w-full h-full object-contain p-3 pointer-events-none"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+            </div>
+            <div className="text-base font-semibold" style={{ color: '#5a4e3c' }}>
+              {presetPreview.name}
+            </div>
+            <div className="text-xs mt-1 mb-4" style={{ color: '#a0937e' }}>
+              {presetPreview.category} · 预设
+            </div>
+            <button
+              onClick={() => setPresetPreview(null)}
+              className="w-full py-2.5 rounded-xl text-sm font-medium"
+              style={{
+                background: 'rgba(255,252,247,0.8)',
+                border: '1px solid rgba(215,205,188,0.4)',
+                color: '#5a4e3c',
+              }}
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
+
       <NewIconSheet
         open={showNewSheet}
         uid={uid}
         listId={list.id}
-        onClose={() => setShowNewSheet(false)}
+        initialName={newSheetInitialName}
+        onClose={() => {
+          setShowNewSheet(false);
+          setNewSheetInitialName(undefined);
+        }}
         onIconCreated={refresh}
       />
     </div>
