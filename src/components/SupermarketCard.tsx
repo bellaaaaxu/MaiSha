@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDroppable } from '@dnd-kit/core';
 import { ItemRow } from './ItemRow';
 import type { MarketGroup } from '@/utils/group-items';
@@ -27,6 +28,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Props) {
   const [collapsed, setCollapsed] = useState(false);
+  const nav = useNavigate();
   const { isOver, setNodeRef } = useDroppable({ id: group.supermarket.id });
   const isEmpty = group.totalCount === 0;
 
@@ -66,7 +68,19 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
         ) : (
           <>
             <span className="text-xs ml-1" style={{ color: '#a0937e' }}>· {group.totalCount}项</span>
-            <span className="ml-auto text-xs" style={{ color: '#c4b49a' }}>{collapsed ? '▸' : '▾'}</span>
+            <span className="ml-auto flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nav(`/shopping/${group.supermarket.id}`);
+                }}
+                className="px-3 py-1 rounded-full text-xs font-medium text-white active:opacity-80"
+                style={{ background: '#7ca982' }}
+              >
+                去购物
+              </button>
+              <span className="text-xs" style={{ color: '#c4b49a' }}>{collapsed ? '▸' : '▾'}</span>
+            </span>
           </>
         )}
       </button>
