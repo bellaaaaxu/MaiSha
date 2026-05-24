@@ -216,10 +216,10 @@ export function NewIconSheet({ open, uid, listId, onClose, onIconCreated }: Prop
             {stage === 'preset_warn' && (
               <>
                 <div className="text-center text-base font-semibold mb-3" style={{ color: '#5a4e3c' }}>
-                  已有预设图标
+                  「{itemName}」已有预设图标
                 </div>
                 <div
-                  className="mx-auto mb-4 rounded-2xl flex items-center justify-center"
+                  className="mx-auto mb-3 rounded-2xl flex items-center justify-center"
                   style={{
                     width: 100, height: 100,
                     background: 'rgba(255,252,247,0.8)',
@@ -229,34 +229,33 @@ export function NewIconSheet({ open, uid, listId, onClose, onIconCreated }: Prop
                   <img
                     src={getIconPath(itemName) ?? undefined}
                     alt={itemName}
-                    className="w-full h-full object-contain p-2"
+                    draggable={false}
+                    className="w-full h-full object-contain p-2 pointer-events-none"
                     style={{ mixBlendMode: 'multiply' }}
                   />
                 </div>
-                <div className="text-center text-sm mb-2" style={{ color: '#5a4e3c' }}>
-                  「{itemName}」已有预设图标
-                </div>
-                <div className="text-center text-xs mb-5 px-4" style={{ color: '#a0937e' }}>
-                  自定义图标会替换它显示。你确定要继续吗？
+                <div className="text-center text-xs mb-5 px-4 leading-relaxed" style={{ color: '#8a6d50' }}>
+                  你可以继续新建一个自定义图标来替换它，<br />
+                  也可以保留现有的预设图标
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setStage('name')}
+                    onClick={onClose}
                     className="flex-1 py-3 rounded-xl text-sm font-medium active:opacity-80"
                     style={{
                       background: 'rgba(255,252,247,0.8)',
                       border: '1px solid rgba(215,205,188,0.4)',
-                      color: '#a0937e',
+                      color: '#5a4e3c',
                     }}
                   >
-                    取消
+                    保留预设
                   </button>
                   <button
                     onClick={() => setStage('picker')}
                     className="flex-1 py-3 rounded-xl text-sm font-medium text-white active:opacity-80"
                     style={{ background: '#c97b63' }}
                   >
-                    继续替换
+                    新建替换
                   </button>
                 </div>
               </>
