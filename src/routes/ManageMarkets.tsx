@@ -30,6 +30,12 @@ export default function ManageMarkets() {
   const [items, setItems] = useState<Supermarket[]>([]);
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
+
+  const hasChanges = useMemo(() => {
+    if (!list) return false;
+    return JSON.stringify(items) !== JSON.stringify(list.supermarkets);
+  }, [items, list]);
 
   useEffect(() => {
     if (list) setItems(JSON.parse(JSON.stringify(list.supermarkets)));
@@ -101,6 +107,24 @@ export default function ManageMarkets() {
     }
   };
 
+  const onBack = () => {
+    if (hasChanges) {
+      setShowUnsavedConfirm(true);
+    } else {
+      nav(-1);
+    }
+  };
+
+  const discardAndLeave = () => {
+    setShowUnsavedConfirm(false);
+    nav(-1);
+  };
+
+  const saveAndLeave = async () => {
+    setShowUnsavedConfirm(false);
+    await save();
+  };
+
   return (
     <div
       className="min-h-screen pb-24"
@@ -115,7 +139,7 @@ export default function ManageMarkets() {
         }}
       >
         <button
-          onClick={() => nav(-1)}
+          onClick={onBack}
           className="text-xl active:opacity-60"
           style={{ color: '#a0937e' }}
           aria-label="返回"
@@ -200,6 +224,62 @@ export default function ManageMarkets() {
           {saving ? '保存中…' : '保存'}
         </button>
       </footer>
+
+      {/* Unsaved-changes confirmation */}
+      {showUnsavedConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowUnsavedConfirm(false)}
+        >
+          <div
+            className="mx-6 w-full max-w-xs rounded-3xl p-6"
+            style={{
+              background: 'linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%)',
+              border: '1px solid rgba(215,205,188,0.5)',
+              boxShadow: '0 8px 32px rgba(100,80,50,0.12)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-5">
+              <div className="text-base font-semibold mb-2" style={{ color: '#5a4e3c' }}>
+                有未保存的修改
+              </div>
+              <div className="text-xs" style={{ color: '#8a7e6b' }}>
+                你的修改还没有保存，确定要离开吗？
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={saveAndLeave}
+                disabled={saving}
+                className="w-full h-11 rounded-xl text-sm font-medium text-white active:opacity-90 disabled:opacity-50"
+                style={{ background: '#7ca982' }}
+              >
+                {saving ? '保存中…' : '保存并返回'}
+              </button>
+              <button
+                onClick={discardAndLeave}
+                className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
+                style={{
+                  background: 'rgba(255,252,247,0.6)',
+                  border: '1px solid rgba(215,205,188,0.4)',
+                  color: '#c97b63',
+                }}
+              >
+                不保存，直接返回
+              </button>
+              <button
+                onClick={() => setShowUnsavedConfirm(false)}
+                className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
+                style={{ color: '#8a7e6b' }}
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
