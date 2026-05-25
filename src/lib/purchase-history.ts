@@ -5,19 +5,26 @@ export async function savePurchaseHistory(
   listId: string,
   supermarketId: string,
   supermarketName: string,
-  items: HistoryItemSnapshot[]
+  items: HistoryItemSnapshot[],
+  amount?: number | null,
+  currency?: string,
 ): Promise<PurchaseHistory> {
   const bought = items.filter(i => i.checked).length;
+  const row: Record<string, unknown> = {
+    list_id: listId,
+    supermarket_id: supermarketId,
+    supermarket_name: supermarketName,
+    items_snapshot: items,
+    total_count: items.length,
+    bought_count: bought,
+  };
+  if (amount != null && amount > 0) {
+    row.amount = amount;
+    if (currency) row.currency = currency;
+  }
   const { data, error } = await supabase
     .from('purchase_history')
-    .insert({
-      list_id: listId,
-      supermarket_id: supermarketId,
-      supermarket_name: supermarketName,
-      items_snapshot: items,
-      total_count: items.length,
-      bought_count: bought,
-    })
+    .insert(row)
     .select()
     .single();
   if (error) throw error;

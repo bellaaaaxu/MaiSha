@@ -12,6 +12,8 @@ const makeHistory = (items: { name: string; checked: boolean }[], date: string):
   })),
   total_count: items.length,
   bought_count: items.filter(i => i.checked).length,
+  amount: null,
+  currency: 'CNY',
   completed_at: date,
 });
 

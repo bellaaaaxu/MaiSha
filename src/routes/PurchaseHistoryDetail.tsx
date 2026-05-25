@@ -5,6 +5,7 @@ import { useList } from '@/hooks/useList';
 import { fetchPurchaseHistoryById } from '@/lib/purchase-history';
 import { addItem } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
+import { formatAmount, getOrDetectCurrency } from '@/utils/currency';
 import type { PurchaseHistory } from '@/types/purchase-history';
 import type { HistoryItemSnapshot } from '@/types/purchase-history';
 
@@ -83,7 +84,12 @@ export default function PurchaseHistoryDetail() {
         <button onClick={() => nav(-1)} className="text-sm" style={{ color: '#a0937e' }}>← 返回</button>
         <div className="flex-1 text-center">
           <div className="text-base font-semibold" style={{ color: '#5a4e3c' }}>{record.supermarket_name}</div>
-          <div className="text-xs" style={{ color: '#a0937e' }}>{dateStr}</div>
+          <div className="text-xs" style={{ color: '#a0937e' }}>
+            {dateStr}
+            {record.amount != null && (
+              <span style={{ color: '#c97b63' }}> · {formatAmount(record.amount, getOrDetectCurrency())}</span>
+            )}
+          </div>
         </div>
         <button onClick={selectAll} className="text-xs" style={{ color: '#7ca982' }}>
           {allSelected ? '取消全选' : '全选'}

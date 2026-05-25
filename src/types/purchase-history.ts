@@ -10,5 +10,7 @@ export interface PurchaseHistory {
   items_snapshot: HistoryItemSnapshot[];
   total_count: number;
   bought_count: number;
+  amount: number | null;
+  currency: string;
   completed_at: string;
 }
