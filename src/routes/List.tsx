@@ -21,6 +21,7 @@ import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
 import { SetIconSheet } from '@/components/SetIconSheet';
 import { MoreMenu } from '@/components/MoreMenu';
+import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
 import PurchaseHistory from '@/routes/PurchaseHistory';
@@ -42,6 +43,7 @@ export default function ListRoute() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [menuItem, setMenuItem] = useState<Item | null>(null);
   const [setIconItem, setSetIconItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
@@ -218,7 +220,7 @@ export default function ListRoute() {
             }}>
               {t('header.joinList')}
             </button>
-            <button onClick={() => setShowMore(true)} style={{
+            <button onClick={() => setShowSettings(true)} style={{
               fontSize: 20, color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
             }}>
               ⚙
@@ -358,6 +360,8 @@ export default function ListRoute() {
           onUndo={undoToast.undo}
           onDismiss={undoToast.dismiss}
         />
+
+        <SettingsDrawer open={showSettings} onClose={() => setShowSettings(false)} />
       </div>
 
       <DragOverlay>
