@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
 import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
 import { calculateFrequentlyBought } from '@/utils/frequently-bought';
@@ -13,7 +14,6 @@ import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits }
 import { useLongPress } from '@/hooks/useLongPress';
 import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
 import { UNDELETABLE_STORE_ID } from '@/utils/constants';
-import { getAddSheetTitle } from '@/utils/warm-copy';
 
 interface Props {
   open: boolean;
@@ -88,6 +88,7 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
 }
 
 export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [frequent, setFrequent] = useState<FrequentItem[]>([]);
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
@@ -423,21 +424,21 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
         {/* header */}
         <div className="flex justify-between items-center px-5 pb-2">
           <div className="text-base font-semibold" style={{ color: '#5a4e3c' }}>
-            {getAddSheetTitle()}
+            {t('addSheet.title')}
           </div>
           <button
             onClick={onClose}
             className="text-sm px-2 py-1 rounded-lg active:opacity-60"
             style={{ color: '#a0937e' }}
           >
-            关闭
+            {t('common.cancel')}
           </button>
         </div>
 
         {/* supermarket selector */}
         <div className="px-5 pb-2">
           <div className="text-[10px] font-medium tracking-wider mb-1.5" style={{ color: '#a0937e' }}>
-            添加到
+            {t('addSheet.store')}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {sortedSupermarkets.map(m => {
@@ -446,14 +447,18 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                 <button
                   key={m.id}
                   onClick={() => setSelectedMarket(m.id)}
-                  className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all active:scale-95"
                   style={{
-                    background: active ? '#7ca982' : 'rgba(255,252,247,0.6)',
-                    color: active ? '#fff' : '#5a4e3c',
-                    border: active ? '1px solid #7ca982' : '1px solid rgba(215,205,188,0.4)',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-pill)',
+                    border: `1.5px solid ${active ? 'var(--accent)' : 'var(--ink-faint)'}`,
+                    background: active ? 'rgba(212, 131, 107, 0.1)' : 'none',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 14,
+                    color: active ? 'var(--accent)' : 'var(--ink-light)',
+                    cursor: 'pointer',
                   }}
                 >
-                  <span>{m.name}</span>
+                  {m.name}
                 </button>
               );
             })}
@@ -474,7 +479,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
               <input
                 className="flex-1 text-sm bg-transparent outline-none"
                 style={{ color: '#5a4e3c' }}
-                placeholder="搜索或输入商品名..."
+                placeholder={t('addSheet.namePlaceholder')}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') submitTyped(); }}
@@ -486,7 +491,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                   className="px-3 py-1 rounded-full text-xs text-white font-medium active:opacity-80"
                   style={{ background: '#7ca982' }}
                 >
-                  添加
+                  {t('addSheet.add')}
                 </button>
               )}
             </div>
@@ -515,7 +520,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
                   <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                    常买
+                    {t('addSheet.frequent')}
                   </span>
                 </div>
                 <button
@@ -598,7 +603,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
               <div className="flex items-center gap-2 mb-2.5 px-1">
                 <div className="w-1.5 h-4 rounded-full" style={{ background: '#c4b49a' }} />
                 <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                  常买
+                  {t('addSheet.frequent')}
                 </span>
                 <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
               </div>
