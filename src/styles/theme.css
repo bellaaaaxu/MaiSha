@@ -1,0 +1,42 @@
+:root {
+  /* Paper palette */
+  --paper: #FBF6EF;
+  --paper-dark: #F3EBDD;
+
+  /* Ink palette */
+  --ink: #4A3728;
+  --ink-light: #8B7355;
+  --ink-faint: #C4B49A;
+
+  /* Accent colors */
+  --accent: #D4836B;
+  --accent-soft: #E8AE97;
+  --green: #7BA37E;
+  --green-soft: #B5D1B7;
+  --blue: #7BA3B8;
+
+  /* Typography */
+  --font-title: 'ZCOOL KuaiLe', 'Nunito', sans-serif;
+  --font-body: 'Noto Sans SC', 'Nunito', sans-serif;
+  --font-en: 'Nunito', sans-serif;
+
+  /* Shadows */
+  --shadow-card:
+    0 2px 4px rgba(74, 55, 40, 0.06),
+    0 6px 16px rgba(74, 55, 40, 0.08),
+    0 12px 32px rgba(74, 55, 40, 0.05);
+  --shadow-icon: 0 2px 6px rgba(74, 55, 40, 0.06);
+
+  /* Radii */
+  --radius-card: 14px;
+  --radius-icon: 14px;
+  --radius-pill: 20px;
+}
+
+/* Base body styles */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
