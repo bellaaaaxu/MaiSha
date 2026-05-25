@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "MaiSha"
+  },
+  "nav": {
+    "list": "List",
+    "history": "History"
+  },
+  "header": {
+    "joinList": "Invite",
+    "settings": "Settings"
+  },
+  "list": {
+    "items": "{{count}} items",
+    "goShopping": "Go shopping",
+    "addItem": "+ Add item",
+    "emptyTitle": "Nothing to buy yet",
+    "emptySubtitle": "Tap below to start adding items"
+  },
+  "shopping": {
+    "back": "Back",
+    "progress": "{{bought}} / {{total}} bought",
+    "addMore": "+ Add one more",
+    "finish": "Done shopping"
+  },
+  "addSheet": {
+    "title": "Add item",
+    "namePlaceholder": "What to buy?",
+    "notePlaceholder": "Note (optional)",
+    "quantityPlaceholder": "Qty",
+    "store": "Store",
+    "noStore": "No store",
+    "add": "Add",
+    "frequent": "Frequent"
+  },
+  "stores": {
+    "manage": "Manage stores",
+    "addNew": "Add new store",
+    "namePlaceholder": "Store name",
+    "unassigned": "No store",
+    "save": "Save"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "iconLibrary": "Icon library",
+    "importExport": "Import / Export",
+    "personalPresets": "Presets",
+    "privacy": "Privacy & Terms",
+    "contact": "Contact us"
+  },
+  "onboarding": {
+    "welcome": "Welcome to MaiSha",
+    "addStores": "Where do you shop?",
+    "addStoresHint": "Add 1-2 stores you visit often",
+    "storePlaceholder": "Store name",
+    "skip": "Skip",
+    "currency": "Choose currency",
+    "done": "Get started"
+  },
+  "share": {
+    "title": "Invite",
+    "description": "Share a link so others can edit this list with you",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "orCode": "Or join with a code"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "loading": "Loading…"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "买啥"
+  },
+  "nav": {
+    "list": "清单",
+    "history": "历史"
+  },
+  "header": {
+    "joinList": "一起买",
+    "settings": "设置"
+  },
+  "list": {
+    "items": "{{count}} 样",
+    "goShopping": "去购物",
+    "addItem": "+ 添加物品",
+    "emptyTitle": "还没有东西要买",
+    "emptySubtitle": "点下面的按钮开始添加吧"
+  },
+  "shopping": {
+    "back": "返回",
+    "progress": "已买 {{bought}} / {{total}} 样",
+    "addMore": "+ 临时加一个",
+    "finish": "结束购物"
+  },
+  "addSheet": {
+    "title": "添加物品",
+    "namePlaceholder": "要买什么？",
+    "notePlaceholder": "备注（可选）",
+    "quantityPlaceholder": "数量",
+    "store": "店铺",
+    "noStore": "未指定店铺",
+    "add": "添加",
+    "frequent": "常买"
+  },
+  "stores": {
+    "manage": "管理店铺",
+    "addNew": "添加新店铺",
+    "namePlaceholder": "输入店铺名称",
+    "unassigned": "未指定店铺",
+    "save": "保存"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言设置",
+    "iconLibrary": "图标库",
+    "importExport": "导入 / 导出",
+    "personalPresets": "个人预设",
+    "privacy": "隐私与条款",
+    "contact": "联系我们"
+  },
+  "onboarding": {
+    "welcome": "欢迎使用买啥",
+    "addStores": "你常去哪些店？",
+    "addStoresHint": "添加 1-2 个常去的店铺",
+    "storePlaceholder": "输入店铺名称",
+    "skip": "跳过",
+    "currency": "选择货币",
+    "done": "开始使用"
+  },
+  "share": {
+    "title": "一起买",
+    "description": "分享链接，邀请家人一起编辑清单",
+    "copyLink": "复制链接",
+    "copied": "已复制",
+    "orCode": "或输入邀请码加入"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "loading": "加载中…"
+  }
+}

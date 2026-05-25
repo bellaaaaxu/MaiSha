@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "買咩"
+  },
+  "nav": {
+    "list": "清單",
+    "history": "記錄"
+  },
+  "header": {
+    "joinList": "一齊買",
+    "settings": "設定"
+  },
+  "list": {
+    "items": "{{count}} 樣",
+    "goShopping": "去買嘢",
+    "addItem": "+ 添加物品",
+    "emptyTitle": "仲未有嘢要買",
+    "emptySubtitle": "撳下面個按鈕開始添加啦"
+  },
+  "shopping": {
+    "back": "返回",
+    "progress": "買咗 {{bought}} / {{total}} 樣",
+    "addMore": "+ 臨時加一樣",
+    "finish": "買完啦"
+  },
+  "addSheet": {
+    "title": "添加物品",
+    "namePlaceholder": "要買咩？",
+    "notePlaceholder": "備註（可選）",
+    "quantityPlaceholder": "數量",
+    "store": "舖頭",
+    "noStore": "未指定舖頭",
+    "add": "添加",
+    "frequent": "常買"
+  },
+  "stores": {
+    "manage": "管理舖頭",
+    "addNew": "添加新舖頭",
+    "namePlaceholder": "輸入舖頭名",
+    "unassigned": "未指定舖頭",
+    "save": "儲存"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "語言設定",
+    "iconLibrary": "圖標庫",
+    "importExport": "導入 / 導出",
+    "personalPresets": "個人預設",
+    "privacy": "私隱與條款",
+    "contact": "聯絡我哋"
+  },
+  "onboarding": {
+    "welcome": "歡迎使用買咩",
+    "addStores": "你成日去邊度買嘢？",
+    "addStoresHint": "添加 1-2 間常去嘅舖頭",
+    "storePlaceholder": "輸入舖頭名",
+    "skip": "跳過",
+    "currency": "揀貨幣",
+    "done": "開始用"
+  },
+  "share": {
+    "title": "一齊買",
+    "description": "分享連結，邀請屋企人一齊編輯清單",
+    "copyLink": "複製連結",
+    "copied": "已複製",
+    "orCode": "或者輸入邀請碼加入"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "delete": "刪除",
+    "edit": "編輯",
+    "save": "儲存",
+    "loading": "載入中…"
+  }
+}
