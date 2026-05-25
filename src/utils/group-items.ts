@@ -1,22 +1,22 @@
-import type { Item, CategoryKey } from '@/types/item';
-import type { Supermarket } from '@/types/supermarket';
+import type { Item } from '@/types/item';
+import type { Store } from '@/types/store';
 import { UNDELETABLE_SUPERMARKET_ID } from './constants';
 
 export interface CategoryGroup {
-  category: CategoryKey;
+  category: string;
   emoji: string;
   items: Item[];
 }
 
 export interface MarketGroup {
-  supermarket: Supermarket;
+  supermarket: Store;
   categories: CategoryGroup[];
   totalCount: number;
 }
 
 export function groupItemsByMarketAndCategory(
   items: Item[],
-  supermarkets: Supermarket[],
+  supermarkets: Store[],
   includeEmpty = false
 ): MarketGroup[] {
   if (!items.length && !includeEmpty) return [];
@@ -51,8 +51,8 @@ export function groupItemsByMarketAndCategory(
       continue;
     }
 
-    const catOrder: CategoryKey[] = [];
-    const catMap = new Map<CategoryKey, CategoryGroup>();
+    const catOrder: string[] = [];
+    const catMap = new Map<string, CategoryGroup>();
     for (const it of bucket) {
       if (!catMap.has(it.category)) {
         catOrder.push(it.category);

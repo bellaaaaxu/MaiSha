@@ -1,5 +1,5 @@
 import type { Item } from '@/types/item';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 import { groupItemsByMarketAndCategory } from './group-items';
 
 function fmtDate(d: Date): string {
@@ -15,7 +15,7 @@ function fmtItem(it: Item): string {
 
 export function generateShareText(
   items: Item[],
-  supermarkets: Supermarket[],
+  supermarkets: Store[],
   now: Date = new Date()
 ): string {
   const unchecked = items.filter(i => !i.checked);

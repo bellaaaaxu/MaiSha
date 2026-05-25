@@ -186,17 +186,17 @@ export default function IconPreview() {
         uid="preview-user"
         listId="preview-list"
         supermarkets={[
-          { id: 'tnt', name: 'T&T 大统华', emoji: '🥬' },
-          { id: 'yc', name: '元初', emoji: '🛒' },
-          { id: 'costco', name: 'Costco', emoji: '🏬' },
-          { id: 'wholefoods', name: 'Whole Foods', emoji: '🥗' },
-          { id: 'none', name: '未分类', emoji: '❓' },
+          { id: 'tnt', name: 'T&T 大统华' },
+          { id: 'yc', name: '元初' },
+          { id: 'costco', name: 'Costco' },
+          { id: 'wholefoods', name: 'Whole Foods' },
+          { id: 'none', name: '未分类' },
         ]}
         customIconMap={new Map()}
         onClose={() => setShowAdd(false)}
         onAdd={async (input: NewItemInput) => {
           const id = crypto.randomUUID();
-          setItems(prev => [...prev, { name: input.name, note: input.note || '', quantity: input.quantity || '', category_emoji: input.category_emoji || '📦', checked: false, id }]);
+          setItems(prev => [...prev, { name: input.name, note: input.note || '', quantity: input.quantity || '', category_emoji: '📦', checked: false, id }]);
           return id;
         }}
         onRemove={async (itemId: string) => {

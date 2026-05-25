@@ -1,11 +1,11 @@
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 import type { CategoryKey } from '@/types/item';
 
-export const DEFAULT_SUPERMARKETS: Supermarket[] = [
-  { id: 'tnt',    name: 'T&T 大统华', emoji: '🥬' },
-  { id: 'yc',     name: '元初',       emoji: '🛒' },
-  { id: 'costco', name: 'Costco',     emoji: '🏬' },
-  { id: 'none',   name: '未分类',     emoji: '❓' }
+export const DEFAULT_SUPERMARKETS: Store[] = [
+  { id: 'tnt',    name: 'T&T 大统华' },
+  { id: 'yc',     name: '元初' },
+  { id: 'costco', name: 'Costco' },
+  { id: 'none',   name: '未分类' },
 ];
 
 export const UNDELETABLE_SUPERMARKET_ID = 'none';

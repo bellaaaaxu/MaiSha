@@ -5,7 +5,7 @@ import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
 import { calculateFrequentlyBought } from '@/utils/frequently-bought';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput, CategoryKey } from '@/types/item';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 import { IconPickerPanel } from '@/components/IconPickerPanel';
 import { AiPreviewModal } from '@/components/AiPreviewModal';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
@@ -20,7 +20,7 @@ interface Props {
   open: boolean;
   uid: string;
   listId: string;
-  supermarkets: Supermarket[];
+  supermarkets: Store[];
   customIconMap: Map<string, string>;
   onClose: () => void;
   onAdd: (input: NewItemInput) => Promise<string>;
@@ -281,20 +281,15 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     toggleItem(name, {
       name, note: '', quantity: '',
       supermarket: selectedMarket,
-      category: m.category as CategoryKey,
-      category_emoji: m.emoji
     });
     setValue('');
   };
 
   const handleSkipIcon = () => {
     if (!pendingItemName) return; // guard
-    const m = matchCategory(pendingItemName);
     toggleItem(pendingItemName, {
       name: pendingItemName, note: '', quantity: '',
       supermarket: selectedMarket,
-      category: pendingCategory,
-      category_emoji: m.emoji
     });
     setShowIconPicker(false);
     setPendingItemName('');
@@ -370,13 +365,10 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const handleAiAccept = async () => {
     if (!pendingItemName) return; // guard
     // Icon already saved by Edge Function, just add the item
-    const m = matchCategory(pendingItemName);
     await onIconsChanged();
     toggleItem(pendingItemName, {
       name: pendingItemName, note: '', quantity: '',
       supermarket: selectedMarket,
-      category: pendingCategory,
-      category_emoji: m.emoji
     });
     setAiModalOpen(false);
     setPendingItemName('');
@@ -386,12 +378,9 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const handleUploadAccept = () => {
     if (!pendingItemName) return; // guard
     // Photo already uploaded, just add the item
-    const m = matchCategory(pendingItemName);
     toggleItem(pendingItemName, {
       name: pendingItemName, note: '', quantity: '',
       supermarket: selectedMarket,
-      category: pendingCategory,
-      category_emoji: m.emoji
     });
     setAiModalOpen(false);
     if (uploadedPreviewUrl) URL.revokeObjectURL(uploadedPreviewUrl);
@@ -426,25 +415,19 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   };
 
   const submitIcon = (item: IconItem) => {
-    const m = matchCategory(item.name);
     toggleItem(item.name, {
       name: item.name,
       note: '', quantity: '',
       supermarket: selectedMarket,
-      category: (item.category || m.category) as CategoryKey,
-      category_emoji: m.emoji
     });
   };
 
   const submitFrequent = (f: FrequentItem) => {
-    const m = matchCategory(f.name);
     toggleItem(f.name, {
       name: f.name,
       note: f.note,
       quantity: '',
       supermarket: selectedMarket,
-      category: m.category as CategoryKey,
-      category_emoji: f.category_emoji || m.emoji
     });
   };
 
@@ -575,11 +558,8 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                   onClick={async () => {
                     for (const item of frequentlyBought) {
                       if (!addedItems.has(item.name)) {
-                        const cat = matchCategory(item.name);
                         await onAdd({
                           name: item.name,
-                          category: cat.category,
-                          category_emoji: item.category_emoji,
                           supermarket: selectedMarket,
                         });
                       }
@@ -611,14 +591,11 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                       anim={anim}
                       size="frequent"
                       onTap={() => {
-                        const cat = matchCategory(item.name);
                         toggleItem(item.name, {
                           name: item.name,
                           note: '',
                           quantity: '',
                           supermarket: selectedMarket,
-                          category: cat.category as CategoryKey,
-                          category_emoji: item.category_emoji,
                         });
                       }}
                       onLongPress={setPreviewIcon}

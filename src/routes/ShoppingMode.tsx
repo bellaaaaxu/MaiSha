@@ -9,7 +9,7 @@ import { resolveIconUrl } from '@/utils/icon-registry';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { ShoppingEndModal } from '@/components/ShoppingEndModal';
 import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
-import type { Item, CategoryKey } from '@/types/item';
+import type { Item } from '@/types/item';
 
 const CATEGORY_COLORS: Record<string, string> = {
   '蔬菜': '#7ca982', '肉蛋': '#c97b63', '乳制品': '#d4a96a',
@@ -19,14 +19,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 interface CategorySection {
-  category: CategoryKey;
+  category: string;
   emoji: string;
   items: Item[];
 }
 
 function groupByCategory(items: Item[]): CategorySection[] {
-  const order: CategoryKey[] = [];
-  const map = new Map<CategoryKey, CategorySection>();
+  const order: string[] = [];
+  const map = new Map<string, CategorySection>();
   for (const item of items) {
     if (!map.has(item.category)) {
       order.push(item.category);

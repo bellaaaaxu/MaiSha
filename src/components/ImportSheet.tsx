@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
 import { parseImportText, parsedToInputs, type ParsedItem } from '@/utils/parse-import-text';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
 
 interface Props {
   open: boolean;
-  supermarkets: Supermarket[];
+  supermarkets: Store[];
   onClose: () => void;
   onImport: (items: ReturnType<typeof parsedToInputs>) => void;
 }

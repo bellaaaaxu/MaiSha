@@ -20,14 +20,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { updateListSupermarkets } from '@/lib/db';
 import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 
 export default function ManageMarkets() {
   const nav = useNavigate();
   const { uid } = useAuth();
   const { list } = useList(uid, null);
 
-  const [items, setItems] = useState<Supermarket[]>([]);
+  const [items, setItems] = useState<Store[]>([]);
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
   const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
@@ -73,10 +73,9 @@ export default function ManageMarkets() {
 
   const add = () => {
     if (!newName.trim()) return;
-    const newMarket: Supermarket = {
+    const newMarket: Store = {
       id: 'sm_' + Date.now().toString(36),
       name: newName.trim(),
-      emoji: '🏪',  // kept in data model for backward compat, not displayed
     };
     // Insert before "未分类"
     setItems([...customMarkets, newMarket, ...(fallbackMarket ? [fallbackMarket] : [])]);
@@ -285,7 +284,7 @@ export default function ManageMarkets() {
 }
 
 interface SortableRowProps {
-  market: Supermarket;
+  market: Store;
   onRename: (val: string) => void;
   onRemove: () => void;
 }

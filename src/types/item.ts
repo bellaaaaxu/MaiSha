@@ -1,3 +1,4 @@
+// CategoryKey kept for backward compat — Task 2 will remove it
 export type CategoryKey =
   | '蔬菜' | '水果' | '肉蛋' | '乳制品' | '主食'
   | '烘焙' | '调料' | '零食' | '饮料' | '日用' | '其他';
@@ -8,9 +9,9 @@ export interface Item {
   name: string;
   note: string;
   quantity: string;
-  supermarket: string;
-  category: CategoryKey;
-  category_emoji: string;
+  supermarket: string;      // DB column name unchanged
+  category: string;         // keep for backward compat, stop writing new values
+  category_emoji: string;   // keep for backward compat, stop writing new values
   checked: boolean;
   checked_at: string | null;
   created_by: string;
@@ -19,4 +20,4 @@ export interface Item {
 }
 
 export type NewItemInput = Pick<Item, 'name'> &
-  Partial<Pick<Item, 'note' | 'quantity' | 'supermarket' | 'category' | 'category_emoji'>>;
+  Partial<Pick<Item, 'note' | 'quantity' | 'supermarket'>>;

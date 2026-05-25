@@ -1,12 +1,12 @@
 import { describe, test, expect } from 'vitest';
 import { generateShareText } from '@/utils/share-text';
 import type { Item } from '@/types/item';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 
-const markets: Supermarket[] = [
-  { id: 'hm', name: '盒马', emoji: '🛒' },
-  { id: 'cc', name: '菜场', emoji: '🥬' },
-  { id: 'none', name: '未分类', emoji: '❓' }
+const markets: Store[] = [
+  { id: 'hm', name: '盒马' },
+  { id: 'cc', name: '菜场' },
+  { id: 'none', name: '未分类' },
 ];
 
 function mk(o: Partial<Item>): Item {

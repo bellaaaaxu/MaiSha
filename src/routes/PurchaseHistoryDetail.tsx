@@ -51,8 +51,6 @@ export default function PurchaseHistoryDetail() {
           name: item.name,
           note: item.note,
           quantity: item.quantity,
-          category: item.category,
-          category_emoji: item.category_emoji,
           supermarket: record.supermarket_id,
         });
         recordItemUsage(uid, {

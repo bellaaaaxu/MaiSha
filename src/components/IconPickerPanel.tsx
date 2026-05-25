@@ -1,10 +1,8 @@
 // src/components/IconPickerPanel.tsx
 import { WatercolorFallback } from '@/components/WatercolorFallback';
-import type { CategoryKey } from '@/types/item';
-
 interface Props {
   itemName: string;
-  category: CategoryKey;
+  category: string;
   remainingCredits: number;
   onUpload: () => void;
   onAiGenerate: () => void;

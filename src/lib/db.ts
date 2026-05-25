@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { DEFAULT_SUPERMARKETS } from '@/utils/constants';
 import type { List } from '@/types/list';
 import type { Item, NewItemInput } from '@/types/item';
-import type { Supermarket } from '@/types/supermarket';
+import type { Store } from '@/types/store';
 
 /** Fetch the current user's list. If none, create one. */
 export async function getOrCreateList(uid: string): Promise<List> {
@@ -64,8 +64,8 @@ export async function addItem(listId: string, createdBy: string, input: NewItemI
       note: input.note ?? '',
       quantity: input.quantity ?? '',
       supermarket: input.supermarket ?? 'none',
-      category: input.category ?? '其他',
-      category_emoji: input.category_emoji ?? '📦',
+      category: '其他',
+      category_emoji: '📦',
       checked: false,
       checked_at: null,
       created_by: createdBy
@@ -104,7 +104,7 @@ export async function joinByCode(code: string): Promise<List | null> {
   return data as List | null;
 }
 
-export async function updateListSupermarkets(listId: string, supermarkets: Supermarket[]): Promise<void> {
+export async function updateListSupermarkets(listId: string, supermarkets: Store[]): Promise<void> {
   const { error } = await supabase
     .from('lists')
     .update({ supermarkets })

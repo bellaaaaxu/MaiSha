@@ -103,7 +103,7 @@ export default function ListRoute() {
       name: input.name,
       note: input.note ?? '',
       supermarket: input.supermarket ?? 'none',
-      category_emoji: input.category_emoji ?? '📦'
+      category_emoji: '📦',
     });
     return item.id;
   };
@@ -167,8 +167,6 @@ export default function ListRoute() {
             note: item.note,
             quantity: item.quantity,
             supermarket: item.supermarket,
-            category: item.category,
-            category_emoji: item.category_emoji,
           });
         } catch { /* silent */ }
       });
@@ -181,8 +179,7 @@ export default function ListRoute() {
     try {
       await addItem(list.id, uid, {
         name: item.name, note: item.note, quantity: item.quantity,
-        supermarket: item.supermarket, category: item.category,
-        category_emoji: item.category_emoji
+        supermarket: item.supermarket,
       });
     } catch { alert('复制失败'); }
   };
