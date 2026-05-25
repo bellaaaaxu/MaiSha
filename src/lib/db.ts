@@ -16,6 +16,14 @@ export async function getOrCreateList(uid: string): Promise<List> {
   if (e1) throw e1;
   if (existing) return existing as List;
 
+  // Use onboarding supermarket choices if available
+  let supermarkets = DEFAULT_SUPERMARKETS;
+  const onboardMarkets = localStorage.getItem('maisha:onboard-supermarkets');
+  if (onboardMarkets) {
+    try { supermarkets = JSON.parse(onboardMarkets); } catch { /* use default */ }
+    localStorage.removeItem('maisha:onboard-supermarkets');
+  }
+
   // Create new
   const { data: created, error: e2 } = await supabase
     .from('lists')
@@ -23,7 +31,7 @@ export async function getOrCreateList(uid: string): Promise<List> {
       name: '家里',
       owner_uid: uid,
       member_uids: [uid],
-      supermarkets: DEFAULT_SUPERMARKETS
+      supermarkets
     })
     .select()
     .single();
