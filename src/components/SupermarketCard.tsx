@@ -2,34 +2,20 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDroppable } from '@dnd-kit/core';
 import { ItemRow } from './ItemRow';
-import type { MarketGroup } from '@/utils/group-items';
+import type { StoreGroup } from '@/utils/group-items';
 import type { Item } from '@/types/item';
 
 interface Props {
-  group: MarketGroup;
+  group: StoreGroup;
   customIconMap?: Map<string, string>;
   onToggle: (item: Item) => void;
   onMenu: (item: Item) => void;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  '蔬菜': '#7ca982',
-  '肉蛋': '#c97b63',
-  '乳制品': '#d4a96a',
-  '主食': '#8b9dc3',
-  '调料': '#b08d57',
-  '日用': '#9b8ec0',
-  '烘焙': '#c9886d',
-  '饮料': '#6a9fb5',
-  '水果': '#d4a06a',
-  '零食': '#c98a8a',
-  '其他': '#999',
-};
-
 export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const nav = useNavigate();
-  const { isOver, setNodeRef } = useDroppable({ id: group.supermarket.id });
+  const { isOver, setNodeRef } = useDroppable({ id: group.store.id });
   const isEmpty = group.totalCount === 0;
 
   return (
@@ -61,7 +47,7 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
           className="text-base font-semibold"
           style={{ color: isEmpty ? '#a0937e' : '#5a4e3c' }}
         >
-          {group.supermarket.name}
+          {group.store.name}
         </span>
         {isEmpty ? (
           <span className="ml-auto text-xs" style={{ color: '#c4b49a' }}>拖到这里换超市</span>
@@ -72,7 +58,7 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  nav(`/shopping/${group.supermarket.id}`);
+                  nav(`/shopping/${group.store.id}`);
                 }}
                 className="px-3 py-1 rounded-full text-xs font-medium text-white active:opacity-80"
                 style={{ background: '#7ca982' }}
@@ -86,21 +72,8 @@ export function SupermarketCard({ group, customIconMap, onToggle, onMenu }: Prop
       </div>
       {!collapsed && !isEmpty && (
         <div>
-          {group.categories.map(cat => (
-            <div key={cat.category}>
-              <div className="flex items-center gap-1.5 mt-2 mb-1.5 px-1">
-                <div
-                  className="w-1 h-3 rounded-full"
-                  style={{ backgroundColor: CATEGORY_COLORS[cat.category] || '#999' }}
-                />
-                <span className="text-xs font-medium" style={{ color: '#a0937e' }}>
-                  {cat.category}
-                </span>
-              </div>
-              {cat.items.map(item => (
-                <ItemRow key={item.id} item={item} customIconMap={customIconMap} onToggle={onToggle} onMenu={onMenu} />
-              ))}
-            </div>
+          {group.items.map(item => (
+            <ItemRow key={item.id} item={item} customIconMap={customIconMap} onToggle={onToggle} onMenu={onMenu} />
           ))}
         </div>
       )}

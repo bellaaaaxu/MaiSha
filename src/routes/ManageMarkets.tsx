@@ -19,7 +19,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { updateListSupermarkets } from '@/lib/db';
-import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import type { Store } from '@/types/store';
 
 export default function ManageMarkets() {
@@ -43,11 +43,11 @@ export default function ManageMarkets() {
 
   // Custom markets are sortable; "未分类" is pinned at the bottom
   const customMarkets = useMemo(
-    () => items.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
+    () => items.filter(s => s.id !== UNDELETABLE_STORE_ID),
     [items]
   );
   const fallbackMarket = useMemo(
-    () => items.find(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+    () => items.find(s => s.id === UNDELETABLE_STORE_ID),
     [items]
   );
 
@@ -63,7 +63,7 @@ export default function ManageMarkets() {
   };
 
   const remove = (id: string) => {
-    if (id === UNDELETABLE_SUPERMARKET_ID) {
+    if (id === UNDELETABLE_STORE_ID) {
       alert('"未分类"不可删');
       return;
     }

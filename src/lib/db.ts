@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { DEFAULT_SUPERMARKETS } from '@/utils/constants';
+import { DEFAULT_STORES } from '@/utils/constants';
 import type { List } from '@/types/list';
 import type { Item, NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
@@ -17,7 +17,7 @@ export async function getOrCreateList(uid: string): Promise<List> {
   if (existing) return existing as List;
 
   // Use onboarding supermarket choices if available
-  let supermarkets = DEFAULT_SUPERMARKETS;
+  let supermarkets = DEFAULT_STORES;
   const onboardMarkets = localStorage.getItem('maisha:onboard-supermarkets');
   if (onboardMarkets) {
     try { supermarkets = JSON.parse(onboardMarkets); } catch { /* use default */ }

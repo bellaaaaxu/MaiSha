@@ -1,12 +1,12 @@
 import { describe, test, expect } from 'vitest';
-import { groupItemsByMarketAndCategory } from '@/utils/group-items';
+import { groupItemsByStore } from '@/utils/group-items';
 import type { Item } from '@/types/item';
 import type { Store } from '@/types/store';
 
 const markets: Store[] = [
   { id: 'hm', name: '盒马' },
   { id: 'cc', name: '菜场' },
-  { id: 'none', name: '未分类' },
+  { id: 'none', name: '未指定店铺' },
 ];
 
 function mk(overrides: Partial<Item>): Item {
@@ -20,56 +20,43 @@ function mk(overrides: Partial<Item>): Item {
   } as Item;
 }
 
-describe('groupItemsByMarketAndCategory', () => {
+describe('groupItemsByStore', () => {
   test('空清单返回空数组', () => {
-    expect(groupItemsByMarketAndCategory([], markets)).toEqual([]);
+    expect(groupItemsByStore([], markets)).toEqual([]);
   });
 
-  test('按超市分组，超市顺序与 markets 一致', () => {
+  test('按店铺分组，店铺顺序与 stores 一致', () => {
     const items = [
-      mk({ id: '1', supermarket: 'cc', category: '蔬菜', category_emoji: '🥬' }),
-      mk({ id: '2', supermarket: 'hm', category: '乳制品', category_emoji: '🥛' })
+      mk({ id: '1', supermarket: 'cc' }),
+      mk({ id: '2', supermarket: 'hm' })
     ];
-    const g = groupItemsByMarketAndCategory(items, markets);
+    const g = groupItemsByStore(items, markets);
     expect(g.length).toBe(2);
-    expect(g[0].supermarket.id).toBe('hm');
-    expect(g[1].supermarket.id).toBe('cc');
+    expect(g[0].store.id).toBe('hm');
+    expect(g[1].store.id).toBe('cc');
   });
 
-  test('超市下按品类副分组', () => {
-    const items = [
-      mk({ id: '1', supermarket: 'cc', category: '蔬菜', category_emoji: '🥬' }),
-      mk({ id: '2', supermarket: 'cc', category: '蔬菜', category_emoji: '🥬' }),
-      mk({ id: '3', supermarket: 'cc', category: '肉蛋', category_emoji: '🥩' })
-    ];
-    const g = groupItemsByMarketAndCategory(items, markets);
-    expect(g[0].categories.length).toBe(2);
-    expect(g[0].categories[0].category).toBe('蔬菜');
-    expect(g[0].categories[0].items.length).toBe(2);
-    expect(g[0].categories[1].category).toBe('肉蛋');
-  });
-
-  test('未知 supermarket id 归入"未分类"组', () => {
+  test('未知 supermarket id 归入"未指定店铺"组', () => {
     const items = [mk({ id: '1', supermarket: 'ghost-market' })];
-    const g = groupItemsByMarketAndCategory(items, markets);
-    expect(g[0].supermarket.id).toBe('none');
+    const g = groupItemsByStore(items, markets);
+    expect(g[0].store.id).toBe('none');
   });
 
-  test('只返回有物品的超市组', () => {
-    const items = [mk({ id: '1', supermarket: 'hm', category: '乳制品' })];
-    const g = groupItemsByMarketAndCategory(items, markets);
+  test('只返回有物品的店铺组', () => {
+    const items = [mk({ id: '1', supermarket: 'hm' })];
+    const g = groupItemsByStore(items, markets);
     expect(g.length).toBe(1);
-    expect(g[0].supermarket.id).toBe('hm');
+    expect(g[0].store.id).toBe('hm');
   });
 
-  test('每个超市组返回 totalCount', () => {
+  test('每个店铺组返回 totalCount', () => {
     const items = [
       mk({ id: '1', supermarket: 'hm' }),
       mk({ id: '2', supermarket: 'hm' }),
       mk({ id: '3', supermarket: 'cc' })
     ];
-    const g = groupItemsByMarketAndCategory(items, markets);
-    expect(g.find(x => x.supermarket.id === 'hm')!.totalCount).toBe(2);
-    expect(g.find(x => x.supermarket.id === 'cc')!.totalCount).toBe(1);
+    const g = groupItemsByStore(items, markets);
+    expect(g.find(x => x.store.id === 'hm')!.totalCount).toBe(2);
+    expect(g.find(x => x.store.id === 'cc')!.totalCount).toBe(1);
   });
 });

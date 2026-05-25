@@ -24,7 +24,7 @@ import { MoreMenu } from '@/components/MoreMenu';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
-import { groupItemsByMarketAndCategory } from '@/utils/group-items';
+import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { generateShareText } from '@/utils/share-text';
@@ -58,7 +58,7 @@ export default function ListRoute() {
 
   // 拖拽中显示所有超市（含空），方便放入空超市
   const groups = useMemo(
-    () => (list ? groupItemsByMarketAndCategory(items, list.supermarkets, !!draggingItem) : []),
+    () => (list ? groupItemsByStore(items, list.supermarkets, !!draggingItem) : []),
     [items, list, draggingItem]
   );
   const uncheckedCount = items.filter(i => !i.checked).length;
@@ -302,7 +302,7 @@ export default function ListRoute() {
           ) : (
             groups.map(g => (
               <SupermarketCard
-                key={g.supermarket.id}
+                key={g.store.id}
                 group={g}
                 customIconMap={customIconMap}
                 onToggle={onToggle}

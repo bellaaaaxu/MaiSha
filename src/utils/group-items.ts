@@ -1,71 +1,44 @@
 import type { Item } from '@/types/item';
 import type { Store } from '@/types/store';
-import { UNDELETABLE_SUPERMARKET_ID } from './constants';
+import { UNDELETABLE_STORE_ID } from './constants';
 
-export interface CategoryGroup {
-  category: string;
-  emoji: string;
+export interface StoreGroup {
+  store: Store;
   items: Item[];
-}
-
-export interface MarketGroup {
-  supermarket: Store;
-  categories: CategoryGroup[];
   totalCount: number;
 }
 
-export function groupItemsByMarketAndCategory(
+export function groupItemsByStore(
   items: Item[],
-  supermarkets: Store[],
+  stores: Store[],
   includeEmpty = false
-): MarketGroup[] {
+): StoreGroup[] {
   if (!items.length && !includeEmpty) return [];
 
-  // Always render "未分类" (fallback) at the bottom regardless of stored order
-  const sortedMarkets = [
-    ...supermarkets.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
-    ...supermarkets.filter(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+  const sorted = [
+    ...stores.filter(s => s.id !== UNDELETABLE_STORE_ID),
+    ...stores.filter(s => s.id === UNDELETABLE_STORE_ID),
   ];
-  const validIds = new Set(sortedMarkets.map(s => s.id));
-  const fallbackId = UNDELETABLE_SUPERMARKET_ID;
-  const marketMap = new Map(sortedMarkets.map(s => [s.id, s]));
+  const validIds = new Set(sorted.map(s => s.id));
+  const storeMap = new Map(sorted.map(s => [s.id, s]));
 
-  const byMarket = new Map<string, Item[]>();
-  for (const it of items) {
-    const mid = validIds.has(it.supermarket) ? it.supermarket : fallbackId;
-    if (!byMarket.has(mid)) byMarket.set(mid, []);
-    byMarket.get(mid)!.push(it);
+  const byStore = new Map<string, Item[]>();
+  for (const item of items) {
+    const sid = validIds.has(item.supermarket) ? item.supermarket : UNDELETABLE_STORE_ID;
+    if (!byStore.has(sid)) byStore.set(sid, []);
+    byStore.get(sid)!.push(item);
   }
 
-  const out: MarketGroup[] = [];
-  for (const s of sortedMarkets) {
-    const bucket = byMarket.get(s.id);
-    if (!bucket || !bucket.length) {
+  const out: StoreGroup[] = [];
+  for (const s of sorted) {
+    const bucket = byStore.get(s.id);
+    if (!bucket?.length) {
       if (includeEmpty) {
-        out.push({
-          supermarket: marketMap.get(s.id)!,
-          categories: [],
-          totalCount: 0
-        });
+        out.push({ store: storeMap.get(s.id)!, items: [], totalCount: 0 });
       }
       continue;
     }
-
-    const catOrder: string[] = [];
-    const catMap = new Map<string, CategoryGroup>();
-    for (const it of bucket) {
-      if (!catMap.has(it.category)) {
-        catOrder.push(it.category);
-        catMap.set(it.category, { category: it.category, emoji: it.category_emoji, items: [] });
-      }
-      catMap.get(it.category)!.items.push(it);
-    }
-
-    out.push({
-      supermarket: marketMap.get(s.id)!,
-      categories: catOrder.map(k => catMap.get(k)!),
-      totalCount: bucket.length
-    });
+    out.push({ store: storeMap.get(s.id)!, items: bucket, totalCount: bucket.length });
   }
   return out;
 }

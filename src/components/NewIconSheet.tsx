@@ -4,8 +4,6 @@ import { AiPreviewModal } from '@/components/AiPreviewModal';
 import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/image-utils';
 import { uploadCustomIcon, generateIcon, getRemainingCredits } from '@/lib/custom-icons';
 import { getIconPath } from '@/utils/icon-registry';
-import { matchCategory } from '@/utils/category-matcher';
-import type { CategoryKey } from '@/types/item';
 
 interface Props {
   open: boolean;
@@ -21,7 +19,6 @@ type Stage = 'name' | 'preset_warn' | 'picker';
 export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCreated }: Props) {
   const [stage, setStage] = useState<Stage>('name');
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<CategoryKey>('其他');
   const [remainingCredits, setRemainingCredits] = useState(5);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
@@ -36,8 +33,6 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
       setName(startName);
       if (startName) {
         const trimmed = sanitizeItemName(startName);
-        const m = matchCategory(trimmed);
-        setCategory(m.category as CategoryKey);
         // If preset exists, go to warn stage; otherwise straight to picker
         if (getIconPath(trimmed)) {
           setStage('preset_warn');
@@ -67,8 +62,6 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
   const handleNext = () => {
     const trimmed = sanitizeItemName(name);
     if (!trimmed) return;
-    const m = matchCategory(trimmed);
-    setCategory(m.category as CategoryKey);
 
     // Preset check
     if (getIconPath(trimmed)) {
@@ -282,7 +275,7 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
                 </div>
                 <IconPickerPanel
                   itemName={itemName}
-                  category={category}
+                  category="其他"
                   remainingCredits={remainingCredits}
                   onUpload={handleUploadPhoto}
                   onAiGenerate={() => handleAiGenerate()}

@@ -1,10 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
-import { matchCategory } from '@/utils/category-matcher';
 import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
 import { calculateFrequentlyBought } from '@/utils/frequently-bought';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
-import type { NewItemInput, CategoryKey } from '@/types/item';
+import type { NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
 import { IconPickerPanel } from '@/components/IconPickerPanel';
 import { AiPreviewModal } from '@/components/AiPreviewModal';
@@ -13,7 +12,7 @@ import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/i
 import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits } from '@/lib/custom-icons';
 import { useLongPress } from '@/hooks/useLongPress';
 import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
-import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import { getAddSheetTitle } from '@/utils/warm-copy';
 
 interface Props {
@@ -27,36 +26,6 @@ interface Props {
   onRemove: (itemId: string) => Promise<void>;
   onIconsChanged: () => void | Promise<void>;
   onOpenImport?: () => void;
-}
-
-const CATEGORY_ORDER = ['蔬菜', '肉蛋', '乳制品', '主食', '调料', '日用', '烘焙', '饮料'];
-const CATEGORY_COLORS: Record<string, string> = {
-  '蔬菜': '#7ca982',
-  '肉蛋': '#c97b63',
-  '乳制品': '#d4a96a',
-  '主食': '#8b9dc3',
-  '调料': '#b08d57',
-  '日用': '#9b8ec0',
-  '烘焙': '#c9886d',
-  '饮料': '#6a9fb5',
-};
-
-function groupByCategory(items: IconItem[]) {
-  const groups: { category: string; items: IconItem[] }[] = [];
-  const map = new Map<string, IconItem[]>();
-  for (const item of items) {
-    const arr = map.get(item.category) ?? [];
-    arr.push(item);
-    map.set(item.category, arr);
-  }
-  for (const cat of CATEGORY_ORDER) {
-    const items = map.get(cat);
-    if (items?.length) groups.push({ category: cat, items });
-  }
-  for (const [cat, items] of map) {
-    if (!CATEGORY_ORDER.includes(cat)) groups.push({ category: cat, items });
-  }
-  return groups;
 }
 
 interface IconButtonProps {
@@ -128,7 +97,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const [selectedMarket, setSelectedMarket] = useState<string>('none');
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [pendingItemName, setPendingItemName] = useState('');
-  const [pendingCategory, setPendingCategory] = useState<CategoryKey>('其他');
   const [remainingCredits, setRemainingCredits] = useState(5);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
@@ -199,10 +167,10 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     };
   }, [previewIcon]);
 
-  // "未分类" always pinned to the end of the supermarket selector
+  // "未指定店铺" always pinned to the end of the supermarket selector
   const sortedSupermarkets = useMemo(() => [
-    ...supermarkets.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
-    ...supermarkets.filter(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+    ...supermarkets.filter(s => s.id !== UNDELETABLE_STORE_ID),
+    ...supermarkets.filter(s => s.id === UNDELETABLE_STORE_ID),
   ], [supermarkets]);
 
   const allIcons = useMemo<IconItem[]>(() => {
@@ -212,7 +180,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       name,
       icon: '',         // unused when iconUrl is set
       iconUrl: url,
-      category: matchCategory(name).category,
+      category: '其他',
     }));
     // Preset icons, excluding any whose names are overridden by custom
     const presets = UNIQUE_ICON_ITEMS.filter(i =>
@@ -228,8 +196,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
       i.name.includes(q) || i.aliases?.some(a => a.includes(q))
     );
   }, [value, allIcons]);
-
-  const groups = useMemo(() => groupByCategory(filtered), [filtered]);
 
   const triggerAnim = useCallback((name: string, type: 'pop' | 'remove') => {
     setAnimating(prev => new Map(prev).set(name, type));
@@ -261,7 +227,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
   const submitTyped = () => {
     const name = value.trim();
     if (!name) return;
-    const m = matchCategory(name);
 
     // Check if preset or custom icon exists
     const hasPreset = UNIQUE_ICON_ITEMS.some(
@@ -272,7 +237,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     if (!hasPreset && !hasCustom) {
       // Show icon picker panel
       setPendingItemName(name);
-      setPendingCategory(m.category as CategoryKey);
       setShowIconPicker(true);
       return;
     }
@@ -586,7 +550,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                       key={`fb-${item.name}`}
                       iconUrl={iconUrl}
                       itemName={item.name}
-                      category={item.category}
+                      category="其他"
                       added={added}
                       anim={anim}
                       size="frequent"
@@ -612,7 +576,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                           />
                         ) : (
                           <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
-                            <WatercolorFallback name={item.name} category={item.category} size={40} />
+                            <WatercolorFallback name={item.name} category="其他" size={40} />
                           </div>
                         )}
                         {added && (
@@ -691,21 +655,11 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
             </div>
           )}
 
-          {/* icon grid by category */}
-          {groups.map((group) => (
-            <div key={group.category} className="mb-4">
-              <div className="flex items-center gap-2 mb-2.5 px-1">
-                <div
-                  className="w-1.5 h-4 rounded-full"
-                  style={{ backgroundColor: CATEGORY_COLORS[group.category] || '#999' }}
-                />
-                <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                  {group.category}
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
-              </div>
+          {/* icon grid (flat, no category sections) */}
+          {filtered.length > 0 && (
+            <div className="mb-4">
               <div className="grid grid-cols-3 gap-2.5">
-                {group.items.map((item) => {
+                {filtered.map((item) => {
                   const added = addedItems.has(item.name);
                   const anim = animating.get(item.name);
                   // Custom icons use iconUrl directly; preset icons build path from filename stem.
@@ -753,13 +707,13 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                 })}
               </div>
             </div>
-          ))}
+          )}
 
           {/* custom icon picker */}
           {showIconPicker && pendingItemName && (
             <IconPickerPanel
               itemName={pendingItemName}
-              category={pendingCategory}
+              category="其他"
               remainingCredits={remainingCredits}
               onUpload={handleUploadPhoto}
               onAiGenerate={() => handleAiGenerate()}
@@ -768,7 +722,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
           )}
 
           {/* no results */}
-          {value && groups.length === 0 && (
+          {value && filtered.length === 0 && (
             <div className="py-8 text-center">
               <p className="text-sm" style={{ color: '#a0937e' }}>
                 没有匹配的图标

@@ -1,6 +1,6 @@
 import type { Item } from '@/types/item';
 import type { Store } from '@/types/store';
-import { groupItemsByMarketAndCategory } from './group-items';
+import { groupItemsByStore } from './group-items';
 
 function fmtDate(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -23,14 +23,12 @@ export function generateShareText(
     return `🛒 买啥 · ${fmtDate(now)}\n\n清单为空 ✨`;
   }
 
-  const groups = groupItemsByMarketAndCategory(unchecked, supermarkets);
+  const groups = groupItemsByStore(unchecked, supermarkets);
   const lines: string[] = [`🛒 买啥 · ${fmtDate(now)} 购物清单`, ''];
   for (const g of groups) {
-    lines.push(`【${g.supermarket.name}】`);
-    for (const c of g.categories) {
-      for (const it of c.items) {
-        lines.push(`  • ${fmtItem(it)}`);
-      }
+    lines.push(`【${g.store.name}】`);
+    for (const it of g.items) {
+      lines.push(`  • ${fmtItem(it)}`);
     }
     lines.push('');
   }

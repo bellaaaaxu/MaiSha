@@ -1,6 +1,5 @@
 // src/components/WatercolorFallback.tsx
 import { getAdaptiveLabel } from '@/utils/image-utils';
-import type { CategoryKey } from '@/types/item';
 
 interface WatercolorColors {
   gradient: string;
@@ -44,7 +43,7 @@ export function getCategoryColor(category: string): WatercolorColors {
 
 interface Props {
   name: string;
-  category: CategoryKey | string;
+  category: string;
   size?: number;
 }
 

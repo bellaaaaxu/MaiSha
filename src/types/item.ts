@@ -1,8 +1,3 @@
-// CategoryKey kept for backward compat — Task 2 will remove it
-export type CategoryKey =
-  | '蔬菜' | '水果' | '肉蛋' | '乳制品' | '主食'
-  | '烘焙' | '调料' | '零食' | '饮料' | '日用' | '其他';
-
 export interface Item {
   id: string;
   list_id: string;

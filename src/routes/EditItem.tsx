@@ -4,8 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { updateItem, deleteItem } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
-import { CATEGORY_DEFS, FALLBACK_CATEGORY, FALLBACK_CATEGORY_EMOJI } from '@/utils/constants';
-import type { Item, CategoryKey } from '@/types/item';
+import type { Item } from '@/types/item';
 
 export default function EditItem() {
   const { id } = useParams<{ id: string }>();
@@ -29,22 +28,14 @@ export default function EditItem() {
     return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
   }
 
-  const categoryOptions = [
-    ...CATEGORY_DEFS.map(d => ({ key: d.key, emoji: d.emoji })),
-    { key: FALLBACK_CATEGORY, emoji: FALLBACK_CATEGORY_EMOJI }
-  ];
-
   const save = async () => {
     if (!item.name.trim()) { alert('名称不能为空'); return; }
-    const cat = categoryOptions.find(c => c.key === item.category)!;
     try {
       await updateItem(item.id, {
         name: item.name.trim(),
         note: item.note,
         quantity: item.quantity,
         supermarket: item.supermarket,
-        category: item.category,
-        category_emoji: cat.emoji
       });
       nav(-1);
     } catch {
@@ -98,22 +89,6 @@ export default function EditItem() {
         >
           {list.supermarkets.map(s => (
             <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="品类">
-        <select
-          className="w-full px-4 py-3 bg-white rounded-xl text-sm outline-none"
-          value={item.category}
-          onChange={(e) => {
-            const key = e.target.value as CategoryKey;
-            const emoji = categoryOptions.find(c => c.key === key)?.emoji ?? '📦';
-            setItem({ ...item, category: key, category_emoji: emoji });
-          }}
-        >
-          {categoryOptions.map(c => (
-            <option key={c.key} value={c.key}>{c.emoji} {c.key}</option>
           ))}
         </select>
       </Field>

@@ -8,34 +8,8 @@ import { updateItem } from '@/lib/db';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { ShoppingEndModal } from '@/components/ShoppingEndModal';
-import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import type { Item } from '@/types/item';
-
-const CATEGORY_COLORS: Record<string, string> = {
-  '蔬菜': '#7ca982', '肉蛋': '#c97b63', '乳制品': '#d4a96a',
-  '主食': '#8b9dc3', '调料': '#b08d57', '日用': '#9b8ec0',
-  '烘焙': '#c9886d', '饮料': '#6a9fb5', '水果': '#d4a06a',
-  '零食': '#c98a8a', '其他': '#999',
-};
-
-interface CategorySection {
-  category: string;
-  emoji: string;
-  items: Item[];
-}
-
-function groupByCategory(items: Item[]): CategorySection[] {
-  const order: string[] = [];
-  const map = new Map<string, CategorySection>();
-  for (const item of items) {
-    if (!map.has(item.category)) {
-      order.push(item.category);
-      map.set(item.category, { category: item.category, emoji: item.category_emoji, items: [] });
-    }
-    map.get(item.category)!.items.push(item);
-  }
-  return order.map(k => map.get(k)!);
-}
 
 export default function ShoppingMode() {
   const { marketId } = useParams<{ marketId: string }>();
@@ -52,8 +26,8 @@ export default function ShoppingMode() {
     [items, marketId]
   );
   const uncategorizedItems = useMemo(
-    () => marketId !== UNDELETABLE_SUPERMARKET_ID
-      ? items.filter(i => i.supermarket === UNDELETABLE_SUPERMARKET_ID && !i.checked)
+    () => marketId !== UNDELETABLE_STORE_ID
+      ? items.filter(i => i.supermarket === UNDELETABLE_STORE_ID && !i.checked)
       : [],
     [items, marketId]
   );
@@ -63,8 +37,6 @@ export default function ShoppingMode() {
   const total = marketItems.length;
   const doneCount = checked.length;
   const progress = total > 0 ? doneCount / total : 0;
-
-  const uncheckedSections = useMemo(() => groupByCategory(unchecked), [unchecked]);
 
   const [uncategorizedCollapsed, setUncategorizedCollapsed] = useState(false);
 
@@ -113,22 +85,13 @@ export default function ShoppingMode() {
         </div>
       </div>
 
-      {/* Unchecked items by category — icon grid */}
+      {/* Unchecked items — flat grid */}
       <div className="px-3 pt-3">
-        {uncheckedSections.map(section => (
-          <div key={section.category} className="mb-4">
-            <div className="flex items-center gap-1.5 mb-2 px-1">
-              <span className="text-xs font-semibold" style={{ color: CATEGORY_COLORS[section.category] || '#999' }}>
-                {section.emoji} {section.category}
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2.5">
-              {section.items.map(item => (
-                <ItemCard key={item.id} item={item} customIconMap={customIconMap} onToggle={onToggle} />
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="grid grid-cols-3 gap-2.5">
+          {unchecked.map(item => (
+            <ItemCard key={item.id} item={item} customIconMap={customIconMap} onToggle={onToggle} />
+          ))}
+        </div>
       </div>
 
       {/* Uncategorized "顺便看看" */}
@@ -139,7 +102,7 @@ export default function ShoppingMode() {
             className="flex items-center gap-1.5 mb-2 px-1"
           >
             <span className="text-xs" style={{ color: '#bbb' }}>{uncategorizedCollapsed ? '▸' : '▾'}</span>
-            <span className="text-xs font-medium" style={{ color: '#bbb' }}>顺便看看 · 未分类</span>
+            <span className="text-xs font-medium" style={{ color: '#bbb' }}>顺便看看 · 未指定店铺</span>
             <span className="text-xs px-1.5 rounded-md" style={{ background: '#f0ebe3', color: '#ccc' }}>
               {uncategorizedItems.length}
             </span>

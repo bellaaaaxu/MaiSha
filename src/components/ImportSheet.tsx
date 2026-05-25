@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { parseImportText, parsedToInputs, type ParsedItem } from '@/utils/parse-import-text';
 import type { Store } from '@/types/store';
-import { UNDELETABLE_SUPERMARKET_ID } from '@/utils/constants';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 
 interface Props {
   open: boolean;
@@ -17,8 +17,8 @@ export function ImportSheet({ open, supermarkets, onClose, onImport }: Props) {
   const parsed = useMemo<ParsedItem[]>(() => parseImportText(text), [text]);
 
   const sortedSupermarkets = useMemo(() => [
-    ...supermarkets.filter(s => s.id !== UNDELETABLE_SUPERMARKET_ID),
-    ...supermarkets.filter(s => s.id === UNDELETABLE_SUPERMARKET_ID),
+    ...supermarkets.filter(s => s.id !== UNDELETABLE_STORE_ID),
+    ...supermarkets.filter(s => s.id === UNDELETABLE_STORE_ID),
   ], [supermarkets]);
 
   const handleImport = () => {

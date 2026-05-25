@@ -1,5 +1,4 @@
-import { matchCategory } from './category-matcher';
-import type { NewItemInput, CategoryKey } from '@/types/item';
+import type { NewItemInput } from '@/types/item';
 
 const PREFIX_RE = /^(?:[-•·]\s*|\d+[.)]\s*|[①②③④⑤⑥⑦⑧⑨⑩]\s*)/;
 const QUANTITY_RE = /\s*[×xX*]\s*(\d+)\s*$|(\d+(?:\.\d+)?)\s*(盒|包|瓶|袋|斤|克|kg|g|个|只|条|根|块|片|罐|箱|升|ml|L)\s*$/i;
@@ -32,12 +31,11 @@ export function parseImportText(text: string): ParsedItem[] {
 
     if (!cleaned) continue;
 
-    const { category, emoji } = matchCategory(cleaned);
     results.push({
       name: cleaned,
       quantity,
-      category,
-      category_emoji: emoji,
+      category: '其他',
+      category_emoji: '📦',
     });
   }
 
@@ -49,7 +47,5 @@ export function parsedToInputs(parsed: ParsedItem[], supermarket: string): NewIt
     name: p.name,
     quantity: p.quantity,
     supermarket,
-    category: p.category as CategoryKey,
-    category_emoji: p.category_emoji,
   }));
 }
