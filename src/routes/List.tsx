@@ -20,7 +20,6 @@ import { StoreCard } from '@/components/StoreCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
 import { SetIconSheet } from '@/components/SetIconSheet';
-import { MoreMenu } from '@/components/MoreMenu';
 import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
@@ -28,7 +27,6 @@ import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
-import { generateShareText } from '@/utils/share-text';
 import type { Item, NewItemInput } from '@/types/item';
 
 export default function ListRoute() {
@@ -42,7 +40,6 @@ export default function ListRoute() {
   const { iconMap: customIconMap, refresh: refreshIcons } = useCustomIcons(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
-  const [showMore, setShowMore] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [menuItem, setMenuItem] = useState<Item | null>(null);
   const [setIconItem, setSetIconItem] = useState<Item | null>(null);
@@ -99,16 +96,6 @@ export default function ListRoute() {
     try {
       await navigator.clipboard.writeText(text);
       alert(code ? `邀请码已复制！\n\n${code}\n\n发给家人，输入邀请码即可加入` : '邀请链接已复制！');
-    } catch {
-      prompt('复制：', text);
-    }
-  };
-
-  const onCopyShareText = async () => {
-    const text = generateShareText(items, list.supermarkets);
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('清单文本已复制');
     } catch {
       prompt('复制：', text);
     }
@@ -336,16 +323,6 @@ export default function ListRoute() {
           listId={list.id}
           onClose={() => setSetIconItem(null)}
           onIconsChanged={refreshIcons}
-        />
-
-        <MoreMenu
-          open={showMore}
-          onClose={() => setShowMore(false)}
-          onCopyShareText={onCopyShareText}
-          onManageMarkets={() => nav('/manage-stores')}
-          onSettings={() => nav('/settings')}
-          onHistory={() => nav('/history')}
-          onImport={() => setShowImport(true)}
         />
 
         <ImportSheet
