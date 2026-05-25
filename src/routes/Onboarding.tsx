@@ -18,6 +18,13 @@ export default function Onboarding() {
       >
         开始使用
       </button>
+      <button
+        onClick={() => nav('/join')}
+        className="w-full max-w-xs h-10 rounded-xl font-medium text-sm mt-3 active:opacity-70"
+        style={{ color: '#7ca982', border: '1px solid rgba(124,169,130,0.3)' }}
+      >
+        🔑 有邀请码？加入清单
+      </button>
     </div>
   );
 }

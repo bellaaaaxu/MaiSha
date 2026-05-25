@@ -6,6 +6,7 @@ export interface List {
   owner_uid: string;
   member_uids: string[];
   supermarkets: Supermarket[];
+  short_code: string;
   created_at: string;
   updated_at: string;
 }

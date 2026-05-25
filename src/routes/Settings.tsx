@@ -12,12 +12,15 @@ export default function Settings() {
 
   const copyInviteLink = async () => {
     if (!list) return;
-    const url = `${location.origin}/list?list=${list.id}`;
+    const code = list.short_code;
+    const text = code
+      ? `邀请码：${code}\n或打开链接：${location.origin}/list?list=${list.id}`
+      : `${location.origin}/list?list=${list.id}`;
     try {
-      await navigator.clipboard.writeText(url);
-      alert(`邀请链接已复制：\n${url}\n\n发给老公，他点链接即加入。`);
+      await navigator.clipboard.writeText(text);
+      alert(code ? `邀请码已复制！\n\n${code}\n\n发给老公，输入邀请码即可加入` : '邀请链接已复制！');
     } catch {
-      prompt('复制链接：', url);
+      prompt('复制：', text);
     }
   };
 
@@ -39,11 +42,29 @@ export default function Settings() {
         <div className="text-base font-semibold">设置</div>
       </header>
 
+      {list?.short_code && (
+        <div className="mb-3 px-4 py-3 bg-white rounded-xl flex items-center justify-between">
+          <div>
+            <div className="text-xs" style={{ color: '#a0937e' }}>清单邀请码</div>
+            <div className="text-xl font-mono font-bold tracking-[0.2em] mt-0.5" style={{ color: '#5a4e3c' }}>
+              {list.short_code}
+            </div>
+          </div>
+          <button
+            onClick={copyInviteLink}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium active:opacity-80"
+            style={{ background: '#7ca982', color: '#fff' }}
+          >
+            复制
+          </button>
+        </div>
+      )}
+
       <button
-        onClick={copyInviteLink}
+        onClick={() => nav('/join')}
         className="w-full flex justify-between items-center px-4 py-4 bg-white rounded-xl mb-2 text-sm active:bg-gray-50"
       >
-        <span>🔗 邀请老公（复制链接）</span>
+        <span>🔑 输入邀请码加入</span>
         <span className="text-gray-300">›</span>
       </button>
 

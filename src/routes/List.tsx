@@ -113,12 +113,15 @@ export default function ListRoute() {
   };
 
   const onShareMenu = async () => {
-    const url = `${location.origin}/list?list=${list.id}`;
+    const code = list.short_code;
+    const text = code
+      ? `邀请码：${code}\n或打开链接：${location.origin}/list?list=${list.id}`
+      : `${location.origin}/list?list=${list.id}`;
     try {
-      await navigator.clipboard.writeText(url);
-      alert('邀请链接已复制！\n' + url);
+      await navigator.clipboard.writeText(text);
+      alert(code ? `邀请码已复制！\n\n${code}\n\n发给家人，输入邀请码即可加入` : '邀请链接已复制！');
     } catch {
-      prompt('复制这个链接：', url);
+      prompt('复制：', text);
     }
   };
 

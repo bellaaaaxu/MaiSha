@@ -90,6 +90,12 @@ export async function clearChecked(listId: string): Promise<number> {
   return data as number;
 }
 
+export async function joinByCode(code: string): Promise<List | null> {
+  const { data, error } = await supabase.rpc('join_by_code', { p_code: code });
+  if (error) throw error;
+  return data as List | null;
+}
+
 export async function updateListSupermarkets(listId: string, supermarkets: Supermarket[]): Promise<void> {
   const { error } = await supabase
     .from('lists')
