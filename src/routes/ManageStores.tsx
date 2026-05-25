@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   PointerSensor,
@@ -22,8 +23,9 @@ import { updateListSupermarkets } from '@/lib/db';
 import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import type { Store } from '@/types/store';
 
-export default function ManageMarkets() {
+export default function ManageStores() {
   const nav = useNavigate();
+  const { t } = useTranslation();
   const { uid } = useAuth();
   const { list } = useList(uid, null);
 
@@ -41,12 +43,12 @@ export default function ManageMarkets() {
     if (list) setItems(JSON.parse(JSON.stringify(list.supermarkets)));
   }, [list]);
 
-  // Custom markets are sortable; "未分类" is pinned at the bottom
-  const customMarkets = useMemo(
+  // Custom stores are sortable; "未分类" is pinned at the bottom
+  const customStores = useMemo(
     () => items.filter(s => s.id !== UNDELETABLE_STORE_ID),
     [items]
   );
-  const fallbackMarket = useMemo(
+  const fallbackStore = useMemo(
     () => items.find(s => s.id === UNDELETABLE_STORE_ID),
     [items]
   );
@@ -56,7 +58,7 @@ export default function ManageMarkets() {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } })
   );
 
-  if (!list) return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
+  if (!list) return <div className="p-8 text-center text-gray-500 text-sm">{t('common.loading')}</div>;
 
   const rename = (id: string, val: string) => {
     setItems(items.map(s => s.id === id ? { ...s, name: val } : s));
@@ -67,36 +69,36 @@ export default function ManageMarkets() {
       alert('"未分类"不可删');
       return;
     }
-    if (!confirm('删除这个超市？已分配到这里的物品会回到"未分类"。')) return;
+    if (!confirm('删除这个店铺？已分配到这里的物品会回到"未分类"。')) return;
     setItems(items.filter(s => s.id !== id));
   };
 
   const add = () => {
     if (!newName.trim()) return;
-    const newMarket: Store = {
+    const newStore: Store = {
       id: 'sm_' + Date.now().toString(36),
       name: newName.trim(),
     };
-    // Insert before "未分类"
-    setItems([...customMarkets, newMarket, ...(fallbackMarket ? [fallbackMarket] : [])]);
+    // Insert before fallback store
+    setItems([...customStores, newStore, ...(fallbackStore ? [fallbackStore] : [])]);
     setNewName('');
   };
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const oldIndex = customMarkets.findIndex(s => s.id === active.id);
-    const newIndex = customMarkets.findIndex(s => s.id === over.id);
+    const oldIndex = customStores.findIndex(s => s.id === active.id);
+    const newIndex = customStores.findIndex(s => s.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const reordered = arrayMove(customMarkets, oldIndex, newIndex);
-    setItems([...reordered, ...(fallbackMarket ? [fallbackMarket] : [])]);
+    const reordered = arrayMove(customStores, oldIndex, newIndex);
+    setItems([...reordered, ...(fallbackStore ? [fallbackStore] : [])]);
   };
 
   const save = async () => {
     setSaving(true);
     try {
-      // Persist: custom markets in their reordered sequence, "未分类" at the end
-      const toSave = [...customMarkets, ...(fallbackMarket ? [fallbackMarket] : [])];
+      // Persist: custom stores in their reordered sequence, fallback at the end
+      const toSave = [...customStores, ...(fallbackStore ? [fallbackStore] : [])];
       await updateListSupermarkets(list.id, toSave);
       nav(-1);
     } catch {
@@ -141,12 +143,12 @@ export default function ManageMarkets() {
           onClick={onBack}
           className="text-xl active:opacity-60"
           style={{ color: '#a0937e' }}
-          aria-label="返回"
+          aria-label={t('shopping.back')}
         >
           ←
         </button>
         <div className="flex-1 text-base font-semibold" style={{ color: '#5a4e3c' }}>
-          管理超市
+          {t('stores.manage')}
         </div>
       </header>
 
@@ -156,11 +158,11 @@ export default function ManageMarkets() {
         </div>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <SortableContext items={customMarkets.map(s => s.id)} strategy={verticalListSortingStrategy}>
-            {customMarkets.map(s => (
+          <SortableContext items={customStores.map(s => s.id)} strategy={verticalListSortingStrategy}>
+            {customStores.map(s => (
               <SortableRow
                 key={s.id}
-                market={s}
+                store={s}
                 onRename={(v) => rename(s.id, v)}
                 onRemove={() => remove(s.id)}
               />
@@ -169,7 +171,7 @@ export default function ManageMarkets() {
         </DndContext>
 
         {/* Fallback "未分类" row (not draggable, pinned at bottom) */}
-        {fallbackMarket && (
+        {fallbackStore && (
           <div
             className="flex items-center gap-3 rounded-2xl p-3 mb-2"
             style={{
@@ -179,7 +181,7 @@ export default function ManageMarkets() {
           >
             <span style={{ color: '#c4b49a' }}>🔒</span>
             <span className="flex-1 text-sm" style={{ color: '#a0937e' }}>
-              {fallbackMarket.name}
+              {fallbackStore.name}
             </span>
             <span className="text-[10px]" style={{ color: '#c4b49a' }}>系统 · 固定底部</span>
           </div>
@@ -194,7 +196,7 @@ export default function ManageMarkets() {
               border: '1px solid rgba(215,205,188,0.4)',
               color: '#5a4e3c',
             }}
-            placeholder="新超市名（如：Walmart）"
+            placeholder={t('stores.namePlaceholder')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
@@ -205,7 +207,7 @@ export default function ManageMarkets() {
             className="px-4 rounded-xl text-sm font-medium text-white active:opacity-80 disabled:opacity-40"
             style={{ background: '#7ca982' }}
           >
-            添加
+            {t('stores.addNew')}
           </button>
         </div>
       </main>
@@ -220,7 +222,7 @@ export default function ManageMarkets() {
           className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90 disabled:opacity-50"
           style={{ background: '#7ca982' }}
         >
-          {saving ? '保存中…' : '保存'}
+          {saving ? t('common.loading') : t('stores.save')}
         </button>
       </footer>
 
@@ -255,7 +257,7 @@ export default function ManageMarkets() {
                 className="w-full h-11 rounded-xl text-sm font-medium text-white active:opacity-90 disabled:opacity-50"
                 style={{ background: '#7ca982' }}
               >
-                {saving ? '保存中…' : '保存并返回'}
+                {saving ? t('common.loading') : '保存并返回'}
               </button>
               <button
                 onClick={discardAndLeave}
@@ -273,7 +275,7 @@ export default function ManageMarkets() {
                 className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
                 style={{ color: '#8a7e6b' }}
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -284,14 +286,14 @@ export default function ManageMarkets() {
 }
 
 interface SortableRowProps {
-  market: Store;
+  store: Store;
   onRename: (val: string) => void;
   onRemove: () => void;
 }
 
-function SortableRow({ market, onRename, onRemove }: SortableRowProps) {
+function SortableRow({ store, onRename, onRemove }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: market.id,
+    id: store.id,
   });
 
   const style = {
@@ -321,7 +323,7 @@ function SortableRow({ market, onRename, onRemove }: SortableRowProps) {
       <input
         className="flex-1 bg-transparent text-sm outline-none"
         style={{ color: '#5a4e3c' }}
-        value={market.name}
+        value={store.name}
         onChange={(e) => onRename(e.target.value)}
       />
       <button

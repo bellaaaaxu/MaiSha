@@ -2,7 +2,7 @@ import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import Onboarding from './routes/Onboarding';
 import ListRoute from './routes/List';
 import EditItem from './routes/EditItem';
-import ManageMarkets from './routes/ManageMarkets';
+import ManageStores from './routes/ManageStores';
 import Settings from './routes/Settings';
 import IconPreview from './routes/IconPreview';
 import IconLibrary from './routes/IconLibrary';
@@ -60,7 +60,7 @@ function AuthedApp() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/list" element={<ListRoute />} />
         <Route path="/edit-item/:id" element={<EditItem />} />
-        <Route path="/manage-markets" element={<ManageMarkets />} />
+        <Route path="/manage-stores" element={<ManageStores />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/icons" element={<IconLibrary />} />
         <Route path="/shopping/:marketId" element={<ShoppingMode />} />

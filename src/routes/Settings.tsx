@@ -77,7 +77,7 @@ export default function Settings() {
       </button>
 
       <button
-        onClick={() => nav('/manage-markets')}
+        onClick={() => nav('/manage-stores')}
         className="w-full flex justify-between items-center px-4 py-4 bg-white rounded-xl mb-2 text-sm active:bg-gray-50"
       >
         <span>🏪 管理超市</span>

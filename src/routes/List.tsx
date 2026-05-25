@@ -340,7 +340,7 @@ export default function ListRoute() {
           open={showMore}
           onClose={() => setShowMore(false)}
           onCopyShareText={onCopyShareText}
-          onManageMarkets={() => nav('/manage-markets')}
+          onManageMarkets={() => nav('/manage-stores')}
           onSettings={() => nav('/settings')}
           onHistory={() => nav('/history')}
           onImport={() => setShowImport(true)}
