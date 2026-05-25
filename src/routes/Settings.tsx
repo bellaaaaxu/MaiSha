@@ -84,6 +84,14 @@ export default function Settings() {
         <span className="text-gray-300">›</span>
       </button>
 
+      <button
+        onClick={() => nav('/privacy')}
+        className="w-full flex justify-between items-center px-4 py-4 bg-white rounded-xl mb-2 text-sm active:bg-gray-50"
+      >
+        <span>🔒 隐私政策</span>
+        <span className="text-gray-300">›</span>
+      </button>
+
       <div className="text-center text-xs text-gray-400 mt-8 space-y-1">
         <div>买啥 MaiSha v1.0.0</div>
         <div>成员 {list?.member_uids.length ?? 0} 人</div>

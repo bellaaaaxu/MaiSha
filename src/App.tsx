@@ -10,6 +10,7 @@ import ShoppingMode from '@/routes/ShoppingMode';
 import PurchaseHistory from '@/routes/PurchaseHistory';
 import PurchaseHistoryDetail from '@/routes/PurchaseHistoryDetail';
 import JoinByCode from '@/routes/JoinByCode';
+import Privacy from '@/routes/Privacy';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAuth } from './hooks/useAuth';
 
@@ -66,6 +67,7 @@ function AuthedApp() {
         <Route path="/history" element={<PurchaseHistory />} />
         <Route path="/history/:id" element={<PurchaseHistoryDetail />} />
         <Route path="/join" element={<JoinByCode />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>
