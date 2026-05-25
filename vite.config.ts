@@ -20,7 +20,9 @@ export default defineConfig({
         lang: 'zh-CN',
         icons: [
           { src: 'icon.svg',          sizes: 'any',      type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icon-maskable.svg', sizes: 'any',      type: 'image/svg+xml', purpose: 'maskable' }
+          { src: 'icon-maskable.svg', sizes: 'any',      type: 'image/svg+xml', purpose: 'maskable' },
+          { src: 'icon-192.png',      sizes: '192x192',  type: 'image/png' },
+          { src: 'icon-512.png',      sizes: '512x512',  type: 'image/png' }
         ]
       },
       workbox: {
