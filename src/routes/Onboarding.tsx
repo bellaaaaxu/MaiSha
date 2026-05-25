@@ -1,350 +1,316 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { saveCurrency, getAllCurrencies, getOrDetectCurrency } from '@/utils/currency';
-
-const HOUSEHOLD_OPTIONS = [
-  { key: '1', emoji: '🧑', label: '一个人' },
-  { key: '2', emoji: '👫', label: '两个人' },
-  { key: 'family', emoji: '👨‍👩‍👧', label: '一家人' },
-];
-
-const SUPERMARKET_PRESETS = [
-  { id: 'tnt', name: 'T&T 大统华', emoji: '🥬' },
-  { id: 'costco', name: 'Costco', emoji: '🏬' },
-  { id: 'walmart', name: 'Walmart', emoji: '🛒' },
-  { id: 'hema', name: '盒马', emoji: '🐴' },
-  { id: 'sam', name: "Sam's Club", emoji: '🏪' },
-  { id: 'yc', name: '元初', emoji: '🛒' },
-];
+import type { Store } from '@/types/store';
 
 const POPULAR_CURRENCIES = ['CNY', 'CAD', 'USD', 'EUR', 'GBP', 'AUD', 'JPY', 'HKD', 'TWD', 'SGD'];
-
-const TOTAL_STEPS = 5;
-
-function StepDots({ current, total }: { current: number; total: number }) {
-  return (
-    <div className="flex gap-2 justify-center mb-8">
-      {Array.from({ length: total }, (_, i) => (
-        <div
-          key={i}
-          className="rounded-full transition-all duration-300"
-          style={{
-            width: i === current ? 20 : 6,
-            height: 6,
-            background: i === current ? '#7ca982' : i < current ? '#b8d4bc' : '#e0d6c6',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function CardOption({
-  selected,
-  onClick,
-  children,
-  style,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  style?: CSSProperties;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-2xl p-4 text-left transition-all duration-200 active:scale-[0.97]"
-      style={{
-        background: selected ? 'rgba(124,169,130,0.12)' : 'rgba(255,252,247,0.6)',
-        border: selected ? '2px solid #7ca982' : '2px solid rgba(215,205,188,0.3)',
-        ...style,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
+const TOTAL_STEPS = 3;
 
 export default function Onboarding() {
   const nav = useNavigate();
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState(0);
-  const [household, setHousehold] = useState('2');
-  const [selectedMarkets, setSelectedMarkets] = useState<Set<string>>(new Set(['tnt', 'costco']));
-  const [customMarket, setCustomMarket] = useState('');
-  const [trackQty, setTrackQty] = useState(false);
+  const [language, setLanguage] = useState(i18n.language || 'zh-CN');
+  const [addedStores, setAddedStores] = useState<Store[]>([]);
+  const [newStoreName, setNewStoreName] = useState('');
   const detectedCurrency = getOrDetectCurrency();
   const [currencyCode, setCurrencyCode] = useState(detectedCurrency.code);
-  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
 
   const goNext = () => {
     if (step >= TOTAL_STEPS - 1) return finish();
-    setDirection('forward');
     setStep(s => s + 1);
   };
 
   const goBack = () => {
-    setDirection('back');
     setStep(s => Math.max(0, s - 1));
   };
 
-  const toggleMarket = (id: string) => {
-    setSelectedMarkets(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const addStore = () => {
+    const name = newStoreName.trim();
+    if (!name) return;
+    const id = name.toLowerCase().replace(/\s+/g, '-');
+    setAddedStores(prev => [...prev, { id, name }]);
+    setNewStoreName('');
   };
 
-  const addCustomMarket = () => {
-    const name = customMarket.trim();
-    if (!name) return;
-    const id = `custom-${name}`;
-    SUPERMARKET_PRESETS.push({ id, name, emoji: '🛒' });
-    setSelectedMarkets(prev => new Set(prev).add(id));
-    setCustomMarket('');
+  const removeStore = (index: number) => {
+    setAddedStores(prev => prev.filter((_, i) => i !== index));
   };
 
   const finish = () => {
-    localStorage.setItem('maisha:household', household);
-    localStorage.setItem('maisha:track-qty', trackQty ? '1' : '0');
     saveCurrency(currencyCode);
-
-    const supermarkets = [
-      ...SUPERMARKET_PRESETS.filter(s => selectedMarkets.has(s.id)),
-      { id: 'none', name: '未分类', emoji: '❓' },
+    const stores: Store[] = [
+      ...addedStores,
+      { id: 'none', name: t('addSheet.noStore') },
     ];
-    localStorage.setItem('maisha:onboard-supermarkets', JSON.stringify(supermarkets));
+    localStorage.setItem('maisha:onboard-supermarkets', JSON.stringify(stores));
+    localStorage.setItem('maisha:language', language);
     localStorage.setItem('maisha:seen', '1');
     nav('/list');
   };
 
-  const animClass = direction === 'forward' ? 'animate-step-forward' : 'animate-step-back';
-
   return (
-    <div
-      className="min-h-screen flex flex-col px-6 py-10"
-      style={{ background: 'linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%)' }}
-    >
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '40px 24px',
+      background: 'var(--paper)',
+    }}>
       {step > 0 && (
         <button
           onClick={goBack}
-          className="self-start text-sm mb-4 active:opacity-60"
-          style={{ color: '#a0937e' }}
+          style={{
+            alignSelf: 'flex-start',
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
+            color: 'var(--ink-light)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            marginBottom: 16,
+          }}
         >
-          ← 上一步
+          ← {t('shopping.back')}
         </button>
       )}
 
-      <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-        <StepDots current={step} total={TOTAL_STEPS} />
+      {/* Step dots */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              width: i === step ? 20 : 6,
+              height: 6,
+              borderRadius: 3,
+              background: i === step ? 'var(--green)' : i < step ? 'var(--green-soft)' : 'var(--ink-faint)',
+              transition: 'all 0.3s',
+            }}
+          />
+        ))}
+      </div>
 
-        <div key={step} className={animClass}>
-          {step === 0 && (
-            <div className="text-center">
-              <div className="text-6xl mb-5" style={{ animation: 'floatBounce 2s ease-in-out infinite' }}>🛒</div>
-              <h1 className="text-2xl font-bold mb-2" style={{ color: '#5a4e3c' }}>买啥 MaiSha</h1>
-              <p className="text-sm mb-10" style={{ color: '#a0937e' }}>
-                和 TA 共享的购物清单
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 360, margin: '0 auto', width: '100%' }}>
+
+        {/* Step 0: Language selection */}
+        {step === 0 && (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🌏</div>
+              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
+                {t('settings.language')}
+              </h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { code: 'zh-CN', label: '简体中文' },
+                { code: 'zh-TW', label: '繁體中文' },
+                { code: 'en', label: 'English' },
+              ].map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    i18n.changeLanguage(lang.code);
+                    setLanguage(lang.code);
+                  }}
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 16,
+                    padding: '14px 20px',
+                    borderRadius: 'var(--radius-card)',
+                    border: language === lang.code
+                      ? '2px solid var(--green)'
+                      : '2px solid var(--ink-faint)',
+                    background: language === lang.code
+                      ? 'rgba(123, 163, 126, 0.1)'
+                      : 'white',
+                    color: 'var(--ink)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span>{lang.label}</span>
+                  {language === lang.code && (
+                    <span style={{ color: 'var(--green)', fontWeight: 700 }}>✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 1: Add stores (free text) */}
+        {step === 1 && (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🏪</div>
+              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
+                {t('onboarding.addStores')}
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 4 }}>
+                {t('onboarding.addStoresHint')}
               </p>
-              <div className="space-y-2.5 mb-10 text-left">
-                {[
-                  { emoji: '📝', text: '想到要买的随手加' },
-                  { emoji: '🏪', text: '按超市分组，到店不慌' },
-                  { emoji: '💚', text: '家人实时同步' },
-                ].map((f, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl px-4 py-3 text-sm flex items-center gap-3"
+            </div>
+
+            {/* Added stores */}
+            {addedStores.map((store, i) => (
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 8,
+                padding: '10px 16px',
+                background: 'white',
+                borderRadius: 'var(--radius-card)',
+                border: '1px solid var(--ink-faint)',
+              }}>
+                <span style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--ink)' }}>
+                  {store.name}
+                </span>
+                <button
+                  onClick={() => removeStore(i)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: 18, color: 'var(--ink-faint)', padding: '0 4px',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+
+            {/* Input for new store */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <input
+                value={newStoreName}
+                onChange={e => setNewStoreName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addStore(); }}
+                placeholder={t('onboarding.storePlaceholder')}
+                style={{
+                  flex: 1,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 15,
+                  padding: '10px 16px',
+                  borderRadius: 'var(--radius-card)',
+                  border: '1px solid var(--ink-faint)',
+                  background: 'white',
+                  color: 'var(--ink)',
+                  outline: 'none',
+                }}
+              />
+              {newStoreName.trim() && (
+                <button
+                  onClick={addStore}
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: 'white',
+                    background: 'var(--green)',
+                    border: 'none',
+                    borderRadius: 'var(--radius-card)',
+                    padding: '10px 16px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('common.confirm')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Currency */}
+        {step === 2 && (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>💰</div>
+              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
+                {t('onboarding.currency')}
+              </h2>
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: 10,
+            }}>
+              {getAllCurrencies()
+                .filter(c => POPULAR_CURRENCIES.includes(c.code))
+                .map(c => (
+                  <button
+                    key={c.code}
+                    onClick={() => setCurrencyCode(c.code)}
                     style={{
-                      background: 'rgba(255,252,247,0.6)',
-                      border: '1px solid rgba(215,205,188,0.3)',
-                      color: '#5a4e3c',
-                      animation: `fadeSlideUp 0.5s ease-out ${0.2 + i * 0.15}s both`,
+                      fontFamily: 'var(--font-body)',
+                      padding: '12px 16px',
+                      borderRadius: 'var(--radius-card)',
+                      border: currencyCode === c.code
+                        ? '2px solid var(--green)'
+                        : '2px solid var(--ink-faint)',
+                      background: currencyCode === c.code
+                        ? 'rgba(123, 163, 126, 0.1)'
+                        : 'white',
+                      color: 'var(--ink)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
                     }}
                   >
-                    <span className="text-lg">{f.emoji}</span>
-                    <span>{f.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div>
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-3">👋</div>
-                <h2 className="text-lg font-bold" style={{ color: '#5a4e3c' }}>你的菜篮子几个人用？</h2>
-                <p className="text-xs mt-1" style={{ color: '#a0937e' }}>帮你优化推荐</p>
-              </div>
-              <div className="space-y-3">
-                {HOUSEHOLD_OPTIONS.map((opt, i) => (
-                  <CardOption
-                    key={opt.key}
-                    selected={household === opt.key}
-                    onClick={() => setHousehold(opt.key)}
-                    style={{ animation: `fadeSlideUp 0.4s ease-out ${i * 0.1}s both` }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-3xl">{opt.emoji}</span>
-                      <span className="text-sm font-medium" style={{ color: '#5a4e3c' }}>{opt.label}</span>
-                      {household === opt.key && (
-                        <span className="ml-auto text-sm" style={{ color: '#7ca982' }}>✓</span>
-                      )}
+                    <div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{c.symbol}</div>
+                      <div style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{c.code}</div>
                     </div>
-                  </CardOption>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-3">🏪</div>
-                <h2 className="text-lg font-bold" style={{ color: '#5a4e3c' }}>你常去哪些超市？</h2>
-                <p className="text-xs mt-1" style={{ color: '#a0937e' }}>可多选，之后还能改</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {SUPERMARKET_PRESETS.map((s, i) => (
-                  <CardOption
-                    key={s.id}
-                    selected={selectedMarkets.has(s.id)}
-                    onClick={() => toggleMarket(s.id)}
-                    style={{ animation: `fadeSlideUp 0.35s ease-out ${i * 0.06}s both` }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{s.emoji}</span>
-                      <span className="text-xs font-medium truncate" style={{ color: '#5a4e3c' }}>{s.name}</span>
-                    </div>
-                  </CardOption>
-                ))}
-              </div>
-              <div className="mt-3 flex gap-2">
-                <input
-                  value={customMarket}
-                  onChange={e => setCustomMarket(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') addCustomMarket(); }}
-                  placeholder="其他超市..."
-                  className="flex-1 text-sm rounded-xl px-3 py-2.5 outline-none"
-                  style={{
-                    background: 'rgba(255,252,247,0.6)',
-                    border: '1px solid rgba(215,205,188,0.3)',
-                    color: '#5a4e3c',
-                  }}
-                />
-                {customMarket.trim() && (
-                  <button
-                    onClick={addCustomMarket}
-                    className="shrink-0 px-3 rounded-xl text-xs font-medium text-white active:opacity-80"
-                    style={{ background: '#7ca982' }}
-                  >
-                    添加
+                    {currencyCode === c.code && (
+                      <span style={{ color: 'var(--green)', fontWeight: 700 }}>✓</span>
+                    )}
                   </button>
-                )}
-              </div>
+                ))}
             </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📏</div>
-                <h2 className="text-lg font-bold" style={{ color: '#5a4e3c' }}>需要记录数量吗？</h2>
-                <p className="text-xs mt-1" style={{ color: '#a0937e' }}>比如「牛奶 × 2盒」</p>
-              </div>
-              <div className="space-y-3">
-                <CardOption
-                  selected={!trackQty}
-                  onClick={() => setTrackQty(false)}
-                  style={{ animation: 'fadeSlideUp 0.4s ease-out both' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">🎯</span>
-                    <div>
-                      <div className="text-sm font-medium" style={{ color: '#5a4e3c' }}>只选种类</div>
-                      <div className="text-xs mt-0.5" style={{ color: '#a0937e' }}>轻松简单，点一下就加</div>
-                    </div>
-                    {!trackQty && <span className="ml-auto text-sm" style={{ color: '#7ca982' }}>✓</span>}
-                  </div>
-                </CardOption>
-                <CardOption
-                  selected={trackQty}
-                  onClick={() => setTrackQty(true)}
-                  style={{ animation: 'fadeSlideUp 0.4s ease-out 0.1s both' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">📝</span>
-                    <div>
-                      <div className="text-sm font-medium" style={{ color: '#5a4e3c' }}>记录数量</div>
-                      <div className="text-xs mt-0.5" style={{ color: '#a0937e' }}>精确管理，适合大采购</div>
-                    </div>
-                    {trackQty && <span className="ml-auto text-sm" style={{ color: '#7ca982' }}>✓</span>}
-                  </div>
-                </CardOption>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div>
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-3">💰</div>
-                <h2 className="text-lg font-bold" style={{ color: '#5a4e3c' }}>你的货币</h2>
-                <p className="text-xs mt-1" style={{ color: '#a0937e' }}>用于记录购物花费</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {getAllCurrencies()
-                  .filter(c => POPULAR_CURRENCIES.includes(c.code))
-                  .map((c, i) => (
-                    <CardOption
-                      key={c.code}
-                      selected={currencyCode === c.code}
-                      onClick={() => setCurrencyCode(c.code)}
-                      style={{ animation: `fadeSlideUp 0.35s ease-out ${i * 0.05}s both` }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-lg font-bold" style={{ color: '#5a4e3c' }}>{c.symbol}</div>
-                          <div className="text-[10px]" style={{ color: '#a0937e' }}>{c.code}</div>
-                        </div>
-                        {currencyCode === c.code && (
-                          <span className="text-sm" style={{ color: '#7ca982' }}>✓</span>
-                        )}
-                      </div>
-                    </CardOption>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom buttons */}
-      <div className="max-w-sm mx-auto w-full space-y-3 pt-6">
+      <div style={{ maxWidth: 360, margin: '0 auto', width: '100%', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <button
           onClick={goNext}
-          className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90 transition-all"
-          style={{ background: '#7ca982' }}
+          style={{
+            width: '100%',
+            height: 48,
+            borderRadius: 12,
+            fontFamily: 'var(--font-body)',
+            fontSize: 16,
+            fontWeight: 700,
+            color: 'white',
+            background: 'var(--green)',
+            border: 'none',
+            cursor: 'pointer',
+          }}
         >
-          {step === 0 ? '开始设置' : step === TOTAL_STEPS - 1 ? '开始使用 🎉' : '下一步'}
+          {step === TOTAL_STEPS - 1 ? t('onboarding.done') : t('onboarding.next')}
         </button>
-        {step === 0 && (
-          <button
-            onClick={() => nav('/join')}
-            className="w-full h-10 rounded-xl font-medium text-sm active:opacity-70"
-            style={{ color: '#7ca982', border: '1px solid rgba(124,169,130,0.3)' }}
-          >
-            🔑 有邀请码？加入清单
-          </button>
-        )}
-        {step > 0 && step < TOTAL_STEPS - 1 && (
+        {step === 1 && (
           <button
             onClick={finish}
-            className="w-full text-xs py-2 active:opacity-60"
-            style={{ color: '#c4b49a' }}
+            style={{
+              width: '100%',
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              color: 'var(--ink-faint)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px 0',
+            }}
           >
-            跳过，直接开始
+            {t('onboarding.skip')}
           </button>
         )}
       </div>
