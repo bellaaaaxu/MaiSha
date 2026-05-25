@@ -10,25 +10,24 @@ import {
   type DragEndEvent,
   type DragStartEvent
 } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { useItems } from '@/hooks/useItems';
 import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { useUndoToast } from '@/hooks/useUndoToast';
-import { useOffline } from '@/hooks/useOffline';
-import { SupermarketCard } from '@/components/SupermarketCard';
+import { StoreCard } from '@/components/StoreCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
 import { SetIconSheet } from '@/components/SetIconSheet';
 import { MoreMenu } from '@/components/MoreMenu';
-import { ConfirmModal } from '@/components/ConfirmModal';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
+import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
-import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
+import { addItem, updateItem, deleteItem } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { generateShareText } from '@/utils/share-text';
-import { getEmptyListText, getEmptyListSubtext, getHeaderSubtext, getFinishShoppingText } from '@/utils/warm-copy';
 import type { Item, NewItemInput } from '@/types/item';
 
 export default function ListRoute() {
@@ -46,10 +45,10 @@ export default function ListRoute() {
   const [menuItem, setMenuItem] = useState<Item | null>(null);
   const [setIconItem, setSetIconItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
-  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [activeTab, setActiveTab] = useState<'list' | 'history'>('list');
+  const { t } = useTranslation();
   const undoToast = useUndoToast();
-  const { isOffline } = useOffline();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -61,9 +60,6 @@ export default function ListRoute() {
     () => (list ? groupItemsByStore(items, list.supermarkets, !!draggingItem) : []),
     [items, list, draggingItem]
   );
-  const uncheckedCount = items.filter(i => !i.checked).length;
-  const checkedCount = items.length - uncheckedCount;
-
   if (listLoading || itemsLoading) {
     return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
   }
@@ -77,25 +73,6 @@ export default function ListRoute() {
       </div>
     );
   }
-
-  const onToggle = async (item: Item) => {
-    const wasChecked = item.checked;
-    try {
-      await updateItem(item.id, {
-        checked: !wasChecked,
-        checked_at: !wasChecked ? new Date().toISOString() : null
-      });
-      if (!wasChecked) {
-        undoToast.show(`已勾选「${item.name}」`, async () => {
-          try {
-            await updateItem(item.id, { checked: false, checked_at: null });
-          } catch { /* silent */ }
-        });
-      }
-    } catch {
-      alert('操作失败');
-    }
-  };
 
   const onAdd = async (input: NewItemInput): Promise<string> => {
     const item = await addItem(list.id, uid, input);
@@ -122,15 +99,6 @@ export default function ListRoute() {
       alert(code ? `邀请码已复制！\n\n${code}\n\n发给家人，输入邀请码即可加入` : '邀请链接已复制！');
     } catch {
       prompt('复制：', text);
-    }
-  };
-
-  const onFinishShopping = async () => {
-    setShowFinishConfirm(false);
-    try {
-      await clearChecked(list.id);
-    } catch {
-      alert('操作失败');
     }
   };
 
@@ -225,116 +193,118 @@ export default function ListRoute() {
       onDragCancel={onDragCancel}
     >
       <div
-        className="min-h-screen pb-36"
-        style={{ background: 'linear-gradient(180deg, #faf6f0 0%, #f3ede4 100%)' }}
+        className="min-h-screen pb-8"
+        style={{ background: 'var(--paper)' }}
       >
-        <header
-          className="px-4 py-3 flex items-center sticky top-0 z-10"
-          style={{
-            background: 'rgba(250,246,240,0.9)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(215,205,188,0.3)',
-          }}
-        >
-          <div className="flex-1">
-            <div className="text-lg font-semibold flex items-center gap-2" style={{ color: '#5a4e3c' }}>
-              买啥
-              {isOffline && (
-                <span
-                  className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(201,123,99,0.15)', color: '#c97b63' }}
-                >
-                  📡 离线模式
-                </span>
-              )}
-            </div>
-            <div className="text-xs" style={{ color: '#a0937e' }}>
-              {getHeaderSubtext(uncheckedCount)}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => nav('/icons')}
-              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
-              style={{
-                minWidth: 40,
-                minHeight: 40,
-                padding: '6px 10px',
-                background: 'rgba(255,252,247,0.7)',
-                border: '1px solid rgba(215,205,188,0.4)',
-              }}
-              aria-label="图标管理"
-            >🎨</button>
-            <button
-              onClick={onShareMenu}
-              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
-              style={{
-                minWidth: 40,
-                minHeight: 40,
-                padding: '6px 10px',
-                background: 'rgba(255,252,247,0.7)',
-                border: '1px solid rgba(215,205,188,0.4)',
-              }}
-              aria-label="分享"
-            >📤</button>
-            <button
-              onClick={() => setShowMore(true)}
-              className="flex items-center justify-center text-lg rounded-xl active:opacity-80 active:scale-95 transition-all"
-              style={{
-                minWidth: 40,
-                minHeight: 40,
-                padding: '6px 10px',
-                background: 'rgba(255,252,247,0.7)',
-                border: '1px solid rgba(215,205,188,0.4)',
-              }}
-              aria-label="更多"
-            >⚙️</button>
-          </div>
-        </header>
-
-        <main className="p-4">
-          {groups.length === 0 ? (
-            <div className="py-24 text-center">
-              <div className="text-6xl mb-4">🛒</div>
-              <div className="text-base" style={{ color: '#a0937e' }}>{getEmptyListText()}</div>
-              <div className="text-xs mt-1" style={{ color: '#c4b49a' }}>{getEmptyListSubtext()}</div>
-            </div>
-          ) : (
-            groups.map(g => (
-              <SupermarketCard
-                key={g.store.id}
-                group={g}
-                customIconMap={customIconMap}
-                onToggle={onToggle}
-                onMenu={setMenuItem}
-              />
-            ))
-          )}
-        </main>
-
-        <footer
-          className="fixed left-0 right-0 bottom-0 mx-auto max-w-mobile px-4 py-3 space-y-2"
-          style={{
-            background: 'linear-gradient(to top, #f3ede4 60%, transparent)',
-          }}
-        >
-          {checkedCount > 0 && (
-            <button
-              onClick={() => setShowFinishConfirm(true)}
-              className="w-full h-11 rounded-xl text-sm font-medium active:opacity-80"
-              style={{ background: 'rgba(255,252,247,0.7)', color: '#7a6e5d', border: '1px solid rgba(215,205,188,0.4)' }}
-            >
-              {getFinishShoppingText(checkedCount)}
+        {/* Header */}
+        <div style={{
+          padding: '16px 24px 12px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-title)',
+            fontSize: 34,
+            color: 'var(--ink)',
+            letterSpacing: 3,
+          }}>
+            {t('app.title')}
+          </span>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <button onClick={onShareMenu} style={{
+              fontFamily: 'var(--font-body)', fontSize: 15,
+              color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
+            }}>
+              {t('header.joinList')}
             </button>
-          )}
+            <button onClick={() => setShowMore(true)} style={{
+              fontSize: 20, color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
+            }}>
+              ⚙
+            </button>
+          </div>
+        </div>
+
+        {/* Dashed divider */}
+        <div style={{
+          margin: '0 24px', height: 2, opacity: 0.5,
+          background: 'repeating-linear-gradient(90deg, var(--ink-faint) 0px, var(--ink-faint) 6px, transparent 6px, transparent 10px)',
+        }} />
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', padding: '10px 24px 4px' }}>
           <button
-            onClick={() => setShowAdd(true)}
-            className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90"
-            style={{ background: '#7ca982' }}
+            onClick={() => setActiveTab('list')}
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 15, cursor: 'pointer',
+              padding: '6px 16px', borderRadius: 'var(--radius-pill)', border: 'none',
+              fontWeight: activeTab === 'list' ? 700 : 500,
+              color: activeTab === 'list' ? 'var(--ink)' : 'var(--ink-faint)',
+              background: activeTab === 'list' ? 'rgba(232, 174, 151, 0.15)' : 'none',
+            }}
           >
-            + 添加物品
+            {t('nav.list')}
           </button>
-        </footer>
+          <button
+            onClick={() => setActiveTab('history')}
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 15, cursor: 'pointer',
+              padding: '6px 16px', borderRadius: 'var(--radius-pill)', border: 'none',
+              fontWeight: activeTab === 'history' ? 700 : 500,
+              color: activeTab === 'history' ? 'var(--ink)' : 'var(--ink-faint)',
+              background: activeTab === 'history' ? 'rgba(232, 174, 151, 0.15)' : 'none',
+            }}
+          >
+            {t('nav.history')}
+          </button>
+        </div>
+
+        {/* Main content */}
+        {activeTab === 'list' && (
+          <>
+            {groups.length === 0 ? (
+              <div style={{ padding: '96px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
+                <div style={{ fontSize: 16, color: 'var(--ink-faint)' }}>{t('list.emptyTitle')}</div>
+                <div style={{ fontSize: 12, marginTop: 4, color: 'var(--ink-faint)' }}>{t('list.emptySubtitle')}</div>
+              </div>
+            ) : (
+              groups.map((group, i) => (
+                <StoreCard
+                  key={group.store.id}
+                  group={group}
+                  customIconMap={customIconMap}
+                  onItemTap={(item) => setMenuItem(item)}
+                  colorIndex={i}
+                />
+              ))
+            )}
+            {/* Add item area */}
+            <div
+              onClick={() => setShowAdd(true)}
+              style={{
+                margin: '16px 18px',
+                padding: '14px 18px',
+                border: '2px dashed var(--ink-faint)',
+                borderRadius: 'var(--radius-card)',
+                textAlign: 'center',
+                color: 'var(--ink-light)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 15,
+                fontWeight: 500,
+                cursor: 'pointer',
+                opacity: 0.6,
+              }}
+            >
+              {t('list.addItem')}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'history' && (
+          <PurchaseHistory />
+        )}
 
         <AddSheet
           open={showAdd}
@@ -381,16 +351,6 @@ export default function ListRoute() {
           supermarkets={list.supermarkets}
           onClose={() => setShowImport(false)}
           onImport={onImport}
-        />
-
-        <ConfirmModal
-          open={showFinishConfirm}
-          title="完成采购"
-          message={`将清掉 ${checkedCount} 项已购物品，未勾选的保留。`}
-          confirmText="清掉已购"
-          cancelText="再想想"
-          onConfirm={onFinishShopping}
-          onCancel={() => setShowFinishConfirm(false)}
         />
 
         <UndoToast
