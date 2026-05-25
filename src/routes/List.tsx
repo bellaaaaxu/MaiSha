@@ -14,12 +14,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { useItems } from '@/hooks/useItems';
 import { useCustomIcons } from '@/hooks/useCustomIcons';
+import { useUndoToast } from '@/hooks/useUndoToast';
+import { useOffline } from '@/hooks/useOffline';
 import { SupermarketCard } from '@/components/SupermarketCard';
 import { AddSheet } from '@/components/AddSheet';
 import { ItemMenu } from '@/components/ItemMenu';
 import { SetIconSheet } from '@/components/SetIconSheet';
 import { MoreMenu } from '@/components/MoreMenu';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { UndoToast } from '@/components/UndoToast';
+import { ImportSheet } from '@/components/ImportSheet';
 import { groupItemsByMarketAndCategory } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearChecked } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
@@ -43,6 +47,9 @@ export default function ListRoute() {
   const [setIconItem, setSetIconItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const undoToast = useUndoToast();
+  const { isOffline } = useOffline();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -72,11 +79,19 @@ export default function ListRoute() {
   }
 
   const onToggle = async (item: Item) => {
+    const wasChecked = item.checked;
     try {
       await updateItem(item.id, {
-        checked: !item.checked,
-        checked_at: !item.checked ? new Date().toISOString() : null
+        checked: !wasChecked,
+        checked_at: !wasChecked ? new Date().toISOString() : null
       });
+      if (!wasChecked) {
+        undoToast.show(`已勾选「${item.name}」`, async () => {
+          try {
+            await updateItem(item.id, { checked: false, checked_at: null });
+          } catch { /* silent */ }
+        });
+      }
     } catch {
       alert('操作失败');
     }
@@ -126,9 +141,37 @@ export default function ListRoute() {
     }
   };
 
+  const onImport = async (inputs: NewItemInput[]) => {
+    let count = 0;
+    for (const input of inputs) {
+      try {
+        await addItem(list.id, uid, input);
+        count++;
+      } catch { /* skip failed */ }
+    }
+    if (count > 0) {
+      undoToast.show(`已导入 ${count} 项`, () => {});
+    }
+  };
+
   const onMenuDelete = async (item: Item) => {
-    if (!confirm(`删除 "${item.name}"？`)) return;
-    try { await deleteItem(item.id); } catch { alert('删除失败'); }
+    try {
+      await deleteItem(item.id);
+      undoToast.show(`已删除「${item.name}」`, async () => {
+        try {
+          await addItem(list.id, uid, {
+            name: item.name,
+            note: item.note,
+            quantity: item.quantity,
+            supermarket: item.supermarket,
+            category: item.category,
+            category_emoji: item.category_emoji,
+          });
+        } catch { /* silent */ }
+      });
+    } catch {
+      alert('删除失败');
+    }
   };
 
   const onMenuDuplicate = async (item: Item) => {
@@ -194,7 +237,17 @@ export default function ListRoute() {
           }}
         >
           <div className="flex-1">
-            <div className="text-lg font-semibold" style={{ color: '#5a4e3c' }}>买啥</div>
+            <div className="text-lg font-semibold flex items-center gap-2" style={{ color: '#5a4e3c' }}>
+              买啥
+              {isOffline && (
+                <span
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(201,123,99,0.15)', color: '#c97b63' }}
+                >
+                  📡 离线模式
+                </span>
+              )}
+            </div>
             <div className="text-xs" style={{ color: '#a0937e' }}>
               {getHeaderSubtext(uncheckedCount)}
             </div>
@@ -293,6 +346,7 @@ export default function ListRoute() {
           onAdd={onAdd}
           onRemove={onRemoveAdded}
           onIconsChanged={refreshIcons}
+          onOpenImport={() => { setShowAdd(false); setShowImport(true); }}
         />
 
         <ItemMenu
@@ -319,6 +373,14 @@ export default function ListRoute() {
           onManageMarkets={() => nav('/manage-markets')}
           onSettings={() => nav('/settings')}
           onHistory={() => nav('/history')}
+          onImport={() => setShowImport(true)}
+        />
+
+        <ImportSheet
+          open={showImport}
+          supermarkets={list.supermarkets}
+          onClose={() => setShowImport(false)}
+          onImport={onImport}
         />
 
         <ConfirmModal
@@ -329,6 +391,12 @@ export default function ListRoute() {
           cancelText="再想想"
           onConfirm={onFinishShopping}
           onCancel={() => setShowFinishConfirm(false)}
+        />
+
+        <UndoToast
+          toast={undoToast.toast}
+          onUndo={undoToast.undo}
+          onDismiss={undoToast.dismiss}
         />
       </div>
 

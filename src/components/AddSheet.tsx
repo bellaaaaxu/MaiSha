@@ -26,6 +26,7 @@ interface Props {
   onAdd: (input: NewItemInput) => Promise<string>;
   onRemove: (itemId: string) => Promise<void>;
   onIconsChanged: () => void | Promise<void>;
+  onOpenImport?: () => void;
 }
 
 const CATEGORY_ORDER = ['蔬菜', '肉蛋', '乳制品', '主食', '调料', '日用', '烘焙', '饮料'];
@@ -117,7 +118,7 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
   );
 }
 
-export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged }: Props) {
+export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
   const [value, setValue] = useState('');
   const [frequent, setFrequent] = useState<FrequentItem[]>([]);
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
@@ -514,30 +515,45 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
 
         {/* search */}
         <div className="px-5 pb-3">
-          <div
-            className="flex items-center rounded-full px-4 py-2.5"
-            style={{
-              background: 'rgba(255,252,247,0.6)',
-              border: '1px solid rgba(215,205,188,0.4)',
-            }}
-          >
-            <span className="text-sm mr-2" style={{ color: '#c4b49a' }}>🔍</span>
-            <input
-              className="flex-1 text-sm bg-transparent outline-none"
-              style={{ color: '#5a4e3c' }}
-              placeholder="搜索或输入商品名..."
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') submitTyped(); }}
-              enterKeyHint="done"
-            />
-            {value && (
+          <div className="flex items-center gap-2">
+            <div
+              className="flex-1 flex items-center rounded-full px-4 py-2.5"
+              style={{
+                background: 'rgba(255,252,247,0.6)',
+                border: '1px solid rgba(215,205,188,0.4)',
+              }}
+            >
+              <span className="text-sm mr-2" style={{ color: '#c4b49a' }}>🔍</span>
+              <input
+                className="flex-1 text-sm bg-transparent outline-none"
+                style={{ color: '#5a4e3c' }}
+                placeholder="搜索或输入商品名..."
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submitTyped(); }}
+                enterKeyHint="done"
+              />
+              {value && (
+                <button
+                  onClick={submitTyped}
+                  className="px-3 py-1 rounded-full text-xs text-white font-medium active:opacity-80"
+                  style={{ background: '#7ca982' }}
+                >
+                  添加
+                </button>
+              )}
+            </div>
+            {onOpenImport && (
               <button
-                onClick={submitTyped}
-                className="px-3 py-1 rounded-full text-xs text-white font-medium active:opacity-80"
-                style={{ background: '#7ca982' }}
+                onClick={onOpenImport}
+                className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full active:opacity-70"
+                style={{
+                  background: 'rgba(255,252,247,0.6)',
+                  border: '1px solid rgba(215,205,188,0.4)',
+                }}
+                aria-label="粘贴导入"
               >
-                添加
+                📋
               </button>
             )}
           </div>

@@ -5,9 +5,10 @@ interface Props {
   onSettings: () => void;
   onCopyShareText: () => void;
   onHistory: () => void;
+  onImport?: () => void;
 }
 
-export function MoreMenu({ open, onClose, onManageMarkets, onSettings, onCopyShareText, onHistory }: Props) {
+export function MoreMenu({ open, onClose, onManageMarkets, onSettings, onCopyShareText, onHistory, onImport }: Props) {
   if (!open) return null;
   return (
     <div
@@ -21,6 +22,14 @@ export function MoreMenu({ open, onClose, onManageMarkets, onSettings, onCopySha
         <div className="py-3 text-center text-sm text-gray-500 border-b border-gray-100">
           更多操作
         </div>
+        {onImport && (
+          <button
+            onClick={() => { onImport(); onClose(); }}
+            className="w-full py-4 text-center text-sm border-b border-gray-100 active:bg-gray-50"
+          >
+            📥 粘贴导入
+          </button>
+        )}
         <button
           onClick={() => { onHistory(); onClose(); }}
           className="w-full py-4 text-center text-sm border-b border-gray-100 active:bg-gray-50"
