@@ -31,7 +31,9 @@
     "store": "Store",
     "noStore": "No store",
     "add": "Add",
-    "frequent": "Frequent"
+    "frequent": "Frequent",
+    "pickStore": "Which store?",
+    "changeStore": "Change"
   },
   "stores": {
     "manage": "Manage stores",

@@ -193,6 +193,7 @@ export default function IconPreview() {
           { id: 'none', name: '未分类' },
         ]}
         customIconMap={new Map()}
+        existingItemNames={new Set(items.map(i => i.name))}
         onClose={() => setShowAdd(false)}
         onAdd={async (input: NewItemInput) => {
           const id = crypto.randomUUID();

@@ -31,7 +31,9 @@
     "store": "店铺",
     "noStore": "未指定店铺",
     "add": "添加",
-    "frequent": "常买"
+    "frequent": "常买",
+    "pickStore": "你要去哪家店？",
+    "changeStore": "换一家"
   },
   "stores": {
     "manage": "管理店铺",

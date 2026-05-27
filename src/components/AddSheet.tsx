@@ -23,6 +23,7 @@ interface Props {
   supermarkets: Store[];
   customIconMap: Map<string, string>;
   existingItemNames: Set<string>;
+  preselectedStore?: string;
   onClose: () => void;
   onAdd: (input: NewItemInput) => Promise<string>;
   onRemove: (itemId: string) => Promise<void>;
@@ -89,7 +90,7 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
   );
 }
 
-export function AddSheet({ open, uid, listId, supermarkets, customIconMap, existingItemNames, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
+export function AddSheet({ open, uid, listId, supermarkets, customIconMap, existingItemNames, preselectedStore, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
@@ -108,6 +109,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
   const [showStylize, setShowStylize] = useState(false);
   const [previewIcon, setPreviewIcon] = useState<{ url: string; name: string; subtitle: string } | null>(null);
   const [showPreviewHint, setShowPreviewHint] = useState(false);
+  const [storeChosen, setStoreChosen] = useState(false);
 
   const { history } = usePurchaseHistory(listId);
   const frequentlyBought = useMemo(
@@ -126,10 +128,16 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
       setAnimating(new Map());
       setBusy(new Set());
       setIconErrors(new Set());
-      setSelectedMarket('none');
+      if (preselectedStore) {
+        setSelectedMarket(preselectedStore);
+        setStoreChosen(true);
+      } else {
+        setSelectedMarket('none');
+        setStoreChosen(false);
+      }
       getRemainingCredits(uid).then(setRemainingCredits).catch(() => {});
     }
-  }, [open, uid]);
+  }, [open, uid, preselectedStore]);
 
   // Reset custom-icon state when sheet closes
   useEffect(() => {
@@ -430,248 +438,276 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
           </button>
         </div>
 
-        {/* supermarket selector */}
-        <div className="px-5 pb-2">
-          <div className="text-[10px] font-medium tracking-wider mb-1.5" style={{ color: '#a0937e' }}>
-            {t('addSheet.store')}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {sortedSupermarkets.map(m => {
-              const active = selectedMarket === m.id;
-              return (
+        {/* Store selection step (shown when no store chosen yet) */}
+        {!storeChosen && (
+          <div className="flex-1 overflow-y-auto px-5 pb-8">
+            <div className="text-center mb-6 mt-4">
+              <div className="text-lg font-semibold" style={{ color: '#5a4e3c', fontFamily: 'var(--font-title)' }}>
+                {t('addSheet.pickStore')}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {sortedSupermarkets.map(m => (
                 <button
                   key={m.id}
-                  onClick={() => setSelectedMarket(m.id)}
+                  onClick={() => {
+                    setSelectedMarket(m.id);
+                    setStoreChosen(true);
+                  }}
+                  className="w-full py-4 px-5 rounded-2xl text-left active:scale-[0.98] transition-transform"
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: 'var(--radius-pill)',
-                    border: `1.5px solid ${active ? 'var(--accent)' : 'var(--ink-faint)'}`,
-                    background: active ? 'rgba(212, 131, 107, 0.1)' : 'none',
+                    background: 'rgba(255,252,247,0.7)',
+                    border: '1.5px solid rgba(215,205,188,0.4)',
                     fontFamily: 'var(--font-body)',
-                    fontSize: 14,
-                    color: active ? 'var(--accent)' : 'var(--ink-light)',
-                    cursor: 'pointer',
+                    fontSize: 16,
+                    color: '#5a4e3c',
                   }}
                 >
                   {m.name}
                 </button>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* search */}
-        <div className="px-5 pb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex-1 flex items-center rounded-full px-4 py-2.5"
-              style={{
-                background: 'rgba(255,252,247,0.6)',
-                border: '1px solid rgba(215,205,188,0.4)',
-              }}
-            >
-              <span className="text-sm mr-2" style={{ color: '#c4b49a' }}>🔍</span>
-              <input
-                className="flex-1 text-sm bg-transparent outline-none"
-                style={{ color: '#5a4e3c' }}
-                placeholder={t('addSheet.namePlaceholder')}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') submitTyped(); }}
-                enterKeyHint="done"
-              />
-              {value && (
-                <button
-                  onClick={submitTyped}
-                  className="px-3 py-1 rounded-full text-xs text-white font-medium active:opacity-80"
-                  style={{ background: '#7ca982' }}
+        {/* Items view (shown after store is chosen) */}
+        {storeChosen && (
+          <>
+            {/* Selected store indicator + change */}
+            <div className="px-5 pb-2 flex items-center gap-2">
+              <span
+                className="text-xs font-medium px-3 py-1 rounded-full"
+                style={{
+                  background: 'rgba(212,131,107,0.1)',
+                  color: 'var(--accent)',
+                  border: '1px solid rgba(212,131,107,0.25)',
+                }}
+              >
+                {sortedSupermarkets.find(m => m.id === selectedMarket)?.name ?? t('addSheet.noStore')}
+              </span>
+              <button
+                onClick={() => setStoreChosen(false)}
+                className="text-xs active:opacity-60"
+                style={{ color: '#a0937e' }}
+              >
+                {t('addSheet.changeStore')}
+              </button>
+            </div>
+
+            {/* search */}
+            <div className="px-5 pb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex-1 flex items-center rounded-full px-4 py-2.5"
+                  style={{
+                    background: 'rgba(255,252,247,0.6)',
+                    border: '1px solid rgba(215,205,188,0.4)',
+                  }}
                 >
-                  {t('addSheet.add')}
-                </button>
+                  <span className="text-sm mr-2" style={{ color: '#c4b49a' }}>🔍</span>
+                  <input
+                    className="flex-1 text-sm bg-transparent outline-none"
+                    style={{ color: '#5a4e3c' }}
+                    placeholder={t('addSheet.namePlaceholder')}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') submitTyped(); }}
+                    enterKeyHint="done"
+                  />
+                  {value && (
+                    <button
+                      onClick={submitTyped}
+                      className="px-3 py-1 rounded-full text-xs text-white font-medium active:opacity-80"
+                      style={{ background: '#7ca982' }}
+                    >
+                      {t('addSheet.add')}
+                    </button>
+                  )}
+                </div>
+                {onOpenImport && (
+                  <button
+                    onClick={onOpenImport}
+                    className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full active:opacity-70"
+                    style={{
+                      background: 'rgba(255,252,247,0.6)',
+                      border: '1px solid rgba(215,205,188,0.4)',
+                    }}
+                    aria-label="粘贴导入"
+                  >
+                    📋
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* scrollable content */}
+            <div className="flex-1 overflow-y-auto px-5 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {/* merged frequent items (history + local, deduplicated) */}
+              {!value && mergedFrequent.length > 0 && (
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-2.5 px-1">
+                    <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
+                    <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
+                      {t('addSheet.frequent')}
+                    </span>
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {mergedFrequent.map(f => {
+                      const inList = existingItemNames.has(f.name);
+                      const added = addedItems.has(f.name);
+                      const disabled = inList && !added;
+                      const anim = animating.get(f.name);
+                      const customUrl = customIconMap.get(f.name);
+                      const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === f.name || i.aliases?.includes(f.name)) : null;
+                      const freqErrorKey = customUrl ? `custom:${f.name}` : presetItem?.icon ?? '';
+                      const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
+                      const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
+                      const iconUrl = showIcon ? iconSrc : null;
+                      return (
+                        <IconButton
+                          key={`freq-${f.name}`}
+                          iconUrl={iconUrl}
+                          itemName={f.name}
+                          category="其他"
+                          added={added}
+                          anim={disabled ? undefined : anim}
+                          size="frequent"
+                          onTap={() => {
+                            if (disabled) return;
+                            toggleItem(f.name, {
+                              name: f.name,
+                              note: f.note,
+                              quantity: '',
+                              supermarket: selectedMarket,
+                            });
+                          }}
+                          onLongPress={setPreviewIcon}
+                        >
+                          <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
+                            {showIcon ? (
+                              <img
+                                src={iconUrl!}
+                                alt={f.name}
+                                draggable={false}
+                                className="w-full h-full object-contain rounded-lg pointer-events-none"
+                                style={{
+                                  mixBlendMode: 'multiply',
+                                  opacity: disabled ? 0.3 : added ? 0.45 : 1,
+                                  transition: 'opacity 0.3s',
+                                  filter: disabled ? 'grayscale(1)' : 'none',
+                                }}
+                                onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
+                              />
+                            ) : (
+                              <div style={{
+                                opacity: disabled ? 0.3 : added ? 0.45 : 1,
+                                transition: 'opacity 0.3s',
+                                filter: disabled ? 'grayscale(1)' : 'none',
+                              }}>
+                                <WatercolorFallback name={f.name} category="其他" size={40} />
+                              </div>
+                            )}
+                            {added && (
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
+                                  <span className="text-white text-xs font-bold">✓</span>
+                                </div>
+                              </div>
+                            )}
+                            {disabled && (
+                              <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2">
+                                <span className="text-[8px] whitespace-nowrap" style={{ color: '#b8a992' }}>已在清单</span>
+                              </div>
+                            )}
+                          </div>
+                        </IconButton>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* icon grid (flat, no category sections) */}
+              {filtered.length > 0 && (
+                <div className="mb-4">
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {filtered.map((item) => {
+                      const added = addedItems.has(item.name);
+                      const anim = animating.get(item.name);
+                      // Custom icons use iconUrl directly; preset icons build path from filename stem.
+                      // Error tracking key is the icon stem (preset) or name (custom) to distinguish.
+                      const errorKey = item.iconUrl ? `custom:${item.name}` : item.icon;
+                      const hasIconFile = !iconErrors.has(errorKey);
+                      const iconUrl = item.iconUrl ?? (hasIconFile ? `/icons/${item.icon}.webp` : null);
+                      return (
+                        <IconButton
+                          key={item.name}
+                          iconUrl={iconUrl}
+                          itemName={item.name}
+                          category={item.category}
+                          added={added}
+                          anim={anim}
+                          size="grid"
+                          onTap={() => submitIcon(item)}
+                          onLongPress={setPreviewIcon}
+                        >
+                          <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center relative">
+                            {hasIconFile ? (
+                              <img
+                                src={iconUrl!}
+                                alt={item.name}
+                                draggable={false}
+                                className="w-full h-full object-contain rounded-xl pointer-events-none"
+                                style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+                                onError={() => setIconErrors(prev => new Set(prev).add(errorKey))}
+                              />
+                            ) : (
+                              <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
+                                <WatercolorFallback name={item.name} category={item.category} size={56} />
+                              </div>
+                            )}
+                            {added && (
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
+                                  <span className="text-white text-sm font-bold">✓</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </IconButton>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* custom icon picker */}
+              {showIconPicker && pendingItemName && (
+                <IconPickerPanel
+                  itemName={pendingItemName}
+                  category="其他"
+                  remainingCredits={remainingCredits}
+                  onUpload={handleUploadPhoto}
+                  onAiGenerate={() => handleAiGenerate()}
+                  onSkip={handleSkipIcon}
+                />
+              )}
+
+              {/* no results */}
+              {value && filtered.length === 0 && (
+                <div className="py-8 text-center">
+                  <p className="text-sm" style={{ color: '#a0937e' }}>
+                    没有匹配的图标
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: '#c4b49a' }}>
+                    按回车或点"添加"直接创建
+                  </p>
+                </div>
               )}
             </div>
-            {onOpenImport && (
-              <button
-                onClick={onOpenImport}
-                className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full active:opacity-70"
-                style={{
-                  background: 'rgba(255,252,247,0.6)',
-                  border: '1px solid rgba(215,205,188,0.4)',
-                }}
-                aria-label="粘贴导入"
-              >
-                📋
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* scrollable content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {/* merged frequent items (history + local, deduplicated) */}
-          {!value && mergedFrequent.length > 0 && (
-            <div className="mb-3">
-              <div className="flex items-center gap-2 mb-2.5 px-1">
-                <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
-                <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                  {t('addSheet.frequent')}
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {mergedFrequent.map(f => {
-                  const inList = existingItemNames.has(f.name);
-                  const added = addedItems.has(f.name);
-                  const disabled = inList && !added;
-                  const anim = animating.get(f.name);
-                  const customUrl = customIconMap.get(f.name);
-                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === f.name || i.aliases?.includes(f.name)) : null;
-                  const freqErrorKey = customUrl ? `custom:${f.name}` : presetItem?.icon ?? '';
-                  const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
-                  const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
-                  const iconUrl = showIcon ? iconSrc : null;
-                  return (
-                    <IconButton
-                      key={`freq-${f.name}`}
-                      iconUrl={iconUrl}
-                      itemName={f.name}
-                      category="其他"
-                      added={added}
-                      anim={disabled ? undefined : anim}
-                      size="frequent"
-                      onTap={() => {
-                        if (disabled) return;
-                        toggleItem(f.name, {
-                          name: f.name,
-                          note: f.note,
-                          quantity: '',
-                          supermarket: selectedMarket,
-                        });
-                      }}
-                      onLongPress={setPreviewIcon}
-                    >
-                      <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
-                        {showIcon ? (
-                          <img
-                            src={iconUrl!}
-                            alt={f.name}
-                            draggable={false}
-                            className="w-full h-full object-contain rounded-lg pointer-events-none"
-                            style={{
-                              mixBlendMode: 'multiply',
-                              opacity: disabled ? 0.3 : added ? 0.45 : 1,
-                              transition: 'opacity 0.3s',
-                              filter: disabled ? 'grayscale(1)' : 'none',
-                            }}
-                            onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
-                          />
-                        ) : (
-                          <div style={{
-                            opacity: disabled ? 0.3 : added ? 0.45 : 1,
-                            transition: 'opacity 0.3s',
-                            filter: disabled ? 'grayscale(1)' : 'none',
-                          }}>
-                            <WatercolorFallback name={f.name} category="其他" size={40} />
-                          </div>
-                        )}
-                        {added && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
-                              <span className="text-white text-xs font-bold">✓</span>
-                            </div>
-                          </div>
-                        )}
-                        {disabled && (
-                          <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2">
-                            <span className="text-[8px] whitespace-nowrap" style={{ color: '#b8a992' }}>已在清单</span>
-                          </div>
-                        )}
-                      </div>
-                    </IconButton>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* icon grid (flat, no category sections) */}
-          {filtered.length > 0 && (
-            <div className="mb-4">
-              <div className="grid grid-cols-3 gap-2.5">
-                {filtered.map((item) => {
-                  const added = addedItems.has(item.name);
-                  const anim = animating.get(item.name);
-                  // Custom icons use iconUrl directly; preset icons build path from filename stem.
-                  // Error tracking key is the icon stem (preset) or name (custom) to distinguish.
-                  const errorKey = item.iconUrl ? `custom:${item.name}` : item.icon;
-                  const hasIconFile = !iconErrors.has(errorKey);
-                  const iconUrl = item.iconUrl ?? (hasIconFile ? `/icons/${item.icon}.webp` : null);
-                  return (
-                    <IconButton
-                      key={item.name}
-                      iconUrl={iconUrl}
-                      itemName={item.name}
-                      category={item.category}
-                      added={added}
-                      anim={anim}
-                      size="grid"
-                      onTap={() => submitIcon(item)}
-                      onLongPress={setPreviewIcon}
-                    >
-                      <div className="w-[68px] h-[68px] mb-1.5 flex items-center justify-center relative">
-                        {hasIconFile ? (
-                          <img
-                            src={iconUrl!}
-                            alt={item.name}
-                            draggable={false}
-                            className="w-full h-full object-contain rounded-xl pointer-events-none"
-                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                            onError={() => setIconErrors(prev => new Set(prev).add(errorKey))}
-                          />
-                        ) : (
-                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
-                            <WatercolorFallback name={item.name} category={item.category} size={56} />
-                          </div>
-                        )}
-                        {added && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
-                              <span className="text-white text-sm font-bold">✓</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </IconButton>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* custom icon picker */}
-          {showIconPicker && pendingItemName && (
-            <IconPickerPanel
-              itemName={pendingItemName}
-              category="其他"
-              remainingCredits={remainingCredits}
-              onUpload={handleUploadPhoto}
-              onAiGenerate={() => handleAiGenerate()}
-              onSkip={handleSkipIcon}
-            />
-          )}
-
-          {/* no results */}
-          {value && filtered.length === 0 && (
-            <div className="py-8 text-center">
-              <p className="text-sm" style={{ color: '#a0937e' }}>
-                没有匹配的图标
-              </p>
-              <p className="text-xs mt-1" style={{ color: '#c4b49a' }}>
-                按回车或点"添加"直接创建
-              </p>
-            </div>
-          )}
-        </div>
+          </>
+        )}
 
         {/* First-time long-press hint */}
         {showPreviewHint && (

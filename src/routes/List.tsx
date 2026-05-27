@@ -275,6 +275,7 @@ export default function ListRoute() {
           supermarkets={list.supermarkets}
           customIconMap={customIconMap}
           existingItemNames={existingItemNames}
+          preselectedStore={preselectedStore}
           onClose={() => { setShowAdd(false); setPreselectedStore(undefined); }}
           onAdd={onAdd}
           onRemove={onRemoveAdded}
