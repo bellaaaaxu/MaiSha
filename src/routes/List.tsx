@@ -232,9 +232,14 @@ export default function ListRoute() {
                   key={group.store.id}
                   group={group}
                   customIconMap={customIconMap}
+                  supermarkets={list.supermarkets}
                   onUpdateNote={async (itemId, note) => {
                     optimisticUpdate(itemId, { note });
                     await updateItem(itemId, { note });
+                  }}
+                  onUpdateStore={async (itemId, storeId) => {
+                    optimisticUpdate(itemId, { supermarket: storeId });
+                    await updateItem(itemId, { supermarket: storeId });
                   }}
                   onDeleteItem={async (itemId) => {
                     optimisticRemove(itemId);

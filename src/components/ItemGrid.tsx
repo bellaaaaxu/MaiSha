@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import { WatercolorFallback } from './WatercolorFallback';
 import type { Item } from '@/types/item';
+import type { Store } from '@/types/store';
 
 interface Props {
   items: Item[];
   customIconMap?: Map<string, string>;
+  supermarkets?: Store[];
   onUpdateNote?: (itemId: string, note: string) => void;
+  onUpdateStore?: (itemId: string, storeId: string) => void;
   onDeleteItem?: (itemId: string) => void;
   dragging?: boolean;
 }
@@ -106,7 +109,7 @@ function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
 
 const COLS = 4;
 
-export function ItemGrid({ items, customIconMap, onUpdateNote, onDeleteItem, dragging }: Props) {
+export function ItemGrid({ items, customIconMap, supermarkets, onUpdateNote, onUpdateStore, onDeleteItem, dragging }: Props) {
   const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState('');
@@ -145,6 +148,11 @@ export function ItemGrid({ items, customIconMap, onUpdateNote, onDeleteItem, dra
     setEditingId(null);
   };
 
+  const handleStoreChange = (storeId: string) => {
+    if (editingId) onUpdateStore?.(editingId, storeId);
+    setEditingId(null);
+  };
+
   const elements: React.ReactNode[] = [];
 
   items.forEach((item, idx) => {
@@ -168,7 +176,7 @@ export function ItemGrid({ items, customIconMap, onUpdateNote, onDeleteItem, dra
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
-            alignItems: 'center',
+            flexDirection: 'column',
             gap: 6,
             padding: '8px 2px',
             margin: '2px 0',
@@ -176,75 +184,103 @@ export function ItemGrid({ items, customIconMap, onUpdateNote, onDeleteItem, dra
             borderBottom: '1px dashed rgba(196, 180, 154, 0.3)',
           }}
         >
-          <span style={{
-            fontSize: 13,
-            fontFamily: 'var(--font-body)',
-            color: 'var(--ink-light)',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}>
-            {editingItem.name}
-          </span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={noteInput}
-            onChange={(e) => setNoteInput(e.target.value)}
-            maxLength={5}
-            placeholder={t('item.notePlaceholder')}
-            style={{
-              flex: 1,
-              minWidth: 0,
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{
+              fontSize: 13,
               fontFamily: 'var(--font-body)',
-              fontSize: 14,
-              padding: '5px 10px',
-              border: '1.5px solid var(--ink-faint)',
+              color: 'var(--ink-light)',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}>
+              {editingItem.name}
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={noteInput}
+              onChange={(e) => setNoteInput(e.target.value)}
+              maxLength={5}
+              placeholder={t('item.notePlaceholder')}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                padding: '5px 10px',
+                border: '1.5px solid var(--ink-faint)',
+                borderRadius: 'var(--radius-pill)',
+                background: 'var(--paper)',
+                color: 'var(--ink)',
+                outline: 'none',
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleConfirm();
+                if (e.key === 'Escape') setEditingId(null);
+              }}
+            />
+            <button onClick={handleConfirm} style={{
+              width: 28, height: 28,
+              borderRadius: '50%', border: 'none',
+              background: 'rgba(124, 169, 130, 0.15)',
+              color: '#7ca982', fontSize: 14, fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              ✓
+            </button>
+            <button onClick={() => setEditingId(null)} style={{
+              width: 28, height: 28,
+              borderRadius: '50%', border: 'none',
+              background: 'rgba(160, 147, 126, 0.1)',
+              color: 'var(--ink-faint)', fontSize: 14, fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              ✗
+            </button>
+            <button onClick={handleDelete} style={{
+              padding: '4px 10px',
               borderRadius: 'var(--radius-pill)',
-              background: 'var(--paper)',
-              color: 'var(--ink)',
-              outline: 'none',
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleConfirm();
-              if (e.key === 'Escape') setEditingId(null);
-            }}
-          />
-          <button onClick={handleConfirm} style={{
-            width: 28, height: 28,
-            borderRadius: '50%', border: 'none',
-            background: 'rgba(124, 169, 130, 0.15)',
-            color: '#7ca982', fontSize: 14, fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            ✓
-          </button>
-          <button onClick={() => setEditingId(null)} style={{
-            width: 28, height: 28,
-            borderRadius: '50%', border: 'none',
-            background: 'rgba(160, 147, 126, 0.1)',
-            color: 'var(--ink-faint)', fontSize: 14, fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            ✗
-          </button>
-          <button onClick={handleDelete} style={{
-            padding: '4px 10px',
-            borderRadius: 'var(--radius-pill)',
-            border: 'none',
-            background: 'rgba(200, 80, 80, 0.1)',
-            color: '#c06060',
-            fontFamily: 'var(--font-body)',
-            fontSize: 12, fontWeight: 500,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}>
-            {t('common.delete')}
-          </button>
+              border: 'none',
+              background: 'rgba(200, 80, 80, 0.1)',
+              color: '#c06060',
+              fontFamily: 'var(--font-body)',
+              fontSize: 12, fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}>
+              {t('common.delete')}
+            </button>
+          </div>
+          {supermarkets && supermarkets.length > 1 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {supermarkets.map(s => {
+                const active = s.id === editingItem.supermarket;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => handleStoreChange(s.id)}
+                    style={{
+                      padding: '2px 10px',
+                      borderRadius: 'var(--radius-pill)',
+                      border: active ? '1.5px solid var(--accent-soft)' : '1px solid var(--ink-faint)',
+                      background: active ? 'rgba(232, 174, 151, 0.15)' : 'transparent',
+                      color: active ? 'var(--ink)' : 'var(--ink-faint)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 11, fontWeight: active ? 600 : 400,
+                      cursor: active ? 'default' : 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {s.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       );
     }

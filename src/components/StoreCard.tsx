@@ -3,11 +3,14 @@ import { useDroppable } from '@dnd-kit/core';
 import { useTranslation } from 'react-i18next';
 import { ItemGrid } from './ItemGrid';
 import type { StoreGroup } from '@/utils/group-items';
+import type { Store } from '@/types/store';
 
 interface Props {
   group: StoreGroup;
   customIconMap?: Map<string, string>;
+  supermarkets?: Store[];
   onUpdateNote?: (itemId: string, note: string) => void;
+  onUpdateStore?: (itemId: string, storeId: string) => void;
   onDeleteItem?: (itemId: string) => void;
   onAddItem?: (storeId: string) => void;
   colorIndex?: number;
@@ -16,7 +19,7 @@ interface Props {
 
 const BORDER_COLORS = ['var(--accent-soft)', 'var(--green-soft)', 'var(--blue)'];
 
-export function StoreCard({ group, customIconMap, onUpdateNote, onDeleteItem, onAddItem, colorIndex = 0, dragging }: Props) {
+export function StoreCard({ group, customIconMap, supermarkets, onUpdateNote, onUpdateStore, onDeleteItem, onAddItem, colorIndex = 0, dragging }: Props) {
   const nav = useNavigate();
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: group.store.id });
@@ -84,7 +87,9 @@ export function StoreCard({ group, customIconMap, onUpdateNote, onDeleteItem, on
         <ItemGrid
           items={group.items}
           customIconMap={customIconMap}
+          supermarkets={supermarkets}
           onUpdateNote={onUpdateNote}
+          onUpdateStore={onUpdateStore}
           onDeleteItem={onDeleteItem}
           dragging={dragging}
         />
