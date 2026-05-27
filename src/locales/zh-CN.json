@@ -24,6 +24,16 @@
     "finish": "结束购物",
     "alsoCheck": "顺便看看"
   },
+  "history": {
+    "manage": "管理",
+    "cancel": "取消",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "delete": "删除",
+    "selectedCount": "已选 {{n}} 项",
+    "confirmDeleteOne": "确定删除这条记录吗？",
+    "confirmDeleteMany": "确定删除 {{n}} 条记录吗？"
+  },
   "addSheet": {
     "title": "添加物品",
     "namePlaceholder": "要买什么？",
@@ -51,7 +61,9 @@
     "importExport": "导入 / 导出",
     "personalPresets": "店铺管理",
     "privacy": "隐私与条款",
-    "contact": "联系我们"
+    "contact": "联系我们",
+    "clearList": "清空清单",
+    "confirmClearList": "确定清空所有商品吗？超市分类会保留"
   },
   "onboarding": {
     "welcome": "欢迎使用买啥",

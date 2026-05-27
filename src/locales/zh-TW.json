@@ -23,6 +23,16 @@
     "addMore": "+ 臨時加一樣",
     "finish": "買完啦"
   },
+  "history": {
+    "manage": "管理",
+    "cancel": "取消",
+    "selectAll": "全選",
+    "deselectAll": "取消全選",
+    "delete": "刪除",
+    "selectedCount": "已選 {{n}} 項",
+    "confirmDeleteOne": "確定刪除這條記錄嗎？",
+    "confirmDeleteMany": "確定刪除 {{n}} 條記錄嗎？"
+  },
   "addSheet": {
     "title": "添加物品",
     "namePlaceholder": "要買咩？",
@@ -47,7 +57,9 @@
     "importExport": "導入 / 導出",
     "personalPresets": "個人預設",
     "privacy": "私隱與條款",
-    "contact": "聯絡我哋"
+    "contact": "聯絡我哋",
+    "clearList": "清空清單",
+    "confirmClearList": "確定清空所有商品嗎？超市分類會保留"
   },
   "onboarding": {
     "welcome": "歡迎使用買咩",

@@ -24,6 +24,16 @@
     "finish": "Done shopping",
     "alsoCheck": "While you're here"
   },
+  "history": {
+    "manage": "Manage",
+    "cancel": "Cancel",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "delete": "Delete",
+    "selectedCount": "{{n}} selected",
+    "confirmDeleteOne": "Delete this record?",
+    "confirmDeleteMany": "Delete {{n}} records?"
+  },
   "addSheet": {
     "title": "Add item",
     "namePlaceholder": "What to buy?",
@@ -51,7 +61,9 @@
     "importExport": "Import / Export",
     "personalPresets": "Manage Stores",
     "privacy": "Privacy & Terms",
-    "contact": "Contact us"
+    "contact": "Contact us",
+    "clearList": "Clear list",
+    "confirmClearList": "Clear all items? Stores will be kept."
   },
   "onboarding": {
     "welcome": "Welcome to MaiSha",
