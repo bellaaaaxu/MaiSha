@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getTopFrequentItems, type FrequentItem } from '@/utils/frequent-items';
+import { getTopFrequentItems } from '@/utils/frequent-items';
 import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
 import { calculateFrequentlyBought } from '@/utils/frequently-bought';
+import { mergeFrequentItems } from '@/utils/merge-frequent-items';
 import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
@@ -21,6 +22,7 @@ interface Props {
   listId: string;
   supermarkets: Store[];
   customIconMap: Map<string, string>;
+  existingItemNames: Set<string>;
   onClose: () => void;
   onAdd: (input: NewItemInput) => Promise<string>;
   onRemove: (itemId: string) => Promise<void>;
@@ -87,10 +89,9 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
   );
 }
 
-export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
+export function AddSheet({ open, uid, listId, supermarkets, customIconMap, existingItemNames, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
-  const [frequent, setFrequent] = useState<FrequentItem[]>([]);
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
   const [animating, setAnimating] = useState<Map<string, 'pop' | 'remove'>>(new Map());
   const [busy, setBusy] = useState<Set<string>>(new Set());
@@ -114,9 +115,13 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     [history]
   );
 
+  const mergedFrequent = useMemo(
+    () => mergeFrequentItems(frequentlyBought, getTopFrequentItems(uid, 12), 8),
+    [frequentlyBought, uid]
+  );
+
   useEffect(() => {
     if (open) {
-      setFrequent(getTopFrequentItems(uid, 12));
       setAddedItems(new Map());
       setAnimating(new Map());
       setBusy(new Set());
@@ -387,16 +392,6 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
     });
   };
 
-  const submitFrequent = (f: FrequentItem) => {
-    toggleItem(f.name, {
-      name: f.name,
-      note: f.note,
-      quantity: '',
-      supermarket: selectedMarket,
-    });
-  };
-
-
   return (
     <div
       className={`fixed inset-0 z-40 transition-colors ${
@@ -513,56 +508,42 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
 
         {/* scrollable content */}
         <div className="flex-1 overflow-y-auto px-5 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {/* frequently bought (history-based) */}
-          {!value && frequentlyBought.length > 0 && (
+          {/* merged frequent items (history + local, deduplicated) */}
+          {!value && mergedFrequent.length > 0 && (
             <div className="mb-3">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
-                  <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                    {t('addSheet.frequent')}
-                  </span>
-                </div>
-                <button
-                  onClick={async () => {
-                    for (const item of frequentlyBought) {
-                      if (!addedItems.has(item.name)) {
-                        await onAdd({
-                          name: item.name,
-                          supermarket: selectedMarket,
-                        });
-                      }
-                    }
-                  }}
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(124,169,130,0.1)', color: '#7ca982' }}
-                >
-                  全部加上
-                </button>
+              <div className="flex items-center gap-2 mb-2.5 px-1">
+                <div className="w-1.5 h-4 rounded-full" style={{ background: '#c97b63' }} />
+                <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
+                  {t('addSheet.frequent')}
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
               </div>
               <div className="grid grid-cols-4 gap-2">
-                {frequentlyBought.map(item => {
-                  const added = addedItems.has(item.name);
-                  const anim = animating.get(item.name);
-                  const customUrl = customIconMap.get(item.name);
-                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === item.name || i.aliases?.includes(item.name)) : null;
-                  const freqErrorKey = customUrl ? `custom:${item.name}` : presetItem?.icon ?? '';
+                {mergedFrequent.map(f => {
+                  const inList = existingItemNames.has(f.name);
+                  const added = addedItems.has(f.name);
+                  const disabled = inList && !added;
+                  const anim = animating.get(f.name);
+                  const customUrl = customIconMap.get(f.name);
+                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === f.name || i.aliases?.includes(f.name)) : null;
+                  const freqErrorKey = customUrl ? `custom:${f.name}` : presetItem?.icon ?? '';
                   const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
                   const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
                   const iconUrl = showIcon ? iconSrc : null;
                   return (
                     <IconButton
-                      key={`fb-${item.name}`}
+                      key={`freq-${f.name}`}
                       iconUrl={iconUrl}
-                      itemName={item.name}
+                      itemName={f.name}
                       category="其他"
                       added={added}
-                      anim={anim}
+                      anim={disabled ? undefined : anim}
                       size="frequent"
                       onTap={() => {
-                        toggleItem(item.name, {
-                          name: item.name,
-                          note: '',
+                        if (disabled) return;
+                        toggleItem(f.name, {
+                          name: f.name,
+                          note: f.note,
                           quantity: '',
                           supermarket: selectedMarket,
                         });
@@ -573,75 +554,23 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                         {showIcon ? (
                           <img
                             src={iconUrl!}
-                            alt={item.name}
-                            draggable={false}
-                            className="w-full h-full object-contain rounded-lg pointer-events-none"
-                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}
-                            onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
-                          />
-                        ) : (
-                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
-                            <WatercolorFallback name={item.name} category="其他" size={40} />
-                          </div>
-                        )}
-                        {added && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ animation: 'checkPop 0.3s ease' }}>
-                            <span style={{ color: '#7ca982', fontSize: 20 }}>✓</span>
-                          </div>
-                        )}
-                      </div>
-                    </IconButton>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* frequent items (local usage history) */}
-          {!value && frequent.length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2.5 px-1">
-                <div className="w-1.5 h-4 rounded-full" style={{ background: '#c4b49a' }} />
-                <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                  {t('addSheet.frequent')}
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {frequent.map(f => {
-                  const added = addedItems.has(f.name);
-                  const anim = animating.get(f.name);
-                  // Check custom first, then preset
-                  const customUrl = customIconMap.get(f.name);
-                  const presetItem = !customUrl ? UNIQUE_ICON_ITEMS.find(i => i.name === f.name || i.aliases?.includes(f.name)) : null;
-                  const freqErrorKey = customUrl ? `custom:${f.name}` : presetItem?.icon ?? '';
-                  const iconSrc = customUrl ?? (presetItem ? `/icons/${presetItem.icon}.webp` : null);
-                  const showIcon = !!iconSrc && !iconErrors.has(freqErrorKey);
-                  const iconUrl = showIcon ? iconSrc : null;
-                  return (
-                    <IconButton
-                      key={`${f.name}|${f.note}|${f.supermarket}`}
-                      iconUrl={iconUrl}
-                      itemName={f.name}
-                      category="其他"
-                      added={added}
-                      anim={anim}
-                      size="frequent"
-                      onTap={() => submitFrequent(f)}
-                      onLongPress={setPreviewIcon}
-                    >
-                      <div className="w-12 h-12 mb-1 flex items-center justify-center relative">
-                        {showIcon ? (
-                          <img
-                            src={iconUrl!}
                             alt={f.name}
                             draggable={false}
                             className="w-full h-full object-contain rounded-lg pointer-events-none"
-                            style={{ mixBlendMode: 'multiply', opacity: added ? 0.45 : 1, transition: 'opacity 0.3s', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+                            style={{
+                              mixBlendMode: 'multiply',
+                              opacity: disabled ? 0.3 : added ? 0.45 : 1,
+                              transition: 'opacity 0.3s',
+                              filter: disabled ? 'grayscale(1)' : 'none',
+                            }}
                             onError={() => setIconErrors(prev => new Set(prev).add(freqErrorKey))}
                           />
                         ) : (
-                          <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
+                          <div style={{
+                            opacity: disabled ? 0.3 : added ? 0.45 : 1,
+                            transition: 'opacity 0.3s',
+                            filter: disabled ? 'grayscale(1)' : 'none',
+                          }}>
                             <WatercolorFallback name={f.name} category="其他" size={40} />
                           </div>
                         )}
@@ -650,6 +579,11 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
                             <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#7ca982' }}>
                               <span className="text-white text-xs font-bold">✓</span>
                             </div>
+                          </div>
+                        )}
+                        {disabled && (
+                          <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2">
+                            <span className="text-[8px] whitespace-nowrap" style={{ color: '#b8a992' }}>已在清单</span>
                           </div>
                         )}
                       </div>

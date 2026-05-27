@@ -59,6 +59,11 @@ export default function ListRoute() {
     () => (list ? groupItemsByStore(items, list.supermarkets, !!draggingItem) : []),
     [items, list, draggingItem]
   );
+
+  const existingItemNames = useMemo(
+    () => new Set(items.map(i => i.name)),
+    [items]
+  );
   if (listLoading || itemsLoading) {
     return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
   }
@@ -301,6 +306,7 @@ export default function ListRoute() {
           listId={list.id}
           supermarkets={list.supermarkets}
           customIconMap={customIconMap}
+          existingItemNames={existingItemNames}
           onClose={() => setShowAdd(false)}
           onAdd={onAdd}
           onRemove={onRemoveAdded}
