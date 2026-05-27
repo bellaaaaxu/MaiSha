@@ -18,8 +18,6 @@ import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { useUndoToast } from '@/hooks/useUndoToast';
 import { StoreCard } from '@/components/StoreCard';
 import { AddSheet } from '@/components/AddSheet';
-import { ItemMenu } from '@/components/ItemMenu';
-import { SetIconSheet } from '@/components/SetIconSheet';
 import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
@@ -41,8 +39,6 @@ export default function ListRoute() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [menuItem, setMenuItem] = useState<Item | null>(null);
-  const [setIconItem, setSetIconItem] = useState<Item | null>(null);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
   const [showImport, setShowImport] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'history'>('list');
@@ -119,43 +115,6 @@ export default function ListRoute() {
     if (count > 0) {
       undoToast.show(`已导入 ${count} 项`, () => {});
     }
-  };
-
-  const onMenuDelete = async (item: Item) => {
-    try {
-      optimisticRemove(item.id);
-      await deleteItem(item.id);
-      undoToast.show(`已删除「${item.name}」`, async () => {
-        try {
-          const restored = await addItem(list.id, uid, {
-            name: item.name,
-            note: item.note,
-            quantity: item.quantity,
-            supermarket: item.supermarket,
-          });
-          optimisticAdd(restored);
-        } catch { /* silent */ }
-      });
-    } catch {
-      alert('删除失败');
-    }
-  };
-
-  const onMenuDuplicate = async (item: Item) => {
-    try {
-      await addItem(list.id, uid, {
-        name: item.name, note: item.note, quantity: item.quantity,
-        supermarket: item.supermarket,
-      });
-    } catch { alert('复制失败'); }
-  };
-
-  const onMenuEdit = (item: Item) => {
-    nav(`/edit-item/${item.id}`);
-  };
-
-  const onMenuSetIcon = (item: Item) => {
-    setSetIconItem(item);
   };
 
   const onDragStart = (e: DragStartEvent) => {
@@ -273,7 +232,7 @@ export default function ListRoute() {
                   key={group.store.id}
                   group={group}
                   customIconMap={customIconMap}
-                  onItemTap={(item) => setMenuItem(item)}
+                  onItemTap={(item) => nav(`/edit-item/${item.id}`)}
                   colorIndex={i}
                 />
               ))
@@ -316,23 +275,6 @@ export default function ListRoute() {
           onRemove={onRemoveAdded}
           onIconsChanged={refreshIcons}
           onOpenImport={() => { setShowAdd(false); setShowImport(true); }}
-        />
-
-        <ItemMenu
-          item={menuItem}
-          onClose={() => setMenuItem(null)}
-          onEdit={onMenuEdit}
-          onDelete={onMenuDelete}
-          onDuplicate={onMenuDuplicate}
-          onSetIcon={onMenuSetIcon}
-        />
-
-        <SetIconSheet
-          item={setIconItem}
-          uid={uid}
-          listId={list.id}
-          onClose={() => setSetIconItem(null)}
-          onIconsChanged={refreshIcons}
         />
 
         <ImportSheet
