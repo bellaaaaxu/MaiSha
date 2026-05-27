@@ -157,30 +157,41 @@ export default function ListRoute() {
         <div style={{
           padding: '16px 24px 12px',
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
+          gap: 12,
         }}>
+          <button
+            onClick={() => setShowSettings(true)}
+            aria-label={t('settings.title')}
+            style={{
+              fontSize: 22,
+              color: 'var(--ink-light)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              lineHeight: 1,
+              marginLeft: -4,
+            }}
+          >
+            ≡
+          </button>
           <span style={{
             fontFamily: 'var(--font-title)',
             fontSize: 34,
             color: 'var(--ink)',
             letterSpacing: 3,
+            flex: 1,
           }}>
             {t('app.title')}
           </span>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <button onClick={onShareMenu} style={{
-              fontFamily: 'var(--font-body)', fontSize: 15,
-              color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
-            }}>
-              {t('header.joinList')}
-            </button>
-            <button onClick={() => setShowSettings(true)} style={{
-              fontSize: 20, color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
-            }}>
-              ⚙
-            </button>
-          </div>
+          <button onClick={onShareMenu} style={{
+            fontFamily: 'var(--font-body)', fontSize: 15,
+            color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
+            padding: '4px 8px',
+          }}>
+            {t('header.joinList')}
+          </button>
         </div>
 
         {/* Dashed divider */}
