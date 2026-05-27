@@ -50,5 +50,9 @@ export function useItems(listId: string | null) {
     setItems(prev => prev.filter(i => i.id !== itemId));
   }, []);
 
-  return { items, loading, error, optimisticAdd, optimisticRemove };
+  const optimisticUpdate = useCallback((itemId: string, patch: Partial<Item>) => {
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, ...patch } : i));
+  }, []);
+
+  return { items, loading, error, optimisticAdd, optimisticRemove, optimisticUpdate };
 }

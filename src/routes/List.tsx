@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   DndContext,
   PointerSensor,
@@ -28,13 +28,12 @@ import { recordItemUsage } from '@/utils/frequent-items';
 import type { Item, NewItemInput } from '@/types/item';
 
 export default function ListRoute() {
-  const nav = useNavigate();
   const [params] = useSearchParams();
   const joinListId = params.get('list');
 
   const { uid } = useAuth();
   const { list, loading: listLoading, error: listErr } = useList(uid, joinListId);
-  const { items, loading: itemsLoading, optimisticAdd, optimisticRemove } = useItems(list?.id ?? null);
+  const { items, loading: itemsLoading, optimisticAdd, optimisticRemove, optimisticUpdate } = useItems(list?.id ?? null);
   const { iconMap: customIconMap, refresh: refreshIcons } = useCustomIcons(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
@@ -233,12 +232,20 @@ export default function ListRoute() {
                   key={group.store.id}
                   group={group}
                   customIconMap={customIconMap}
-                  onItemTap={(item) => nav(`/edit-item/${item.id}`)}
+                  onUpdateNote={async (itemId, note) => {
+                    optimisticUpdate(itemId, { note });
+                    await updateItem(itemId, { note });
+                  }}
+                  onDeleteItem={async (itemId) => {
+                    optimisticRemove(itemId);
+                    await deleteItem(itemId);
+                  }}
                   onAddItem={(storeId) => {
                     setPreselectedStore(storeId);
                     setShowAdd(true);
                   }}
                   colorIndex={i}
+                  dragging={!!draggingItem}
                 />
               ))
             )}

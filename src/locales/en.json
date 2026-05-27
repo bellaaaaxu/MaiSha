@@ -68,6 +68,9 @@
     "copied": "Copied!",
     "orCode": "Or join with a code"
   },
+  "item": {
+    "notePlaceholder": "x1, type…"
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
