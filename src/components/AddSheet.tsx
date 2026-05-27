@@ -428,10 +428,10 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, onClo
           </div>
           <button
             onClick={onClose}
-            className="text-sm px-2 py-1 rounded-lg active:opacity-60"
-            style={{ color: '#a0937e' }}
+            className="text-sm px-3 py-1 rounded-lg active:opacity-60"
+            style={{ color: '#7ca982', fontWeight: 600 }}
           >
-            {t('common.cancel')}
+            {t('common.done')}
           </button>
         </div>
 
