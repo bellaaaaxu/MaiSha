@@ -36,7 +36,7 @@ export default function ListRoute() {
 
   const { uid } = useAuth();
   const { list, loading: listLoading, error: listErr } = useList(uid, joinListId);
-  const { items, loading: itemsLoading } = useItems(list?.id ?? null);
+  const { items, loading: itemsLoading, optimisticAdd, optimisticRemove } = useItems(list?.id ?? null);
   const { iconMap: customIconMap, refresh: refreshIcons } = useCustomIcons(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
@@ -80,6 +80,7 @@ export default function ListRoute() {
 
   const onAdd = async (input: NewItemInput): Promise<string> => {
     const item = await addItem(list.id, uid, input);
+    optimisticAdd(item);
     recordItemUsage(uid, {
       name: input.name,
       note: input.note ?? '',
@@ -90,6 +91,7 @@ export default function ListRoute() {
   };
 
   const onRemoveAdded = async (itemId: string) => {
+    optimisticRemove(itemId);
     await deleteItem(itemId);
   };
 
@@ -121,15 +123,17 @@ export default function ListRoute() {
 
   const onMenuDelete = async (item: Item) => {
     try {
+      optimisticRemove(item.id);
       await deleteItem(item.id);
       undoToast.show(`已删除「${item.name}」`, async () => {
         try {
-          await addItem(list.id, uid, {
+          const restored = await addItem(list.id, uid, {
             name: item.name,
             note: item.note,
             quantity: item.quantity,
             supermarket: item.supermarket,
           });
+          optimisticAdd(restored);
         } catch { /* silent */ }
       });
     } catch {
