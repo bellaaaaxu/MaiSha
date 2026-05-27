@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MaiSha - Journal Style Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  :root {
+    --paper: #FBF6EF;
+    --paper-dark: #F3EBDD;
+    --ink: #4A3728;
+    --ink-light: #8B7355;
+    --ink-faint: #C4B49A;
+    --accent: #D4836B;
+    --accent-soft: #E8AE97;
+    --green: #7BA37E;
+    --green-soft: #B5D1B7;
+    --blue: #7BA3B8;
+    --font-title: 'ZCOOL KuaiLe', 'Nunito', sans-serif;
+    --font-body: 'Noto Sans SC', 'Nunito', sans-serif;
+    --font-en: 'Nunito', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: #E8DFD3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    min-height: 100vh;
+    gap: 32px;
+  }
+
+  .phone-frame {
+    width: 375px;
+    min-height: 812px;
+    background: var(--paper);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    position: relative;
+    /* Paper texture overlay */
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, var(--paper) 0%, #F7F0E6 100%);
+  }
+
+  /* ===== Header ===== */
+  .header {
+    padding: 60px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title {
+    font-family: var(--font-title);
+    font-size: 34px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 3px;
+    position: relative;
+  }
+
+  .header-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-soft);
+    border-radius: 2px;
+    transform: rotate(-0.5deg);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .header-btn {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--ink-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 4px 0;
+  }
+
+  .header-btn:hover { color: var(--accent); }
+
+  .header-btn-icon {
+    font-size: 20px;
+    color: var(--ink-light);
+  }
+
+  /* ===== Divider ===== */
+  .divider {
+    margin: 0 24px;
+    height: 2px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--ink-faint) 0px,
+      var(--ink-faint) 6px,
+      transparent 6px,
+      transparent 10px
+    );
+    opacity: 0.5;
+    transform: rotate(-0.3deg);
+  }
+
+  /* ===== Date ===== */
+  .date-line {
+    padding: 14px 24px 8px;
+    font-size: 14px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  /* ===== Store Card ===== */
+  .store-card {
+    margin: 12px 18px;
+    padding: 16px 18px 12px;
+    background: white;
+    border-radius: 14px;
+    position: relative;
+    /* Layered shadow for depth / card-stack feel */
+    box-shadow:
+      0 2px 4px rgba(74, 55, 40, 0.06),
+      0 6px 16px rgba(74, 55, 40, 0.08),
+      0 12px 32px rgba(74, 55, 40, 0.05);
+    border-left: 4px solid var(--accent-soft);
+    transform: rotate(-0.3deg);
+    transition: box-shadow 0.2s;
+  }
+
+  .store-card:nth-child(odd) {
+    transform: rotate(0.2deg);
+    border-left-color: var(--green-soft);
+  }
+
+  .store-card:nth-child(3) {
+    border-left-color: var(--blue);
+    transform: rotate(-0.15deg);
+  }
+
+  .store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .store-name {
+    font-family: var(--font-title);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 1px;
+  }
+
+  .store-count {
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+
+  /* ===== Item Grid (List View) ===== */
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .grid-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 2px 6px rgba(74, 55, 40, 0.06);
+  }
+
+  .grid-label {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .grid-sub {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  /* ===== Sub Navigation ===== */
+  .sub-nav {
+    display: flex;
+    gap: 0;
+    padding: 10px 24px 4px;
+  }
+
+  .sub-nav-btn {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 16px;
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+
+  .sub-nav-btn.active {
+    color: var(--ink);
+    background: rgba(232, 174, 151, 0.15);
+    font-weight: 700;
+  }
+
+  .item-note {
+    font-size: 13px;
+    color: var(--ink-light);
+    margin-left: auto;
+  }
+
+  .item-qty {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    min-width: 24px;
+    text-align: right;
+  }
+
+  /* ===== Add Button ===== */
+  .add-area {
+    margin: 16px 18px;
+    padding: 14px 18px;
+    border: 2px dashed var(--ink-faint);
+    border-radius: 14px;
+    text-align: center;
+    color: var(--ink-light);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.6;
+  }
+
+  .add-area:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    opacity: 1;
+  }
+
+  /* ===== Decorative elements ===== */
+  .deco-brush {
+    position: absolute;
+    width: 40px;
+    height: 4px;
+    background: var(--accent-soft);
+    border-radius: 2px;
+    opacity: 0.4;
+  }
+
+  .tape {
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 50px;
+    height: 18px;
+    background: rgba(232, 174, 151, 0.35);
+    transform: rotate(3deg);
+    border-radius: 1px;
+  }
+
+  .store-card:nth-child(odd) .tape {
+    background: rgba(181, 209, 183, 0.35);
+    right: auto;
+    left: 24px;
+    transform: rotate(-2deg);
+  }
+
+  /* ===== Watercolor splash decoration ===== */
+  .watercolor-deco {
+    position: absolute;
+    bottom: 40px;
+    right: -10px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(ellipse at center, rgba(212, 131, 107, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .watercolor-deco-2 {
+    position: absolute;
+    top: 120px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(ellipse at center, rgba(123, 163, 126, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ===== Shopping button ===== */
+  .shop-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 16px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 20px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-light);
+    cursor: pointer;
+  }
+
+  /* ===== Footer nav hint ===== */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .home-indicator {
+    width: 134px;
+    height: 5px;
+    background: var(--ink-faint);
+    border-radius: 3px;
+    opacity: 0.3;
+  }
+
+  /* ===== Comparison: current style (right panel) ===== */
+  .comparison {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .label-tag {
+    text-align: center;
+    font-family: var(--font-title);
+    font-size: 18px;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+
+  /* ===== Shopping Mode ===== */
+  .shop-header {
+    padding: 60px 24px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .shop-back {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--ink-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  .shop-title {
+    font-family: var(--font-title);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .shop-progress-wrap {
+    padding: 4px 24px 16px;
+  }
+
+  .shop-progress-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .shop-progress-bar {
+    height: 6px;
+    background: var(--paper-dark);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .shop-progress-fill {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, var(--green-soft), var(--green));
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .shop-items {
+    padding: 0 24px;
+  }
+
+  .shop-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    gap: 14px;
+    border-bottom: 1px dashed rgba(196, 180, 154, 0.25);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .shop-item:last-child { border-bottom: none; }
+
+  .shop-item.bought { opacity: 0.45; }
+
+  .shop-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(74, 55, 40, 0.06);
+  }
+
+  .shop-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .shop-item-name {
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .shop-item-name.done {
+    color: var(--ink-faint);
+  }
+
+  .shop-item-detail {
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+
+  .bought-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .shop-finish-area {
+    padding: 28px 24px;
+    text-align: center;
+  }
+
+  .shop-finish-btn {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    background: var(--green);
+    border: none;
+    border-radius: 24px;
+    padding: 14px 48px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(123, 163, 126, 0.3);
+  }
+
+  .shop-add-btn {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    background: none;
+    border: 1.5px dashed var(--ink-faint);
+    border-radius: 20px;
+    padding: 8px 20px;
+    cursor: pointer;
+    margin-top: 16px;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="label-tag">~ 手账风 mockup ~</div>
+  <div class="phone-frame">
+    <!-- Decorative watercolor blobs -->
+    <div class="watercolor-deco"></div>
+    <div class="watercolor-deco-2"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">买啥</div>
+      <div class="header-actions">
+        <button class="header-btn">分享</button>
+        <button class="header-btn header-btn-icon">&#9881;</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sub nav: current list + history -->
+    <div class="sub-nav">
+      <button class="sub-nav-btn active">清单</button>
+      <button class="sub-nav-btn">历史</button>
+    </div>
+
+    <!-- Store Card 1: Costco -->
+    <div class="store-card">
+      <div class="tape"></div>
+      <div class="store-header">
+        <span class="store-name">Costco</span>
+        <span class="store-count">4 样</span>
+      </div>
+      <div class="item-grid">
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #FDE8D8;">🥛</div>
+          <span class="grid-label">牛奶</span>
+          <span class="grid-sub">全脂</span>
+        </div>
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #FFF3D6;">🥚</div>
+          <span class="grid-label">鸡蛋</span>
+          <span class="grid-sub">有机</span>
+        </div>
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #E8F0FE;">🧻</div>
+          <span class="grid-label">厨房纸巾</span>
+          <span class="grid-sub">x2</span>
+        </div>
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #E8E0F4;">🫐</div>
+          <span class="grid-label">蓝莓</span>
+          <span class="grid-sub">x3</span>
+        </div>
+      </div>
+      <div class="shop-btn">去购物 &#10230;</div>
+    </div>
+
+    <!-- Store Card 2: IKEA -->
+    <div class="store-card">
+      <div class="tape"></div>
+      <div class="store-header">
+        <span class="store-name">IKEA</span>
+        <span class="store-count">2 样</span>
+      </div>
+      <div class="item-grid">
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #FFF8E1;">💡</div>
+          <span class="grid-label">台灯</span>
+          <span class="grid-sub">书房用</span>
+        </div>
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #E0F2F1;">📦</div>
+          <span class="grid-label">收纳盒</span>
+          <span class="grid-sub">x4</span>
+        </div>
+      </div>
+      <div class="shop-btn">去购物 &#10230;</div>
+    </div>
+
+    <!-- Store Card 3: CVS -->
+    <div class="store-card">
+      <div class="tape"></div>
+      <div class="store-header">
+        <span class="store-name">CVS</span>
+        <span class="store-count">1 样</span>
+      </div>
+      <div class="item-grid">
+        <div class="grid-item">
+          <div class="grid-icon" style="background: #FFF3E0;">💊</div>
+          <span class="grid-label">维生素 D</span>
+        </div>
+      </div>
+      <div class="shop-btn">去购物 &#10230;</div>
+    </div>
+
+
+    <!-- Add area -->
+    <div class="add-area">
+      + 添加物品
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Shopping Mode ========== -->
+<div>
+  <div class="label-tag">~ 去购物模式 ~</div>
+  <div class="phone-frame">
+
+    <!-- Shopping header: back + store name -->
+    <div class="shop-header">
+      <button class="shop-back">&larr; 返回</button>
+      <div class="shop-title">Costco</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="shop-progress-wrap">
+      <div class="shop-progress-text">已买 2 / 4 样</div>
+      <div class="shop-progress-bar">
+        <div class="shop-progress-fill" style="width: 50%"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Items -->
+    <div class="shop-items">
+      <div class="shop-item bought">
+        <div class="shop-icon" style="background: #FDE8D8;">🥛</div>
+        <div class="shop-item-info">
+          <span class="shop-item-name done">牛奶</span>
+          <span class="shop-item-detail">全脂</span>
+        </div>
+        <div class="bought-badge">✓</div>
+      </div>
+      <div class="shop-item bought">
+        <div class="shop-icon" style="background: #FFF3D6;">🥚</div>
+        <div class="shop-item-info">
+          <span class="shop-item-name done">鸡蛋</span>
+          <span class="shop-item-detail">有机</span>
+        </div>
+        <div class="bought-badge">✓</div>
+      </div>
+      <div class="shop-item">
+        <div class="shop-icon" style="background: #E8F0FE;">🧻</div>
+        <div class="shop-item-info">
+          <span class="shop-item-name">厨房纸巾</span>
+          <span class="shop-item-detail">x2</span>
+        </div>
+      </div>
+      <div class="shop-item">
+        <div class="shop-icon" style="background: #E8E0F4;">🫐</div>
+        <div class="shop-item-info">
+          <span class="shop-item-name">蓝莓</span>
+          <span class="shop-item-detail">x3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add item inline -->
+    <div style="text-align: center; padding: 16px;">
+      <button class="shop-add-btn">+ 临时加一个</button>
+    </div>
+
+    <!-- Finish button -->
+    <div class="shop-finish-area">
+      <button class="shop-finish-btn">结束购物</button>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
