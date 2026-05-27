@@ -38,6 +38,7 @@ export default function ListRoute() {
   const { iconMap: customIconMap, refresh: refreshIcons } = useCustomIcons(list?.id ?? null);
 
   const [showAdd, setShowAdd] = useState(false);
+  const [preselectedStore, setPreselectedStore] = useState<string | undefined>();
   const [showSettings, setShowSettings] = useState(false);
   const [draggingItem, setDraggingItem] = useState<Item | null>(null);
   const [showImport, setShowImport] = useState(false);
@@ -233,6 +234,10 @@ export default function ListRoute() {
                   group={group}
                   customIconMap={customIconMap}
                   onItemTap={(item) => nav(`/edit-item/${item.id}`)}
+                  onAddItem={(storeId) => {
+                    setPreselectedStore(storeId);
+                    setShowAdd(true);
+                  }}
                   colorIndex={i}
                 />
               ))
@@ -270,7 +275,7 @@ export default function ListRoute() {
           supermarkets={list.supermarkets}
           customIconMap={customIconMap}
           existingItemNames={existingItemNames}
-          onClose={() => setShowAdd(false)}
+          onClose={() => { setShowAdd(false); setPreselectedStore(undefined); }}
           onAdd={onAdd}
           onRemove={onRemoveAdded}
           onIconsChanged={refreshIcons}

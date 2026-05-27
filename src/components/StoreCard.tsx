@@ -9,12 +9,13 @@ interface Props {
   group: StoreGroup;
   customIconMap?: Map<string, string>;
   onItemTap?: (item: Item) => void;
+  onAddItem?: (storeId: string) => void;
   colorIndex?: number;
 }
 
 const BORDER_COLORS = ['var(--accent-soft)', 'var(--green-soft)', 'var(--blue)'];
 
-export function StoreCard({ group, customIconMap, onItemTap, colorIndex = 0 }: Props) {
+export function StoreCard({ group, customIconMap, onItemTap, onAddItem, colorIndex = 0 }: Props) {
   const nav = useNavigate();
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: group.store.id });
@@ -48,9 +49,33 @@ export function StoreCard({ group, customIconMap, onItemTap, colorIndex = 0 }: P
         }}>
           {group.store.name}
         </span>
-        <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
-          {t('list.items', { count: group.totalCount })}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+            {t('list.items', { count: group.totalCount })}
+          </span>
+          {onAddItem && (
+            <button
+              onClick={() => onAddItem(group.store.id)}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                border: '1.5px dashed var(--ink-faint)',
+                background: 'none',
+                color: 'var(--ink-light)',
+                fontSize: 18,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                lineHeight: 1,
+              }}
+              aria-label={`添加到${group.store.name}`}
+            >
+              +
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Item grid */}
