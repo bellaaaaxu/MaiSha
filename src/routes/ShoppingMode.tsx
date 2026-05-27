@@ -36,10 +36,10 @@ export default function ShoppingMode() {
     return [...unchecked, ...checked];
   }, [marketItems]);
 
-  const unassignedItems = useMemo(
-    () => items.filter(i => i.supermarket === UNDELETABLE_STORE_ID && !i.checked),
-    [items]
-  );
+  const unassignedItems = useMemo(() => {
+    const validIds = new Set(list?.supermarkets.map(s => s.id) ?? []);
+    return items.filter(i => !i.checked && (!validIds.has(i.supermarket) || i.supermarket === UNDELETABLE_STORE_ID));
+  }, [items, list?.supermarkets]);
 
   const total = marketItems.length;
   const boughtCount = marketItems.filter(i => i.checked).length;
@@ -214,7 +214,6 @@ export default function ShoppingMode() {
                       gap: 12,
                       borderBottom: '1px dashed rgba(196, 180, 154, 0.15)',
                       cursor: 'pointer',
-                      opacity: 0.6,
                     }}
                   >
                     <div style={{
