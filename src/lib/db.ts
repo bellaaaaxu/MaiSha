@@ -111,3 +111,9 @@ export async function updateListSupermarkets(listId: string, supermarkets: Store
     .eq('id', listId);
   if (error) throw error;
 }
+
+export async function clearAllItems(listId: string): Promise<number> {
+  const { data, error } = await supabase.rpc('clear_all_items', { p_list_id: listId });
+  if (error) throw error;
+  return data as number;
+}
