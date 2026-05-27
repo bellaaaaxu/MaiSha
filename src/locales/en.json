@@ -21,7 +21,8 @@
     "back": "Back",
     "progress": "{{bought}} / {{total}} bought",
     "addMore": "+ Add one more",
-    "finish": "Done shopping"
+    "finish": "Done shopping",
+    "alsoCheck": "While you're here"
   },
   "addSheet": {
     "title": "Add item",

@@ -36,13 +36,10 @@ describe('groupItemsByStore', () => {
     expect(g[1].store.id).toBe('cc');
   });
 
-  test('未知 supermarket id 归入"未指定店铺"组并共享到指定店铺', () => {
+  test('未知 supermarket id 归入"未指定店铺"组', () => {
     const items = [mk({ id: '1', supermarket: 'ghost-market' })];
     const g = groupItemsByStore(items, markets);
-    expect(g).toHaveLength(3);
-    expect(g[2].store.id).toBe('none');
-    expect(g[0].items).toHaveLength(1);
-    expect(g[1].items).toHaveLength(1);
+    expect(g[0].store.id).toBe('none');
   });
 
   test('只返回有物品的店铺组', () => {

@@ -21,7 +21,8 @@
     "back": "返回",
     "progress": "已买 {{bought}} / {{total}} 样",
     "addMore": "+ 临时加一个",
-    "finish": "结束购物"
+    "finish": "结束购物",
+    "alsoCheck": "顺便看看"
   },
   "addSheet": {
     "title": "添加物品",

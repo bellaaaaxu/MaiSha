@@ -6,6 +6,7 @@ import { useList } from '@/hooks/useList';
 import { useItems } from '@/hooks/useItems';
 import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { updateItem } from '@/lib/db';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { ShoppingEndModal } from '@/components/ShoppingEndModal';
@@ -20,6 +21,7 @@ export default function ShoppingMode() {
   const { items } = useItems(list?.id ?? null);
   const { iconMap: customIconMap } = useCustomIcons(list?.id ?? null);
   const [showEndModal, setShowEndModal] = useState(false);
+  const [showUnassigned, setShowUnassigned] = useState(true);
 
   const supermarket = list?.supermarkets.find(s => s.id === marketId);
   const marketItems = useMemo(
@@ -33,6 +35,11 @@ export default function ShoppingMode() {
     const checked = marketItems.filter(i => i.checked);
     return [...unchecked, ...checked];
   }, [marketItems]);
+
+  const unassignedItems = useMemo(
+    () => items.filter(i => i.supermarket === UNDELETABLE_STORE_ID && !i.checked),
+    [items]
+  );
 
   const total = marketItems.length;
   const boughtCount = marketItems.filter(i => i.checked).length;
@@ -169,6 +176,76 @@ export default function ShoppingMode() {
           );
         })}
       </div>
+
+      {/* "Also check" panel for unassigned items */}
+      {unassignedItems.length > 0 && marketId !== UNDELETABLE_STORE_ID && (
+        <div style={{ padding: '12px 24px 0' }}>
+          <button
+            onClick={() => setShowUnassigned(!showUnassigned)}
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600,
+              color: 'var(--ink-light)', background: 'none', border: 'none',
+              cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            <span>{t('shopping.alsoCheck')}</span>
+            <span style={{
+              fontSize: 12, fontWeight: 400,
+              color: 'var(--ink-faint)',
+            }}>
+              {unassignedItems.length}
+            </span>
+            <span style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
+              {showUnassigned ? '▾' : '▸'}
+            </span>
+          </button>
+          {showUnassigned && (
+            <div style={{ marginTop: 4 }}>
+              {unassignedItems.map(item => {
+                const iconUrl = resolveIconUrl(item.name, customIconMap);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => handleToggle(item)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '10px 0',
+                      gap: 12,
+                      borderBottom: '1px dashed rgba(196, 180, 154, 0.15)',
+                      cursor: 'pointer',
+                      opacity: 0.6,
+                    }}
+                  >
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 10,
+                      overflow: 'hidden', flexShrink: 0,
+                      boxShadow: 'var(--shadow-icon)',
+                      background: 'var(--paper)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {iconUrl
+                        ? <img src={iconUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <WatercolorFallback name={item.name} size={36} category="其他" />}
+                    </div>
+                    <span style={{
+                      fontFamily: 'var(--font-body)', fontSize: 15,
+                      color: 'var(--ink-light)', flex: 1,
+                    }}>
+                      {item.name}
+                      {item.note && (
+                        <span style={{ fontSize: 12, color: 'var(--ink-faint)', marginLeft: 4 }}>
+                          {item.note}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Add more button */}
       <div style={{ textAlign: 'center', padding: 16 }}>
