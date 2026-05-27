@@ -33,7 +33,8 @@
     "add": "Add",
     "frequent": "Frequent",
     "pickStore": "Which store?",
-    "changeStore": "Change"
+    "changeStore": "Change",
+    "addStore": "+ Add new store"
   },
   "stores": {
     "manage": "Manage stores",
@@ -47,7 +48,7 @@
     "language": "Language",
     "iconLibrary": "Icon library",
     "importExport": "Import / Export",
-    "personalPresets": "Presets",
+    "personalPresets": "Manage Stores",
     "privacy": "Privacy & Terms",
     "contact": "Contact us"
   },

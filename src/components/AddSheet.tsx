@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTopFrequentItems } from '@/utils/frequent-items';
 import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
@@ -92,6 +93,7 @@ function IconButton({ iconUrl, itemName, category, added, anim, onTap, onLongPre
 
 export function AddSheet({ open, uid, listId, supermarkets, customIconMap, existingItemNames, preselectedStore, onClose, onAdd, onRemove, onIconsChanged, onOpenImport }: Props) {
   const { t } = useTranslation();
+  const nav = useNavigate();
   const [value, setValue] = useState('');
   const [addedItems, setAddedItems] = useState<Map<string, string>>(new Map());
   const [animating, setAnimating] = useState<Map<string, 'pop' | 'remove'>>(new Map());
@@ -466,6 +468,19 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
                   {m.name}
                 </button>
               ))}
+              <button
+                onClick={() => { onClose(); nav('/manage-stores'); }}
+                className="w-full py-4 px-5 rounded-2xl text-center active:scale-[0.98] transition-transform"
+                style={{
+                  background: 'none',
+                  border: '1.5px dashed rgba(215,205,188,0.4)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 15,
+                  color: 'var(--ink-faint)',
+                }}
+              >
+                {t('addSheet.addStore')}
+              </button>
             </div>
           </div>
         )}
