@@ -43,14 +43,16 @@ describe('groupItemsByStore', () => {
     expect(result[1].items).toHaveLength(1);
   });
 
-  it('puts unknown store items into fallback', () => {
+  it('puts unknown store items into fallback and shares to assigned stores', () => {
     const items = [
       makeItem({ id: '1', name: 'Mystery', supermarket: 'deleted-store' }),
     ];
     const result = groupItemsByStore(items, stores);
-    expect(result).toHaveLength(1);
-    expect(result[0].store.id).toBe('none');
+    expect(result).toHaveLength(3);
+    expect(result[0].store.id).toBe('costco');
     expect(result[0].items).toHaveLength(1);
+    expect(result[2].store.id).toBe('none');
+    expect(result[2].items).toHaveLength(1);
   });
 
   it('returns empty array when no items and includeEmpty is false', () => {

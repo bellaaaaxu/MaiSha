@@ -5,10 +5,12 @@ import { resolveIconUrl } from '@/utils/icon-registry';
 import { WatercolorFallback } from './WatercolorFallback';
 import type { Item } from '@/types/item';
 import type { Store } from '@/types/store';
+import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 
 interface Props {
   items: Item[];
   customIconMap?: Map<string, string>;
+  storeId?: string;
   supermarkets?: Store[];
   onUpdateNote?: (itemId: string, note: string) => void;
   onUpdateStore?: (itemId: string, storeId: string) => void;
@@ -20,10 +22,11 @@ interface CellProps {
   item: Item;
   customIconMap?: Map<string, string>;
   isEditing: boolean;
+  isShared: boolean;
   onTap: () => void;
 }
 
-function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
+function ItemCell({ item, customIconMap, isEditing, isShared, onTap }: CellProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: item.id,
     data: { item },
@@ -44,7 +47,7 @@ function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
         alignItems: 'center',
         gap: 4,
         cursor: isDragging ? 'grabbing' : 'pointer',
-        opacity: isDragging ? 0.3 : 1,
+        opacity: isDragging ? 0.3 : isShared ? 0.45 : 1,
         transition: 'opacity 0.15s',
         borderRadius: 8,
         padding: '4px 2px',
@@ -109,7 +112,7 @@ function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
 
 const COLS = 4;
 
-export function ItemGrid({ items, customIconMap, supermarkets, onUpdateNote, onUpdateStore, onDeleteItem, dragging }: Props) {
+export function ItemGrid({ items, customIconMap, storeId, supermarkets, onUpdateNote, onUpdateStore, onDeleteItem, dragging }: Props) {
   const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState('');
@@ -162,6 +165,7 @@ export function ItemGrid({ items, customIconMap, supermarkets, onUpdateNote, onU
         item={item}
         customIconMap={customIconMap}
         isEditing={item.id === editingId}
+        isShared={!!storeId && storeId !== UNDELETABLE_STORE_ID && item.supermarket === UNDELETABLE_STORE_ID}
         onTap={() => openEditor(item)}
       />
     );

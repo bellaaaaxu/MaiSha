@@ -87,6 +87,7 @@ export function StoreCard({ group, customIconMap, supermarkets, onUpdateNote, on
         <ItemGrid
           items={group.items}
           customIconMap={customIconMap}
+          storeId={group.store.id}
           supermarkets={supermarkets}
           onUpdateNote={onUpdateNote}
           onUpdateStore={onUpdateStore}
