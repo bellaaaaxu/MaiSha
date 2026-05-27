@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { ConfirmModal } from './ConfirmModal';
 
 interface Props {
   open: boolean;
+  itemCount: number;
   onClose: () => void;
+  onClearList: () => Promise<void>;
 }
 
-export function SettingsDrawer({ open, onClose }: Props) {
+export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const items = [
     { label: t('settings.language'), action: () => nav('/settings/language') },
@@ -18,6 +24,19 @@ export function SettingsDrawer({ open, onClose }: Props) {
     { label: t('settings.privacy'), action: () => nav('/privacy') },
     { label: t('settings.contact'), action: () => window.open('mailto:support@maisha.app') },
   ];
+
+  const handleClear = async () => {
+    setClearing(true);
+    try {
+      await onClearList();
+      setConfirmOpen(false);
+      onClose();
+    } catch {
+      alert('清空失败');
+    } finally {
+      setClearing(false);
+    }
+  };
 
   return (
     <>
@@ -75,7 +94,38 @@ export function SettingsDrawer({ open, onClose }: Props) {
             {item.label}
           </button>
         ))}
+
+        {/* Clear list — destructive, separated by extra spacing */}
+        <button
+          onClick={() => itemCount > 0 && setConfirmOpen(true)}
+          disabled={itemCount === 0}
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 16,
+            fontWeight: 500,
+            color: itemCount === 0 ? '#d5cbbe' : '#c97b63',
+            background: 'none',
+            border: 'none',
+            padding: '16px 0',
+            marginTop: 24,
+            textAlign: 'left',
+            cursor: itemCount === 0 ? 'not-allowed' : 'pointer',
+            opacity: itemCount === 0 ? 0.6 : 1,
+          }}
+        >
+          {t('settings.clearList')}
+        </button>
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title={t('settings.clearList')}
+        message={t('settings.confirmClearList')}
+        confirmText={clearing ? '清空中…' : t('settings.clearList')}
+        cancelText={t('history.cancel')}
+        onConfirm={handleClear}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </>
   );
 }

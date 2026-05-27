@@ -23,7 +23,7 @@ import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
 import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
-import { addItem, updateItem, deleteItem } from '@/lib/db';
+import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import type { Item, NewItemInput } from '@/types/item';
 
@@ -308,7 +308,14 @@ export default function ListRoute() {
           onDismiss={undoToast.dismiss}
         />
 
-        <SettingsDrawer open={showSettings} onClose={() => setShowSettings(false)} />
+        <SettingsDrawer
+          open={showSettings}
+          itemCount={items.length}
+          onClose={() => setShowSettings(false)}
+          onClearList={async () => {
+            await clearAllItems(list.id);
+          }}
+        />
       </div>
 
       <DragOverlay>
