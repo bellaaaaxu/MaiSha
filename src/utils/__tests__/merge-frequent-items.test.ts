@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mergeFrequentItems, type MergedFrequentItem } from '../merge-frequent-items';
+import { mergeFrequentItems } from '../merge-frequent-items';
 import type { FrequentlyBoughtItem } from '../frequently-bought';
 import type { FrequentItem } from '../frequent-items';
 
