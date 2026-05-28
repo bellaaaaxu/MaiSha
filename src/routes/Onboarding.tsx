@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { saveCurrency, getOrDetectCurrency } from '@/utils/currency';
+import { saveCurrency, getAllCurrencies, getOrDetectCurrency } from '@/utils/currency';
 import Wordmark from '@/components/Wordmark';
 import WashiTape from '@/components/WashiTape';
 import type { Store } from '@/types/store';
+
+const POPULAR_CURRENCIES = ['CNY', 'CAD', 'USD', 'EUR', 'GBP', 'AUD', 'JPY', 'HKD', 'TWD', 'SGD'];
 
 const TOTAL_STEPS = 3;
 
@@ -427,6 +429,103 @@ function Step1Stores({
   );
 }
 
-function Step2Currency(_props: { currencyCode: string; setCurrencyCode: (c: string) => void }) {
-  return <div>Step 2 placeholder — replaced in Task 7</div>;
+function Step2Currency({
+  currencyCode,
+  setCurrencyCode,
+}: {
+  currencyCode: string;
+  setCurrencyCode: (c: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <Wordmark variant="mini" />
+
+      <div style={{ position: 'relative', textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+          <WashiTape
+            src="/decorations/washi-blue.png"
+            width={100}
+            rotation={-3}
+            opacity={0.85}
+            style={{ marginLeft: -40 }}
+          />
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--font-title)',
+            fontSize: 28,
+            color: 'var(--ink)',
+            letterSpacing: 2,
+            display: 'inline-block',
+            position: 'relative',
+            margin: 0,
+          }}
+        >
+          {t('onboarding.currency')}
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: -4,
+              height: 3,
+              background: 'var(--accent-soft)',
+              borderRadius: 2,
+              transform: 'rotate(-0.5deg)',
+              opacity: 0.7,
+            }}
+          />
+        </h2>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: 10,
+          marginTop: 24,
+        }}
+      >
+        {getAllCurrencies()
+          .filter(c => POPULAR_CURRENCIES.includes(c.code))
+          .map(c => (
+            <button
+              key={c.code}
+              onClick={() => setCurrencyCode(c.code)}
+              style={{
+                fontFamily: 'var(--font-body)',
+                padding: '14px 16px',
+                borderRadius: 14,
+                border: 'none',
+                background: 'white',
+                color: 'var(--ink)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow:
+                  currencyCode === c.code
+                    ? 'inset 4px 0 0 0 var(--blue), 0 2px 8px rgba(74, 55, 40, 0.06)'
+                    : '0 2px 8px rgba(74, 55, 40, 0.06)',
+              }}
+            >
+              <div>
+                <div style={{ fontFamily: 'var(--font-title)', fontSize: 18, fontWeight: 400 }}>
+                  {c.symbol}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--ink-faint)', fontFamily: 'var(--font-en)', letterSpacing: 1 }}>
+                  {c.code}
+                </div>
+              </div>
+              {currencyCode === c.code && (
+                <span style={{ color: 'var(--blue)', fontWeight: 700 }}>✓</span>
+              )}
+            </button>
+          ))}
+      </div>
+    </div>
+  );
 }
