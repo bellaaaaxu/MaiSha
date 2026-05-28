@@ -67,12 +67,16 @@
   },
   "onboarding": {
     "welcome": "欢迎使用买啥",
-    "addStores": "你常去哪些店？",
-    "addStoresHint": "添加 1-2 个常去的店铺",
+    "wordmark": "买啥",
+    "wordmarkLatin": "MaiSha",
+    "slogan": "去哪买，买点啥",
+    "addStores": "常去的店",
+    "addStoresHint": "你常去哪几家？后面可以随时改",
     "storePlaceholder": "输入店铺名称",
+    "addStoreHelper": "按回车或点 + 添加，可以继续添加多个",
     "next": "下一步",
-    "skip": "跳过",
-    "currency": "选择货币",
+    "skip": "先这样，回头再加",
+    "currency": "用什么货币",
     "done": "开始使用"
   },
   "share": {

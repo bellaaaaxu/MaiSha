@@ -1,27 +1,28 @@
 {
   "app": {
-    "title": "買咩"
+    "title": "買啥"
   },
   "nav": {
     "list": "清單",
-    "history": "記錄"
+    "history": "歷史"
   },
   "header": {
-    "joinList": "一齊買",
+    "joinList": "一起買",
     "settings": "設定"
   },
   "list": {
     "items": "{{count}} 樣",
-    "goShopping": "去買嘢",
-    "addItem": "+ 添加物品",
-    "emptyTitle": "仲未有嘢要買",
-    "emptySubtitle": "撳下面個按鈕開始添加啦"
+    "goShopping": "去購物",
+    "addItem": "+ 新增物品",
+    "emptyTitle": "還沒有東西要買",
+    "emptySubtitle": "點下面的按鈕開始新增吧"
   },
   "shopping": {
     "back": "返回",
-    "progress": "買咗 {{bought}} / {{total}} 樣",
-    "addMore": "+ 臨時加一樣",
-    "finish": "買完啦"
+    "progress": "已買 {{bought}} / {{total}} 樣",
+    "addMore": "+ 臨時加一個",
+    "finish": "結束購物",
+    "alsoCheck": "順便看看"
   },
   "history": {
     "manage": "管理",
@@ -34,54 +35,65 @@
     "confirmDeleteMany": "確定刪除 {{n}} 條記錄嗎？"
   },
   "addSheet": {
-    "title": "添加物品",
-    "namePlaceholder": "要買咩？",
-    "notePlaceholder": "備註（可選）",
+    "title": "新增物品",
+    "namePlaceholder": "要買什麼？",
+    "notePlaceholder": "備註（選填）",
     "quantityPlaceholder": "數量",
-    "store": "舖頭",
-    "noStore": "未指定舖頭",
-    "add": "添加",
-    "frequent": "常買"
+    "store": "店家",
+    "noStore": "未指定店家",
+    "add": "新增",
+    "frequent": "常買",
+    "pickStore": "要去哪家店？",
+    "changeStore": "換一家",
+    "addStore": "+ 新增店家"
   },
   "stores": {
-    "manage": "管理舖頭",
-    "addNew": "添加新舖頭",
-    "namePlaceholder": "輸入舖頭名",
-    "unassigned": "未指定舖頭",
+    "manage": "管理店家",
+    "addNew": "新增店家",
+    "namePlaceholder": "輸入店家名稱",
+    "unassigned": "未指定店家",
     "save": "儲存"
   },
   "settings": {
     "title": "設定",
     "language": "語言設定",
     "iconLibrary": "圖標庫",
-    "importExport": "導入 / 導出",
-    "personalPresets": "個人預設",
-    "privacy": "私隱與條款",
-    "contact": "聯絡我哋",
+    "importExport": "匯入 / 匯出",
+    "personalPresets": "店家管理",
+    "privacy": "隱私與條款",
+    "contact": "聯絡我們",
     "clearList": "清空清單",
-    "confirmClearList": "確定清空所有商品嗎？超市分類會保留"
+    "confirmClearList": "確定清空所有商品嗎？店家分類會保留"
   },
   "onboarding": {
-    "welcome": "歡迎使用買咩",
-    "addStores": "你成日去邊度買嘢？",
-    "addStoresHint": "添加 1-2 間常去嘅舖頭",
-    "storePlaceholder": "輸入舖頭名",
+    "welcome": "歡迎使用買啥",
+    "wordmark": "買啥",
+    "wordmarkLatin": "MaiSha",
+    "slogan": "去哪買，買點什麼",
+    "addStores": "常去的店",
+    "addStoresHint": "你常去哪幾家？之後可以隨時改",
+    "storePlaceholder": "輸入店家名稱",
+    "addStoreHelper": "按 Enter 或點 + 新增，可以繼續新增多個",
     "next": "下一步",
-    "skip": "跳過",
-    "currency": "揀貨幣",
-    "done": "開始用"
+    "skip": "先這樣，之後再加",
+    "currency": "用什麼貨幣",
+    "done": "開始使用"
   },
   "share": {
-    "title": "一齊買",
-    "description": "分享連結，邀請屋企人一齊編輯清單",
+    "title": "一起買",
+    "description": "分享連結，邀請家人一起編輯清單",
     "copyLink": "複製連結",
     "copied": "已複製",
-    "orCode": "或者輸入邀請碼加入"
+    "orCode": "或輸入邀請碼加入"
+  },
+  "item": {
+    "notePlaceholder": "x1, 全脂…"
   },
   "common": {
     "cancel": "取消",
     "confirm": "確認",
     "delete": "刪除",
+    "done": "完成",
     "edit": "編輯",
     "save": "儲存",
     "loading": "載入中…"

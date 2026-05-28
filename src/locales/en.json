@@ -67,12 +67,16 @@
   },
   "onboarding": {
     "welcome": "Welcome to MaiSha",
-    "addStores": "Where do you shop?",
-    "addStoresHint": "Add 1-2 stores you visit often",
+    "wordmark": "MaiSha",
+    "wordmarkLatin": "买啥",
+    "slogan": "Where to go, what to get",
+    "addStores": "Where you shop",
+    "addStoresHint": "Pick a few stores you visit often — you can change this anytime",
     "storePlaceholder": "Store name",
+    "addStoreHelper": "Press Enter or tap + to add. You can add as many as you like.",
     "next": "Next",
-    "skip": "Skip",
-    "currency": "Choose currency",
+    "skip": "Maybe later",
+    "currency": "What currency",
     "done": "Get started"
   },
   "share": {
