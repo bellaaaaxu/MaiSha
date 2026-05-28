@@ -246,14 +246,185 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
   );
 }
 
-function Step1Stores(_props: {
+function Step1Stores({
+  addedStores,
+  newStoreName,
+  setNewStoreName,
+  addStore,
+  removeStore,
+}: {
   addedStores: Store[];
   newStoreName: string;
   setNewStoreName: (s: string) => void;
   addStore: () => void;
   removeStore: (i: number) => void;
 }) {
-  return <div>Step 1 placeholder — replaced in Task 6</div>;
+  const { t } = useTranslation();
+  const hasInput = newStoreName.trim().length > 0;
+
+  // Rotation and border color cycle per chip index
+  const chipRotations = [-0.3, 0.2, -0.15, 0.25, -0.2];
+  const chipBorderColors = ['var(--accent-soft)', 'var(--green-soft)', 'var(--blue)'];
+
+  return (
+    <div>
+      <Wordmark variant="mini" />
+
+      {/* Step title area: washi tape + title + underline */}
+      <div style={{ position: 'relative', textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+          <WashiTape
+            src="/decorations/washi-coral.png"
+            width={100}
+            rotation={-3}
+            opacity={0.85}
+            style={{ marginRight: -40 }}
+          />
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--font-title)',
+            fontSize: 28,
+            color: 'var(--ink)',
+            letterSpacing: 2,
+            display: 'inline-block',
+            position: 'relative',
+            margin: 0,
+          }}
+        >
+          {t('onboarding.addStores')}
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: -4,
+              height: 3,
+              background: 'var(--accent-soft)',
+              borderRadius: 2,
+              transform: 'rotate(-0.5deg)',
+              opacity: 0.7,
+            }}
+          />
+        </h2>
+      </div>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 13,
+          color: 'var(--ink-light)',
+          textAlign: 'center',
+          marginTop: 8,
+          marginBottom: 24,
+        }}
+      >
+        {t('onboarding.addStoresHint')}
+      </p>
+
+      {/* Added stores list */}
+      {addedStores.map((store, i) => (
+        <div
+          key={`${store.id}-${i}`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 10,
+            padding: '14px 16px',
+            background: 'white',
+            borderRadius: 14,
+            boxShadow: 'var(--shadow-card)',
+            borderLeft: `4px solid ${chipBorderColors[i % chipBorderColors.length]}`,
+            transform: `rotate(${chipRotations[i % chipRotations.length]}deg)`,
+          }}
+        >
+          <span
+            style={{
+              flex: 1,
+              fontFamily: 'var(--font-title)',
+              fontSize: 18,
+              letterSpacing: 1,
+              color: 'var(--ink)',
+            }}
+          >
+            {store.name}
+          </span>
+          <button
+            onClick={() => removeStore(i)}
+            aria-label="Remove store"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 22,
+              color: 'var(--ink-faint)',
+              padding: '0 4px',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+
+      {/* Input area: text input + always-visible + button */}
+      <div style={{ display: 'flex', gap: 8, marginTop: addedStores.length > 0 ? 16 : 0 }}>
+        <input
+          value={newStoreName}
+          onChange={e => setNewStoreName(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') addStore();
+          }}
+          placeholder={t('onboarding.storePlaceholder')}
+          style={{
+            flex: 1,
+            fontFamily: 'var(--font-body)',
+            fontSize: 15,
+            padding: '12px 16px',
+            borderRadius: 14,
+            border: '1px dashed var(--ink-faint)',
+            background: 'white',
+            color: 'var(--ink)',
+            outline: 'none',
+          }}
+        />
+        <button
+          onClick={addStore}
+          disabled={!hasInput}
+          aria-label="Add store"
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            border: 'none',
+            background: hasInput ? 'var(--accent)' : 'var(--ink-faint)',
+            opacity: hasInput ? 1 : 0.4,
+            color: 'white',
+            fontSize: 24,
+            fontWeight: 300,
+            cursor: hasInput ? 'pointer' : 'not-allowed',
+            transition: 'background 0.2s, opacity 0.2s',
+            flexShrink: 0,
+          }}
+        >
+          +
+        </button>
+      </div>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 12,
+          color: 'var(--ink-faint)',
+          textAlign: 'center',
+          marginTop: 8,
+          marginBottom: 0,
+        }}
+      >
+        {t('onboarding.addStoreHelper')}
+      </p>
+    </div>
+  );
 }
 
 function Step2Currency(_props: { currencyCode: string; setCurrencyCode: (c: string) => void }) {
