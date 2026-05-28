@@ -21,6 +21,7 @@ export default function Onboarding() {
   const [newStoreName, setNewStoreName] = useState('');
   const detectedCurrency = getOrDetectCurrency();
   const [currencyCode, setCurrencyCode] = useState(detectedCurrency.code);
+  const [finishing, setFinishing] = useState(false);
 
   const goNext = () => {
     if (step >= TOTAL_STEPS - 1) return finish();
@@ -44,6 +45,7 @@ export default function Onboarding() {
   };
 
   const finish = () => {
+    setFinishing(true);
     saveCurrency(currencyCode);
     const stores: Store[] = [
       ...addedStores,
@@ -52,7 +54,7 @@ export default function Onboarding() {
     localStorage.setItem('maisha:onboard-supermarkets', JSON.stringify(stores));
     localStorage.setItem('maisha:language', language);
     localStorage.setItem('maisha:seen', '1');
-    nav('/list');
+    setTimeout(() => nav('/list'), 600);
   };
 
   return (
@@ -186,6 +188,28 @@ export default function Onboarding() {
           </button>
         )}
       </div>
+
+      {finishing && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(251, 246, 239, 0.92)',
+            zIndex: 100,
+            animation: 'inkSpread 0.5s ease-out',
+          }}
+        >
+          <WashiTape
+            src="/decorations/washi-blue-botanical.png"
+            width={240}
+            rotation={-3}
+            opacity={0.95}
+          />
+        </div>
+      )}
     </div>
   );
 }
