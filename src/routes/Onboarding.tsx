@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { saveCurrency, getOrDetectCurrency } from '@/utils/currency';
 import Wordmark from '@/components/Wordmark';
+import WashiTape from '@/components/WashiTape';
 import type { Store } from '@/types/store';
 
 const TOTAL_STEPS = 3;
@@ -192,6 +193,16 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
   const { i18n } = useTranslation();
   return (
     <div>
+      {/* Washi tape decoration above wordmark */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+        <WashiTape
+          src="/decorations/washi-sage-botanical.png"
+          width={120}
+          rotation={-3}
+          opacity={0.85}
+          style={{ marginLeft: -40 }}
+        />
+      </div>
       <Wordmark variant="hero" />
       <div style={{ marginTop: 40 }}>
         {[
