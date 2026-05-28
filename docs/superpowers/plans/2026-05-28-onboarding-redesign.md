@@ -36,13 +36,13 @@
 
 ---
 
-## Task 1: Add i18n keys for the redesigned onboarding
+## Task 1: Add onboarding i18n keys + fix zh-TW to standard traditional Chinese
 
-**Why first:** Foundational — every subsequent UI task references these strings. Doing this first lets later tasks fail with clear i18n errors instead of hardcoded text drift.
+**Why first:** Foundational — every subsequent UI task references these strings. The zh-TW rewrite is bundled here because the existing file is in written Cantonese (買咩、嘅、啲), which is mismatched with the `zh-TW` locale code and unreadable for Taiwan / standard traditional Chinese users. Fixing it now (rather than only adding new keys) avoids leaving the app in an inconsistent state.
 
 **Files:**
 - Modify: `src/locales/zh-CN.json` (the `onboarding` section)
-- Modify: `src/locales/zh-TW.json` (the `onboarding` section)
+- Replace: `src/locales/zh-TW.json` (full file — change from written Cantonese to standard traditional Chinese)
 - Modify: `src/locales/en.json` (the `onboarding` section)
 
 - [ ] **Step 1: Update `src/locales/zh-CN.json` onboarding section**
@@ -66,26 +66,122 @@ Replace the existing `"onboarding"` block (lines 68-77) with:
   },
 ```
 
-- [ ] **Step 2: Update `src/locales/zh-TW.json` onboarding section (Cantonese style)**
+- [ ] **Step 2: Replace `src/locales/zh-TW.json` entirely**
 
-Replace the existing `"onboarding"` block (lines 64-73) with:
+Overwrite the file with standard written traditional Chinese (Taiwan / HK shared style; serves both regions). This also fills in keys that were missing relative to `zh-CN.json` (`shopping.alsoCheck`, `addSheet.pickStore` / `changeStore` / `addStore`, `item.notePlaceholder`, `common.done`).
 
 ```json
-  "onboarding": {
-    "welcome": "歡迎使用買咩",
-    "wordmark": "買咩",
-    "wordmarkLatin": "MaiSha",
-    "slogan": "去邊買，買啲咩",
-    "addStores": "成日去嘅舖頭",
-    "addStoresHint": "你成日去邊幾間？之後可以隨時改",
-    "storePlaceholder": "輸入舖頭名",
-    "addStoreHelper": "撳 Enter 或者點 + 加，可以加多幾間",
-    "next": "下一步",
-    "skip": "先咁啦，遲啲再加",
-    "currency": "用咩貨幣",
-    "done": "開始用"
+{
+  "app": {
+    "title": "買啥"
   },
+  "nav": {
+    "list": "清單",
+    "history": "歷史"
+  },
+  "header": {
+    "joinList": "一起買",
+    "settings": "設定"
+  },
+  "list": {
+    "items": "{{count}} 樣",
+    "goShopping": "去購物",
+    "addItem": "+ 新增物品",
+    "emptyTitle": "還沒有東西要買",
+    "emptySubtitle": "點下面的按鈕開始新增吧"
+  },
+  "shopping": {
+    "back": "返回",
+    "progress": "已買 {{bought}} / {{total}} 樣",
+    "addMore": "+ 臨時加一個",
+    "finish": "結束購物",
+    "alsoCheck": "順便看看"
+  },
+  "history": {
+    "manage": "管理",
+    "cancel": "取消",
+    "selectAll": "全選",
+    "deselectAll": "取消全選",
+    "delete": "刪除",
+    "selectedCount": "已選 {{n}} 項",
+    "confirmDeleteOne": "確定刪除這條記錄嗎？",
+    "confirmDeleteMany": "確定刪除 {{n}} 條記錄嗎？"
+  },
+  "addSheet": {
+    "title": "新增物品",
+    "namePlaceholder": "要買什麼？",
+    "notePlaceholder": "備註（選填）",
+    "quantityPlaceholder": "數量",
+    "store": "店家",
+    "noStore": "未指定店家",
+    "add": "新增",
+    "frequent": "常買",
+    "pickStore": "要去哪家店？",
+    "changeStore": "換一家",
+    "addStore": "+ 新增店家"
+  },
+  "stores": {
+    "manage": "管理店家",
+    "addNew": "新增店家",
+    "namePlaceholder": "輸入店家名稱",
+    "unassigned": "未指定店家",
+    "save": "儲存"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "語言設定",
+    "iconLibrary": "圖標庫",
+    "importExport": "匯入 / 匯出",
+    "personalPresets": "店家管理",
+    "privacy": "隱私與條款",
+    "contact": "聯絡我們",
+    "clearList": "清空清單",
+    "confirmClearList": "確定清空所有商品嗎？店家分類會保留"
+  },
+  "onboarding": {
+    "welcome": "歡迎使用買啥",
+    "wordmark": "買啥",
+    "wordmarkLatin": "MaiSha",
+    "slogan": "去哪買，買點什麼",
+    "addStores": "常去的店",
+    "addStoresHint": "你常去哪幾家？之後可以隨時改",
+    "storePlaceholder": "輸入店家名稱",
+    "addStoreHelper": "按 Enter 或點 + 新增，可以繼續新增多個",
+    "next": "下一步",
+    "skip": "先這樣，之後再加",
+    "currency": "用什麼貨幣",
+    "done": "開始使用"
+  },
+  "share": {
+    "title": "一起買",
+    "description": "分享連結，邀請家人一起編輯清單",
+    "copyLink": "複製連結",
+    "copied": "已複製",
+    "orCode": "或輸入邀請碼加入"
+  },
+  "item": {
+    "notePlaceholder": "x1, 全脂…"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "delete": "刪除",
+    "done": "完成",
+    "edit": "編輯",
+    "save": "儲存",
+    "loading": "載入中…"
+  }
+}
 ```
+
+**Translation notes (for the executor — do not change these choices without checking with the user):**
+- `店家` (vs `店鋪` / `商店`): chosen for warmth — fits the journal aesthetic. Both Taiwan and HK readers understand it.
+- `新增` (vs `添加`): Taiwan/HK standard term for "add" in software contexts.
+- `匯入 / 匯出` (vs `導入 / 導出`): Taiwan standard for import/export.
+- `設定` (vs `設置`): Taiwan/HK standard for "settings".
+- `選填` (vs `可選`): Taiwan natural form for "optional" in forms.
+- Brand `買啥`: kept as-is (a brand name; not localized further).
+- Slogan `去哪買，買點什麼`: parallels the zh-CN slogan structure; "什麼" replaces the mainland-colloquial "啥".
 
 - [ ] **Step 3: Update `src/locales/en.json` onboarding section**
 
@@ -116,11 +212,24 @@ npm run typecheck
 ```
 Expected: No errors. If a locale file has invalid JSON, TypeScript / Vite picks it up at import time.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Visual smoke check — switch to 繁體中文 in running app**
+
+Run:
+```
+npm run dev
+```
+
+In the app:
+1. Open settings (or use whatever UI lets you switch language)
+2. Switch to 繁體中文
+3. Browse the main list view: verify NO Cantonese characters (買咩、嘢、嘅、啲、撳、咁) appear anywhere
+4. Verify menu / button labels read like natural standard Chinese (e.g., "新增物品", "結束購物", "管理店家")
+
+- [ ] **Step 6: Commit**
 
 ```
 git add src/locales/zh-CN.json src/locales/zh-TW.json src/locales/en.json
-git commit -m "feat(i18n): add onboarding redesign strings (wordmark, slogan, helper)"
+git commit -m "feat(i18n): rewrite zh-TW to standard traditional Chinese + onboarding strings"
 ```
 
 ---
