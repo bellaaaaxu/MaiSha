@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { saveCurrency, getAllCurrencies, getOrDetectCurrency } from '@/utils/currency';
@@ -22,6 +22,15 @@ export default function Onboarding() {
   const detectedCurrency = getOrDetectCurrency();
   const [currencyCode, setCurrencyCode] = useState(detectedCurrency.code);
   const [finishing, setFinishing] = useState(false);
+  const finishTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (finishTimerRef.current !== null) {
+        window.clearTimeout(finishTimerRef.current);
+      }
+    };
+  }, []);
 
   const goNext = () => {
     if (step >= TOTAL_STEPS - 1) return finish();
@@ -54,7 +63,7 @@ export default function Onboarding() {
     localStorage.setItem('maisha:onboard-supermarkets', JSON.stringify(stores));
     localStorage.setItem('maisha:language', language);
     localStorage.setItem('maisha:seen', '1');
-    setTimeout(() => nav('/list'), 600);
+    finishTimerRef.current = window.setTimeout(() => nav('/list'), 600);
   };
 
   return (
@@ -198,7 +207,7 @@ export default function Onboarding() {
             alignItems: 'center',
             justifyContent: 'center',
             background: 'rgba(251, 246, 239, 0.92)',
-            zIndex: 100,
+            zIndex: 40,
             animation: 'inkSpread 0.5s ease-out',
           }}
         >
@@ -242,6 +251,7 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
               i18n.changeLanguage(lang.code);
               setLanguage(lang.code);
             }}
+            aria-pressed={language === lang.code}
             style={{
               width: '100%',
               fontFamily: 'var(--font-body)',
@@ -250,7 +260,7 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
               marginBottom: 12,
               borderRadius: 14,
               border: 'none',
-              background: 'white',
+              background: language === lang.code ? 'rgba(212, 131, 107, 0.08)' : 'white',
               color: 'var(--ink)',
               cursor: 'pointer',
               textAlign: 'left',
@@ -424,14 +434,14 @@ function Step1Stores({
             height: 48,
             borderRadius: 14,
             border: 'none',
-            background: hasInput ? 'var(--accent)' : 'var(--ink-faint)',
-            opacity: hasInput ? 1 : 0.4,
-            color: 'white',
+            background: hasInput ? 'var(--accent)' : 'white',
+            color: hasInput ? 'white' : 'var(--ink-faint)',
             fontSize: 24,
             fontWeight: 300,
             cursor: hasInput ? 'pointer' : 'not-allowed',
-            transition: 'background 0.2s, opacity 0.2s',
+            transition: 'background 0.2s, color 0.2s',
             flexShrink: 0,
+            boxShadow: hasInput ? 'none' : '0 2px 8px rgba(74, 55, 40, 0.06)',
           }}
         >
           +
@@ -518,12 +528,14 @@ function Step2Currency({
             <button
               key={c.code}
               onClick={() => setCurrencyCode(c.code)}
+              aria-pressed={currencyCode === c.code}
+              aria-label={c.code}
               style={{
                 fontFamily: 'var(--font-body)',
                 padding: '14px 16px',
                 borderRadius: 14,
                 border: 'none',
-                background: 'white',
+                background: currencyCode === c.code ? 'rgba(115, 144, 168, 0.08)' : 'white',
                 color: 'var(--ink)',
                 cursor: 'pointer',
                 textAlign: 'left',

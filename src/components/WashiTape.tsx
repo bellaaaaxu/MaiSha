@@ -26,6 +26,9 @@ export default function WashiTape({
       role="presentation"
       alt=""
       src={src}
+      onError={(e) => {
+        (e.currentTarget as HTMLImageElement).style.display = 'none';
+      }}
       style={{
         width,
         height: 'auto',
