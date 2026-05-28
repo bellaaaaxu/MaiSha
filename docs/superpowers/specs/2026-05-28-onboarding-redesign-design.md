@@ -261,9 +261,12 @@ Wordmark 在 3 个步骤都出现，但分两种尺寸：
 
 ### 5.8 完成动效
 
-当用户在 Step 3 点击「开始使用」时：
-- 在主按钮上方淡入显示 `washi-blue-botanical.png`（200ms fade，180ms 后整体跳转到 `/list`）
-- 简单 fade，不做复杂动画（避免增加 v1 复杂度）
+当用户在 Step 3 点击「开始使用」时（或 Step 2 点击「先这样，回头再加」时也走同一路径）：
+- 全屏覆盖一层米色 paper 半透明 overlay（`rgba(251, 246, 239, 0.92)`），`zIndex: 40`（在路由内容之上、`UpdatePrompt` 之下）
+- overlay 中央以 240px 宽显示 `washi-blue-botanical.png`，旋转 -3°，opacity 0.95
+- 使用 [src/index.css:65-69](src/index.css) 已有的 `inkSpread` keyframe（0.3→1.05→1.0 缩放，blur 8px→2px→0，opacity 0→0.8→1），duration 0.5s ease-out
+- 总流程：触发 → `setTimeout(() => nav('/list'), 600)`，给动画约 100ms 沉淀时间后跳转
+- 为了避免组件提前卸载时 timer 留在内存里，用 `useRef` + `useEffect` cleanup 包住 timer
 
 ---
 
