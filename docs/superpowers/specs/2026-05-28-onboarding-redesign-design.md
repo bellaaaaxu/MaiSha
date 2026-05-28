@@ -112,9 +112,9 @@ background-image:
 
 | 文件 | 用途 |
 |---|---|
-| `washi-sage-botanical.png` | Step 1 欢迎卡顶部（开篇仪式） |
-| `washi-coral.png` | Step 2 标题装饰 |
-| `washi-blue.png` | Step 3 标题装饰 |
+| `washi-sage-botanical.png` | Step 1 hero wordmark 旁（开篇仪式） |
+| `washi-coral.png` | Step 2「常去的店」标题旁 |
+| `washi-blue.png` | Step 3「用什么货币」标题旁 |
 | `washi-blue-botanical.png` | Onboarding 完成动效（收尾呼应） |
 
 **通用渲染规则：**
@@ -168,59 +168,76 @@ background-image:
 </div>
 ```
 
-### 5.3 Step 1：欢迎卡 + 语言选择
+### 5.3 Wordmark 分级（所有步骤共享逻辑）
+
+Wordmark 在 3 个步骤都出现，但分两种尺寸：
+
+**Hero 版（仅 Step 1）：**
+- 「买啥」—— ZCOOL KuaiLe，**56px**，`var(--ink)`，letter-spacing 8px
+- 「MaiSha」—— Nunito，14px，`var(--ink-light)`，letter-spacing 3px，间距 wordmark 下 4px
+- 手绘下划线 —— `::after` 伪元素或 div，3px 高，`var(--accent-soft)` 色，旋转 -0.5deg，宽度匹配 wordmark
+- 下方 24px 跟 slogan：「去哪买，买点啥」—— Noto Sans SC，16px，`var(--ink-light)`
+
+**Mini 版（Step 2、Step 3）：**
+- 「买啥」—— ZCOOL KuaiLe，**28px**，`var(--ink)`，letter-spacing 4px
+- 「MaiSha」—— Nunito，10px，`var(--ink-faint)`，letter-spacing 2px
+- 手绘下划线 —— 2px 高，`var(--accent-soft)`，旋转 -0.3deg
+- 不带 slogan
+- 与下方 step-specific 标题间距 32px
+
+**为什么分级：** Step 1 的 hero 是「打招呼」C 位；Step 2/3 的 mini 是「身份徽章」常驻，让步给该步骤的标题。用户每步都看到品牌，但不会被同一个大字砸 3 次。
+
+### 5.4 Step 1：语言选择（Hero wordmark 在顶部）
 
 **结构（从上到下）：**
 
-1. **Washi 胶带装饰**（`washi-sage-botanical.png`），宽 120px，旋转 -3°，相对 wordmark 偏左上 20px
-2. **Wordmark 区**（居中）：
-   - 「买啥」—— ZCOOL KuaiLe，56px，`var(--ink)`，letter-spacing 8px
-   - 「MaiSha」—— Nunito，14px，`var(--ink-light)`，letter-spacing 3px，间距 wordmark 下 4px
-   - 手绘下划线 —— 用 `::after` 伪元素或 div，3px 高，`var(--accent-soft)` 色，旋转 -0.5deg，宽度匹配 wordmark
-3. **Slogan**：「去哪买，买点啥」—— Noto Sans SC，16px，`var(--ink-light)`，与 wordmark 间距 24px
-4. **语言选择列表**（与 wordmark 间距 40px）：
+1. **Washi 胶带装饰**（`washi-sage-botanical.png`），宽 120px，旋转 -3°，相对 wordmark 偏左上 20px，`opacity: 0.85`
+2. **Hero wordmark + slogan**（见 §5.3）
+3. **语言选择列表**（与 slogan 间距 40px）：
    - 移除原 🌏 emoji
    - 按钮样式：白底，圆角 14px，`box-shadow: 0 2px 8px rgba(74, 55, 40, 0.06)`
    - 选中状态：左边 4px `var(--accent)` 立边，背景 `rgba(232, 174, 151, 0.12)`
    - 文字：Noto Sans SC，16px，`var(--ink)`
    - 选中指示：右侧 ✓ 改成 `var(--accent)` 色
 
-### 5.4 Step 2：添加店铺
+### 5.5 Step 2：添加店铺（Mini wordmark + 步骤标题）
 
 **结构（从上到下）：**
 
-1. **标题装饰区**（居中）：
+1. **Mini wordmark**（见 §5.3）—— 居中，无 washi 装饰
+2. **步骤标题装饰区**（居中，与 mini wordmark 间距 32px）：
    - 「常去的店」—— ZCOOL KuaiLe，28px，`var(--ink)`
    - 手绘下划线，珊瑚色，旋转 -0.5deg
    - 上方贴 `washi-coral.png`，宽 100px，旋转 -3°，偏右 20px
-2. **提示文字**：「你常去哪几家？后面可以随时改」—— Noto Sans SC，13px，`var(--ink-light)`，标题下方 8px
-3. **已添加店铺列表**：
+3. **提示文字**：「你常去哪几家？后面可以随时改」—— Noto Sans SC，13px，`var(--ink-light)`，标题下方 8px
+4. **已添加店铺列表**：
    - 每个 chip 是 mockup-journal 的 store-card 简化版：白底，圆角 14px，多层柔阴影，左 4px 彩色 border（珊瑚/绿/蓝循环），微旋转（-0.3deg / 0.2deg / -0.15deg 循环）
    - 内容：店名（ZCOOL KuaiLe 18px）+ 右侧 × 删除按钮（半透明，hover 时变珊瑚色）
-4. **输入区**（贴在最后一个 chip 下方）：
+5. **输入区**（贴在最后一个 chip 下方）：
    - 输入框：圆角 14px，1px 虚线 border `var(--ink-faint)`，白底，padding 10px 14px
    - 「+」按钮：48×48，圆角 14px，**始终可见**：
      - 空状态：`background: var(--ink-faint)`，`opacity: 0.4`
      - 有内容：`background: var(--accent)`，`opacity: 1`
      - 内容：白色 `+` 图标，24px
    - 输入框右侧 8px 间距
-5. **提示文字**：「按回车或点 + 添加，可以继续添加多个」—— Noto Sans SC，12px，`var(--ink-faint)`，输入框下方 8px
+6. **提示文字**：「按回车或点 + 添加，可以继续添加多个」—— Noto Sans SC，12px，`var(--ink-faint)`，输入框下方 8px
 
-### 5.5 Step 3：货币选择
+### 5.6 Step 3：货币选择（Mini wordmark + 步骤标题）
 
 **结构（从上到下）：**
 
-1. **标题装饰区**（居中）：
+1. **Mini wordmark**（见 §5.3）—— 居中，无 washi 装饰
+2. **步骤标题装饰区**（居中，与 mini wordmark 间距 32px）：
    - 「用什么货币」—— ZCOOL KuaiLe，28px，`var(--ink)`
    - 手绘下划线，珊瑚色
    - 上方贴 `washi-blue.png`，宽 100px，旋转 -3°，偏左 20px
-2. **货币网格** —— 沿用现有 2 列布局，但：
+3. **货币网格** —— 沿用现有 2 列布局，但：
    - 按钮改为白底圆角 14px，与 Step 1 语言按钮同一套样式
    - 选中状态：左 4px `var(--blue)` 立边，背景浅蓝
    - 货币符号：ZCOOL KuaiLe，18px
    - 货币代码：Nunito，10px，`var(--ink-faint)`
 
-### 5.6 底部按钮区
+### 5.7 底部按钮区
 
 ```jsx
 <button style={{
@@ -242,7 +259,7 @@ background-image:
 - 字号 13px，`var(--ink-light)`，下划线点状（dashed）
 - 间距按钮下方 12px
 
-### 5.7 完成动效
+### 5.8 完成动效
 
 当用户在 Step 3 点击「开始使用」时：
 - 在主按钮上方淡入显示 `washi-blue-botanical.png`（200ms fade，180ms 后整体跳转到 `/list`）
@@ -278,7 +295,7 @@ background-image:
 - `slogan`：
   - zh-CN：「去哪买，买点啥」
   - zh-TW：「去哪買，買點啥」
-  - en：「What to buy, where to go」（或留作 TBD 由用户最终决定）
+  - en：「Where to go, what to bring」（对仗中文结构，「bring」暗示「带回家」更温暖）
 - `addStores` / `currency` 用更短的诗意化文案，呼应手账气质
 
 ---
@@ -334,14 +351,13 @@ public/decorations/
 
 ---
 
-## 9. 待用户最终确认的小决策
+## 9. 用户已确认的决策（2026-05-28 brainstorm）
 
-实施时如果遇到，按以下默认值执行；如有不同想法可在 review 时提出：
-
-1. **英文 slogan**：暂定「What to buy, where to go」，可后续替换
-2. **Wordmark 是否每步都显示**：默认**仅 Step 1 显示**（Step 2/3 用各自的小标题 + washi 胶带承担视觉锚点）；如果想让 wordmark 一直在顶部，可在 review 时改
-3. **跳过按钮位置**：保留在 Step 2 下方，文案改为「先这样，回头再加」更温和
-4. **货币布局**：保持 2 列网格，不改 grid
+1. **英文 slogan**：「Where to go, what to bring」（已选 §6 中的方案 1）
+2. **Wordmark 显示策略**：3 步全显示，但分级 —— Step 1 用 hero（56px + slogan），Step 2/3 用 mini（28px，无 slogan）。详见 §5.3
+3. **跳过按钮位置**：保留在 Step 2 下方，文案「先这样，回头再加」
+4. **货币布局**：保持 2 列网格
+5. **文案微调**：本次先用 §6 中的版本，后续如需润色再单独讨论
 
 ---
 
