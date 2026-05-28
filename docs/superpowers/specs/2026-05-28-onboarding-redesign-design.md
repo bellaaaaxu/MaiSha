@@ -295,7 +295,7 @@ Wordmark 在 3 个步骤都出现，但分两种尺寸：
 - `slogan`：
   - zh-CN：「去哪买，买点啥」
   - zh-TW：「去哪買，買點啥」
-  - en：「Where to go, what to bring」（对仗中文结构，「bring」暗示「带回家」更温暖）
+  - en：「Where to go, what to get」（对仗中文结构，避开与购物清单 app「Bring!」撞名）
 - `addStores` / `currency` 用更短的诗意化文案，呼应手账气质
 
 ---
@@ -353,7 +353,7 @@ public/decorations/
 
 ## 9. 用户已确认的决策（2026-05-28 brainstorm）
 
-1. **英文 slogan**：「Where to go, what to bring」（已选 §6 中的方案 1）
+1. **英文 slogan**：「Where to go, what to get」（避开与 Bring! app 撞名）
 2. **Wordmark 显示策略**：3 步全显示，但分级 —— Step 1 用 hero（56px + slogan），Step 2/3 用 mini（28px，无 slogan）。详见 §5.3
 3. **跳过按钮位置**：保留在 Step 2 下方，文案「先这样，回头再加」
 4. **货币布局**：保持 2 列网格
