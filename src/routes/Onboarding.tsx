@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { saveCurrency, getAllCurrencies, getOrDetectCurrency } from '@/utils/currency';
+import { saveCurrency, getOrDetectCurrency } from '@/utils/currency';
+import Wordmark from '@/components/Wordmark';
 import type { Store } from '@/types/store';
 
-const POPULAR_CURRENCIES = ['CNY', 'CAD', 'USD', 'EUR', 'GBP', 'AUD', 'JPY', 'HKD', 'TWD', 'SGD'];
 const TOTAL_STEPS = 3;
+
+const PAPER_TEXTURE = `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"), linear-gradient(180deg, var(--paper) 0%, #F7F0E6 100%)`;
 
 export default function Onboarding() {
   const nav = useNavigate();
@@ -51,13 +53,17 @@ export default function Onboarding() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '40px 24px',
-      background: 'var(--paper)',
-    }}>
+    <div
+      style={{
+        minHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '24px',
+        background: 'var(--paper)',
+        backgroundImage: PAPER_TEXTURE,
+      }}
+    >
+      {/* Back button */}
       {step > 0 && (
         <button
           onClick={goBack}
@@ -69,222 +75,84 @@ export default function Onboarding() {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            marginBottom: 16,
+            marginBottom: 8,
+            padding: 0,
           }}
         >
           ← {t('shopping.back')}
         </button>
       )}
 
-      {/* Step dots */}
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
+      {/* Step indicator: dashed-line journal style */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 4,
+          justifyContent: 'center',
+          marginBottom: 32,
+          marginTop: step === 0 ? 8 : 0,
+        }}
+      >
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
           <div
             key={i}
             style={{
-              width: i === step ? 20 : 6,
-              height: 6,
-              borderRadius: 3,
-              background: i === step ? 'var(--green)' : i < step ? 'var(--green-soft)' : 'var(--ink-faint)',
+              width: i === step ? 32 : 16,
+              height: 3,
+              background: i <= step ? 'var(--accent-soft)' : 'var(--ink-faint)',
+              borderRadius: 2,
+              opacity: i <= step ? 0.8 : 0.3,
+              transform: i === step ? 'rotate(-0.3deg)' : 'none',
               transition: 'all 0.3s',
             }}
           />
         ))}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 360, margin: '0 auto', width: '100%' }}>
-
-        {/* Step 0: Language selection */}
-        {step === 0 && (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🌏</div>
-              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
-                {t('settings.language')}
-              </h2>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                { code: 'zh-CN', label: '简体中文' },
-                { code: 'zh-TW', label: '繁體中文' },
-                { code: 'en', label: 'English' },
-              ].map(lang => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    i18n.changeLanguage(lang.code);
-                    setLanguage(lang.code);
-                  }}
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 16,
-                    padding: '14px 20px',
-                    borderRadius: 'var(--radius-card)',
-                    border: language === lang.code
-                      ? '2px solid var(--green)'
-                      : '2px solid var(--ink-faint)',
-                    background: language === lang.code
-                      ? 'rgba(123, 163, 126, 0.1)'
-                      : 'white',
-                    color: 'var(--ink)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span>{lang.label}</span>
-                  {language === lang.code && (
-                    <span style={{ color: 'var(--green)', fontWeight: 700 }}>✓</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 1: Add stores (free text) */}
+      {/* Step content area — top-aligned, not centered */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          maxWidth: 360,
+          margin: '0 auto',
+          width: '100%',
+          paddingTop: 8,
+        }}
+      >
+        {step === 0 && <Step0Language language={language} setLanguage={setLanguage} />}
         {step === 1 && (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🏪</div>
-              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
-                {t('onboarding.addStores')}
-              </h2>
-              <p style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 4 }}>
-                {t('onboarding.addStoresHint')}
-              </p>
-            </div>
-
-            {/* Added stores */}
-            {addedStores.map((store, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                marginBottom: 8,
-                padding: '10px 16px',
-                background: 'white',
-                borderRadius: 'var(--radius-card)',
-                border: '1px solid var(--ink-faint)',
-              }}>
-                <span style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--ink)' }}>
-                  {store.name}
-                </span>
-                <button
-                  onClick={() => removeStore(i)}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontSize: 18, color: 'var(--ink-faint)', padding: '0 4px',
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-
-            {/* Input for new store */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input
-                value={newStoreName}
-                onChange={e => setNewStoreName(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') addStore(); }}
-                placeholder={t('onboarding.storePlaceholder')}
-                style={{
-                  flex: 1,
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 15,
-                  padding: '10px 16px',
-                  borderRadius: 'var(--radius-card)',
-                  border: '1px solid var(--ink-faint)',
-                  background: 'white',
-                  color: 'var(--ink)',
-                  outline: 'none',
-                }}
-              />
-              {newStoreName.trim() && (
-                <button
-                  onClick={addStore}
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: 'white',
-                    background: 'var(--green)',
-                    border: 'none',
-                    borderRadius: 'var(--radius-card)',
-                    padding: '10px 16px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {t('common.confirm')}
-                </button>
-              )}
-            </div>
-          </div>
+          <Step1Stores
+            addedStores={addedStores}
+            newStoreName={newStoreName}
+            setNewStoreName={setNewStoreName}
+            addStore={addStore}
+            removeStore={removeStore}
+          />
         )}
-
-        {/* Step 2: Currency */}
-        {step === 2 && (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>💰</div>
-              <h2 style={{ fontFamily: 'var(--font-title)', fontSize: 22, color: 'var(--ink)' }}>
-                {t('onboarding.currency')}
-              </h2>
-            </div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 10,
-            }}>
-              {getAllCurrencies()
-                .filter(c => POPULAR_CURRENCIES.includes(c.code))
-                .map(c => (
-                  <button
-                    key={c.code}
-                    onClick={() => setCurrencyCode(c.code)}
-                    style={{
-                      fontFamily: 'var(--font-body)',
-                      padding: '12px 16px',
-                      borderRadius: 'var(--radius-card)',
-                      border: currencyCode === c.code
-                        ? '2px solid var(--green)'
-                        : '2px solid var(--ink-faint)',
-                      background: currencyCode === c.code
-                        ? 'rgba(123, 163, 126, 0.1)'
-                        : 'white',
-                      color: 'var(--ink)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>{c.symbol}</div>
-                      <div style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{c.code}</div>
-                    </div>
-                    {currencyCode === c.code && (
-                      <span style={{ color: 'var(--green)', fontWeight: 700 }}>✓</span>
-                    )}
-                  </button>
-                ))}
-            </div>
-          </div>
-        )}
+        {step === 2 && <Step2Currency currencyCode={currencyCode} setCurrencyCode={setCurrencyCode} />}
       </div>
 
       {/* Bottom buttons */}
-      <div style={{ maxWidth: 360, margin: '0 auto', width: '100%', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div
+        style={{
+          maxWidth: 360,
+          margin: '0 auto',
+          width: '100%',
+          paddingTop: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
         <button
           onClick={goNext}
           style={{
             width: '100%',
-            height: 48,
-            borderRadius: 12,
+            height: 52,
+            borderRadius: 14,
             fontFamily: 'var(--font-body)',
             fontSize: 16,
             fontWeight: 700,
@@ -292,6 +160,7 @@ export default function Onboarding() {
             background: 'var(--green)',
             border: 'none',
             cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(123, 163, 126, 0.25)',
           }}
         >
           {step === TOTAL_STEPS - 1 ? t('onboarding.done') : t('onboarding.next')}
@@ -303,7 +172,7 @@ export default function Onboarding() {
               width: '100%',
               fontFamily: 'var(--font-body)',
               fontSize: 13,
-              color: 'var(--ink-faint)',
+              color: 'var(--ink-light)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -316,4 +185,66 @@ export default function Onboarding() {
       </div>
     </div>
   );
+}
+
+// Placeholder step components — replaced in Tasks 5/6/7
+function Step0Language({ language, setLanguage }: { language: string; setLanguage: (l: string) => void }) {
+  const { i18n } = useTranslation();
+  return (
+    <div>
+      <Wordmark variant="hero" />
+      <div style={{ marginTop: 40 }}>
+        {[
+          { code: 'zh-CN', label: '简体中文' },
+          { code: 'zh-TW', label: '繁體中文' },
+          { code: 'en', label: 'English' },
+        ].map(lang => (
+          <button
+            key={lang.code}
+            onClick={() => {
+              i18n.changeLanguage(lang.code);
+              setLanguage(lang.code);
+            }}
+            style={{
+              width: '100%',
+              fontFamily: 'var(--font-body)',
+              fontSize: 16,
+              padding: '14px 20px',
+              marginBottom: 12,
+              borderRadius: 14,
+              border: 'none',
+              background: 'white',
+              color: 'var(--ink)',
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              boxShadow:
+                language === lang.code
+                  ? 'inset 4px 0 0 0 var(--accent), 0 2px 8px rgba(74, 55, 40, 0.06)'
+                  : '0 2px 8px rgba(74, 55, 40, 0.06)',
+            }}
+          >
+            <span>{lang.label}</span>
+            {language === lang.code && <span style={{ color: 'var(--accent)', fontWeight: 700 }}>✓</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Step1Stores(_props: {
+  addedStores: Store[];
+  newStoreName: string;
+  setNewStoreName: (s: string) => void;
+  addStore: () => void;
+  removeStore: (i: number) => void;
+}) {
+  return <div>Step 1 placeholder — replaced in Task 6</div>;
+}
+
+function Step2Currency(_props: { currencyCode: string; setCurrencyCode: (c: string) => void }) {
+  return <div>Step 2 placeholder — replaced in Task 7</div>;
 }
