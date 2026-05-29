@@ -199,7 +199,7 @@ persistActiveList(account, list)                 // 镜像写 localStorage + dur
 
 **⚠️ 本设计唯一需要小心处：冷启动宽限。** 全新安装时 KVS 本地缓存可能尚未从 iCloud 同步下来，`load()` 立刻读可能返回 `null`。处理：**仅在 localStorage 完全为空、且 `findAccountForUid` 无果的冷启动路径**上，订阅 `didChangeExternally`、最多等 ~1.5s（由 splash screen 遮住），等 iCloud 推下来再决定是否「建新账号」。热启动（localStorage 有值）完全不走这条，无延迟。
 
-**`active-list.ts`（新）—— 收口写入：** `persistActiveList(account, list)` 同时写 `maisha:list-id` 和 `durableStore.save({accountId, recoveryCode, activeListId})`；`clearActiveList()` 同时清两边。**不变量：durable store 永远镜像 localStorage 的当前指针。** 现散落的 `localStorage.setItem(STORAGE_KEY,…)`（[useList.ts:23/34](src/hooks/useList.ts:23)、[JoinByCode.tsx:29](src/routes/JoinByCode.tsx:29)）全部收口到此。
+**`active-list.ts`（新）—— 收口写入：** `persistActiveList(account, list)` 同时写 `maisha:list-id`、`maisha:account` 和 `durableStore.save({accountId, recoveryCode, activeListId})`；`clearStoredList()` **只清 `maisha:list-id`**（保留缓存账号，使找回后 bootstrap 落到账号首清单）。写入侧不变量：durable store 镜像 localStorage 的当前指针 —— 注意 iOS 上 durable 指针**有意**在 localStorage 被清后仍存活（这正是找回机制），故该镜像是写入侧、非双向。现散落的 `localStorage.setItem(STORAGE_KEY,…)`（[useList.ts:23/34](src/hooks/useList.ts:23)、[JoinByCode.tsx:29](src/routes/JoinByCode.tsx:29)）全部收口到此。
 
 ---
 
