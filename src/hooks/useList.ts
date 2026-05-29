@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getOrCreateList, joinList } from '@/lib/db';
+import { resolveActiveContext } from '@/lib/bootstrap';
+import { getDurableStore } from '@/lib/durable-store';
+import { findAccountForUid, createAccount, claimAccount } from '@/lib/account';
+import { joinList, getOrCreatePrimaryList } from '@/lib/db';
+import { getStoredListId, persistActiveList } from '@/lib/active-list';
 import type { List } from '@/types/list';
-
-const STORAGE_KEY = 'maisha:list-id';
 
 export function useList(uid: string | null, joinListId: string | null) {
   const [list, setList] = useState<List | null>(null);
@@ -14,25 +16,22 @@ export function useList(uid: string | null, joinListId: string | null) {
     let cancelled = false;
     (async () => {
       try {
-        const listId = joinListId || localStorage.getItem(STORAGE_KEY);
-
-        if (listId) {
-          const joined = await joinList(listId);
-          if (cancelled) return;
-          if (joined) {
-            localStorage.setItem(STORAGE_KEY, joined.id);
-            setList(joined);
-            setLoading(false);
-            return;
-          }
-          // list_id invalid or deleted — clear stored value
-          localStorage.removeItem(STORAGE_KEY);
-        }
-
-        const mine = await getOrCreateList(uid);
+        const { account, list } = await resolveActiveContext(
+          {
+            loadDurable: () => getDurableStore().load(),
+            findAccountForUid,
+            claimAccount,
+            createAccount,
+            getStoredListId,
+            joinOrGetList: joinList,
+            getOrCreatePrimaryList,
+          },
+          { uid, urlListId: joinListId }
+        );
         if (cancelled) return;
-        localStorage.setItem(STORAGE_KEY, mine.id);
-        setList(mine);
+        await persistActiveList(account, list);
+        if (cancelled) return;
+        setList(list);
         setLoading(false);
       } catch (err) {
         if (!cancelled) { setError((err as Error).message); setLoading(false); }
