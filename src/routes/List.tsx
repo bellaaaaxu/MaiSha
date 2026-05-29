@@ -21,6 +21,7 @@ import { AddSheet } from '@/components/AddSheet';
 import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
+import { RecoveryCodeCard } from '@/components/RecoveryCodeCard';
 import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
@@ -231,6 +232,7 @@ export default function ListRoute() {
         {/* Main content */}
         {activeTab === 'list' && (
           <>
+            <RecoveryCodeCard itemCount={items.length} />
             {groups.length === 0 ? (
               <div style={{ padding: '96px 0', textAlign: 'center' }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
