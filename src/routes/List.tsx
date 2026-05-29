@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   DndContext,
   PointerSensor,
@@ -31,6 +31,7 @@ import type { Item, NewItemInput } from '@/types/item';
 export default function ListRoute() {
   const [params] = useSearchParams();
   const joinListId = params.get('list');
+  const nav = useNavigate();
 
   const { uid } = useAuth();
   const { list, loading: listLoading, error: listErr } = useList(uid, joinListId);
@@ -238,6 +239,23 @@ export default function ListRoute() {
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
                 <div style={{ fontSize: 16, color: 'var(--ink-faint)' }}>{t('list.emptyTitle')}</div>
                 <div style={{ fontSize: 12, marginTop: 4, color: 'var(--ink-faint)' }}>{t('list.emptySubtitle')}</div>
+                <button
+                  onClick={() => nav('/join?mode=recover')}
+                  style={{
+                    marginTop: 24,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 13,
+                    color: 'var(--ink-light)',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: 3,
+                    padding: 8,
+                  }}
+                >
+                  已经有清单？输入找回码恢复
+                </button>
               </div>
             ) : (
               groups.map((group, i) => (
