@@ -212,7 +212,7 @@ export default function Onboarding() {
           }}
         >
           <WashiTape
-            src="/decorations/washi-blue-botanical.png"
+            src="/decorations/washi-blue-botanical.webp"
             width={240}
             rotation={-3}
             opacity={0.95}
@@ -231,7 +231,7 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
       {/* Washi tape decoration above wordmark */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
         <WashiTape
-          src="/decorations/washi-sage-botanical.png"
+          src="/decorations/washi-sage-botanical.webp"
           width={120}
           rotation={-3}
           opacity={0.85}
@@ -310,7 +310,7 @@ function Step1Stores({
       <div style={{ position: 'relative', textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
           <WashiTape
-            src="/decorations/washi-coral.png"
+            src="/decorations/washi-coral.webp"
             width={100}
             rotation={-3}
             opacity={0.85}
@@ -478,7 +478,7 @@ function Step2Currency({
       <div style={{ position: 'relative', textAlign: 'center', marginTop: 32, marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
           <WashiTape
-            src="/decorations/washi-blue.png"
+            src="/decorations/washi-blue.webp"
             width={100}
             rotation={-3}
             opacity={0.85}

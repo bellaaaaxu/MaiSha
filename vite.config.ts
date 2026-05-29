@@ -26,32 +26,10 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // Note: png deliberately excluded from precache. The onboarding washi
-        // decorations in /decorations/ are large (3-5 MB) and exceed Workbox's
-        // default 2 MiB precache limit. They're cached on-demand via the
-        // runtimeCaching rule below — first onboarding visit fetches them
-        // over the network; subsequent visits read from cache.
-        // TODO: compress these PNGs (target <300 KB each) so they can move
-        // back into precache for true offline-first behavior.
         globPatterns: ['**/*.{js,css,html,svg,webp,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
-          // Onboarding washi decorations — cache-first, served from public/decorations/
-          {
-            urlPattern: /\/decorations\/.*\.png$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'onboarding-decorations',
-              expiration: {
-                maxEntries: 20,
-                maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year (assets are immutable)
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
           // Specific: custom icons — cache-first for offline access
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/custom-icons\/.*/,
