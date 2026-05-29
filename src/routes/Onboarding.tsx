@@ -196,6 +196,23 @@ export default function Onboarding() {
             {t('onboarding.skip')}
           </button>
         )}
+        {step === 0 && (
+          <button
+            onClick={() => nav('/join?mode=recover')}
+            style={{
+              width: '100%',
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              color: 'var(--ink-light)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px 0',
+            }}
+          >
+            已经用过买啥？输入找回码恢复清单
+          </button>
+        )}
       </div>
 
       {finishing && (
