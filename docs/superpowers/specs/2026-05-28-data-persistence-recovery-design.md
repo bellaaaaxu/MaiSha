@@ -88,50 +88,39 @@ ALTER TABLE lists ADD COLUMN account_id UUID REFERENCES accounts(id);
 
 - 清单归属一个账号。`lists.member_uids` 与 `lists.short_code` **保留**——用于跨账号把单个清单分享给家人（家人成为 list 成员，但不进你的账号）。
 
-### 4.3 RLS 升级：账号成员资格级联
+### 4.3 访问授权：claim 时把 uid 加入清单成员（不重写 RLS）
 
-访问判断从「直接是清单成员」扩展为「直接是清单成员 **OR** 是清单所属账号的成员」。为保持 DRY，引入 helper：
+**不广义化现有 RLS**——在有真实数据的线上库上重写策略风险高，且 custom-icons storage bucket 的上传/删除策略仍按 list 成员判断（[003:80](supabase/migrations/003_custom_icons.sql:80)），单靠 RLS 级联并不完整。取而代之：`claim_account`（§4.4）把找回的 uid **同时加进账号 `member_uids` 和该账号名下所有清单的 `member_uids`**，使其成为各清单的**直接成员**。于是 lists / items / custom_icons / purchase_history 以及 storage bucket 的**全部现有成员制策略原样生效，一条都不用改**——线上迁移风险最低。
 
-```sql
-CREATE OR REPLACE FUNCTION can_access_list(p_list_id UUID)
-RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM lists l
-    WHERE l.id = p_list_id
-      AND (
-        auth.uid() = ANY(l.member_uids)
-        OR l.account_id IN (SELECT id FROM accounts WHERE auth.uid() = ANY(member_uids))
-      )
-  );
-$$;
-```
-
-- `lists` 的 SELECT/UPDATE、`items` / `custom_icons` / `purchase_history` 的全部策略改用 `can_access_list(...)`（items 等用 `can_access_list(list_id)`；lists 自身用 `can_access_list(id)`）。
-- `accounts` 自身 RLS：
+- `accounts` 需新增 RLS：
   - `SELECT/UPDATE USING (auth.uid() = ANY(member_uids))`
-  - `INSERT WITH CHECK (auth.uid() = ANY(member_uids))` —— 否则 `createAccount` 会被 RLS 挡掉。
-- `lists` 的 INSERT 策略（001 现为 `owner_uid = auth.uid() AND auth.uid() = ANY(member_uids)`）追加约束：`account_id IN (SELECT id FROM accounts WHERE auth.uid() = ANY(member_uids))`，防止把新清单挂到他人账号下。
-- 因为账号成员资格已级联，找回时**不必**再往每个 list 的 `member_uids` 里喷 uid——加进 `accounts.member_uids` 一处即可。
+  - `INSERT WITH CHECK (auth.uid() = ANY(member_uids))` —— 否则 `createAccount` 会被挡。
+- `lists` 的 INSERT 策略（001 现为 `owner_uid = auth.uid() AND auth.uid() = ANY(member_uids)`）追加：`AND account_id IN (SELECT id FROM accounts WHERE auth.uid() = ANY(member_uids))`，防止把新清单挂到他人账号下。
+- 代价：`lists.member_uids` 每次找回追加一个（死）uid——见 §10；死 uid 无法登录，无安全影响。
 
 ### 4.4 `claim_account` RPC
 
 ```sql
 CREATE OR REPLACE FUNCTION claim_account(p_code TEXT)
 RETURNS accounts LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE result accounts;
+DECLARE v_account accounts;
 BEGIN
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not authenticated'; END IF;
 
-  UPDATE accounts
-    SET member_uids = array_append(member_uids, auth.uid()), updated_at = NOW()
-    WHERE recovery_code = upper(trim(p_code))
-      AND NOT (auth.uid() = ANY(member_uids))
-    RETURNING * INTO result;
+  SELECT * INTO v_account FROM accounts WHERE recovery_code = upper(trim(p_code));
+  IF NOT FOUND THEN RETURN NULL; END IF;          -- 码不存在
 
-  IF NOT FOUND THEN  -- 码无效，或已是成员
-    SELECT * INTO result FROM accounts WHERE recovery_code = upper(trim(p_code));
+  -- 加入账号成员
+  IF NOT (auth.uid() = ANY(v_account.member_uids)) THEN
+    UPDATE accounts SET member_uids = array_append(member_uids, auth.uid()), updated_at = NOW()
+      WHERE id = v_account.id RETURNING * INTO v_account;
   END IF;
-  RETURN result;  -- NULL 表示码不存在
+
+  -- 喷到账号名下所有清单，使现有成员制 RLS 原样生效（含 storage）
+  UPDATE lists SET member_uids = array_append(member_uids, auth.uid()), updated_at = NOW()
+    WHERE account_id = v_account.id AND NOT (auth.uid() = ANY(member_uids));
+
+  RETURN v_account;
 END;
 $$;
 ```
@@ -233,8 +222,9 @@ BEGIN
 END $$;
 -- 4. 置 NOT NULL
 ALTER TABLE lists ALTER COLUMN account_id SET NOT NULL;
--- 5. can_access_list() + 重写 lists/items/custom_icons/purchase_history 的 RLS（§4.3）
--- 6. claim_account() RPC（§4.4）
+-- 5. accounts 的 RLS（§4.3）+ 重建 lists INSERT 策略加 account 归属校验
+-- 6. claim_account() RPC（§4.4，含向账号名下清单喷 member）
+-- 不改 items / custom_icons / purchase_history / storage 的任何策略。
 ```
 
 迁移后：每个现有清单各得一个账号（成员继承），自动生成找回码。用户自己的清单**不会丢**。
