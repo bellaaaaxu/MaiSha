@@ -4,13 +4,13 @@ import type { List } from '@/types/list';
 import type { Item, NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
 
-/** Fetch the current user's list. If none, create one. */
-export async function getOrCreateList(uid: string): Promise<List> {
-  // Try find existing
+/** 取账号名下第一个清单；没有则创建（沿用 onboarding 选的超市）。 */
+export async function getOrCreatePrimaryList(accountId: string, uid: string): Promise<List> {
   const { data: existing, error: e1 } = await supabase
     .from('lists')
     .select('*')
-    .contains('member_uids', [uid])
+    .eq('account_id', accountId)
+    .order('created_at', { ascending: true })
     .limit(1)
     .maybeSingle();
   if (e1) throw e1;
@@ -24,13 +24,13 @@ export async function getOrCreateList(uid: string): Promise<List> {
     localStorage.removeItem('maisha:onboard-supermarkets');
   }
 
-  // Create new
   const { data: created, error: e2 } = await supabase
     .from('lists')
     .insert({
       name: '家里',
       owner_uid: uid,
       member_uids: [uid],
+      account_id: accountId,
       supermarkets
     })
     .select()
