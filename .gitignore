@@ -12,3 +12,4 @@ dist-ssr/
 .claude/
 *.tsbuildinfo
 supabase/.temp/
+icon-staging/
