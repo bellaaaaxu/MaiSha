@@ -9,6 +9,9 @@
 // Invariants (enforced by tests/item-catalog.test.mjs): stems are [a-z0-9-]+,
 // unique here, and never collide with an icon-prompts.md stem.
 // `category` values are already the registry categories used by icon-registry.ts.
+//
+// Packaging/container items pin the vessel + 「无标签无文字」 in desc so the model
+// renders a consistent object (and avoids hallucinating brand logos/text).
 
 export default [
   // ── 蔬菜 ──
@@ -91,9 +94,9 @@ export default [
 
   // ── 乳制品 ──
   { name: '奶油', stem: 'cream', category: '乳制品', desc: '一团奶油' },
-  { name: '淡奶油', stem: 'whipping-cream', category: '乳制品', desc: '一盒淡奶油' },
+  { name: '淡奶油', stem: 'whipping-cream', category: '乳制品', desc: '一个纸盒装淡奶油，无标签无文字' },
   { name: '芝士片', stem: 'cheese-slices', category: '乳制品', desc: '几片黄色芝士片' },
-  { name: '奶粉', stem: 'milk-powder', category: '乳制品', desc: '一罐奶粉' },
+  { name: '奶粉', stem: 'milk-powder', category: '乳制品', desc: '一个圆罐装奶粉，无标签无文字' },
 
   // ── 豆制品 ──
   { name: '豆干', stem: 'dried-tofu', category: '豆制品', desc: '几块豆腐干' },
@@ -104,7 +107,7 @@ export default [
 
   // ── 主食 ──
   { name: '挂面', stem: 'dried-noodles', category: '主食', desc: '一把挂面' },
-  { name: '方便面', stem: 'instant-noodles', category: '主食', desc: '一块方便面饼' },
+  { name: '方便面', stem: 'instant-noodles', category: '主食', desc: '一块干方便面饼' },
   { name: '米粉', stem: 'rice-noodles', category: '主食', desc: '一把细米粉' },
   { name: '馒头', stem: 'steamed-bun', category: '主食', desc: '两个白馒头' },
   { name: '包子', stem: 'baozi', category: '主食', desc: '一个白包子' },
@@ -118,19 +121,19 @@ export default [
   { name: '绿豆', stem: 'mung-beans', category: '主食', desc: '一捧绿豆' },
 
   // ── 调料 ──
-  { name: '醋', stem: 'vinegar', category: '调料', desc: '一瓶醋' },
-  { name: '香醋', stem: 'black-vinegar', category: '调料', desc: '一瓶香醋' },
-  { name: '芝麻油', stem: 'sesame-oil', category: '调料', desc: '一瓶香油' },
-  { name: '鸡精', stem: 'chicken-bouillon', category: '调料', desc: '一盒鸡精' },
-  { name: '味精', stem: 'msg', category: '调料', desc: '一袋味精' },
-  { name: '胡椒粉', stem: 'pepper-powder', category: '调料', desc: '一瓶胡椒粉' },
+  { name: '醋', stem: 'vinegar', category: '调料', desc: '一个深色玻璃瓶装的醋，无标签无文字' },
+  { name: '香醋', stem: 'black-vinegar', category: '调料', desc: '一个深色玻璃瓶装香醋，无标签无文字' },
+  { name: '芝麻油', stem: 'sesame-oil', category: '调料', desc: '一个小玻璃瓶装琥珀色芝麻油，无标签无文字' },
+  { name: '鸡精', stem: 'chicken-bouillon', category: '调料', desc: '一个小盒装鸡精，无标签无文字' },
+  { name: '味精', stem: 'msg', category: '调料', desc: '一小袋白色味精，无标签无文字' },
+  { name: '胡椒粉', stem: 'pepper-powder', category: '调料', desc: '一个小调料瓶装胡椒粉，无标签无文字' },
   { name: '辣椒粉', stem: 'chili-powder', category: '调料', desc: '一小堆红辣椒粉' },
   { name: '孜然', stem: 'cumin', category: '调料', desc: '一小堆孜然粒' },
   { name: '五香粉', stem: 'five-spice', category: '调料', desc: '一小堆五香粉' },
-  { name: '辣椒酱', stem: 'chili-sauce', category: '调料', desc: '一瓶红辣椒酱' },
-  { name: '老干妈', stem: 'laoganma', category: '调料', desc: '一罐红盖辣酱' },
+  { name: '辣椒酱', stem: 'chili-sauce', category: '调料', desc: '一个玻璃罐装红辣椒酱，无标签无文字' },
+  { name: '老干妈', stem: 'laoganma', category: '调料', desc: '一个红色瓶盖的玻璃罐辣酱，无标签无文字' },
   { name: '甜面酱', stem: 'sweet-bean-sauce', category: '调料', desc: '一碟甜面酱' },
-  { name: '黄豆酱', stem: 'soybean-paste', category: '调料', desc: '一罐黄豆酱' },
+  { name: '黄豆酱', stem: 'soybean-paste', category: '调料', desc: '一个玻璃罐装黄豆酱，无标签无文字' },
   { name: '淀粉', stem: 'cornstarch', category: '调料', desc: '一捧白淀粉' },
   { name: '芝麻', stem: 'sesame', category: '调料', desc: '一小堆白芝麻' },
   { name: '干辣椒', stem: 'dried-chili', category: '调料', desc: '一把干红辣椒' },
@@ -157,9 +160,9 @@ export default [
 
   // ── 方便食品 ──
   { name: '火腿肠', stem: 'ham-sausage', category: '方便食品', desc: '几根火腿肠' },
-  { name: '午餐肉', stem: 'luncheon-meat', category: '方便食品', desc: '午餐肉罐头' },
-  { name: '鱼罐头', stem: 'canned-fish', category: '方便食品', desc: '一个鱼罐头' },
-  { name: '八宝粥', stem: 'congee-can', category: '方便食品', desc: '一罐八宝粥' },
+  { name: '午餐肉', stem: 'luncheon-meat', category: '方便食品', desc: '一个方形午餐肉罐头，无标签无文字' },
+  { name: '鱼罐头', stem: 'canned-fish', category: '方便食品', desc: '一个圆形鱼罐头，无标签无文字' },
+  { name: '八宝粥', stem: 'congee-can', category: '方便食品', desc: '一个圆罐装八宝粥，无标签无文字' },
 
   // ── 零食 ──
   { name: '饼干', stem: 'biscuits', category: '零食', desc: '几块饼干' },
@@ -168,70 +171,70 @@ export default [
   { name: '果冻', stem: 'jelly', category: '零食', desc: '彩色果冻杯' },
   { name: '爆米花', stem: 'popcorn', category: '零食', desc: '一桶爆米花' },
   { name: '海苔', stem: 'seaweed-snack', category: '零食', desc: '一片即食海苔' },
-  { name: '辣条', stem: 'latiao', category: '零食', desc: '一包红色辣条' },
+  { name: '辣条', stem: 'latiao', category: '零食', desc: '一包红色辣条，无标签无文字' },
   { name: '棒棒糖', stem: 'lollipop', category: '零食', desc: '一根彩色棒棒糖' },
 
   // ── 饮料（含茶咖）──
-  { name: '雪碧', stem: 'sprite', category: '饮料', desc: '一瓶绿色汽水' },
+  { name: '雪碧', stem: 'sprite', category: '饮料', desc: '一个绿色塑料瓶装汽水，无标签无文字' },
   { name: '橙汁', stem: 'orange-juice', category: '饮料', desc: '一杯橙汁' },
-  { name: '苹果汁', stem: 'apple-juice', category: '饮料', desc: '一瓶苹果汁' },
-  { name: '椰汁', stem: 'coconut-drink', category: '饮料', desc: '一罐椰汁' },
-  { name: '苏打水', stem: 'soda-water', category: '饮料', desc: '一瓶苏打水' },
-  { name: '功能饮料', stem: 'energy-drink', category: '饮料', desc: '一个金罐功能饮料' },
-  { name: '乳酸菌', stem: 'yogurt-drink', category: '饮料', desc: '一瓶乳酸菌饮料' },
-  { name: '气泡水', stem: 'sparkling-water', category: '饮料', desc: '一瓶气泡水' },
+  { name: '苹果汁', stem: 'apple-juice', category: '饮料', desc: '一个瓶装苹果汁，无标签无文字' },
+  { name: '椰汁', stem: 'coconut-drink', category: '饮料', desc: '一个银色易拉罐装椰汁，无标签无文字' },
+  { name: '苏打水', stem: 'soda-water', category: '饮料', desc: '一个透明瓶装苏打水，无标签无文字' },
+  { name: '功能饮料', stem: 'energy-drink', category: '饮料', desc: '一个金色易拉罐功能饮料，无标签无文字' },
+  { name: '乳酸菌', stem: 'yogurt-drink', category: '饮料', desc: '一个小塑料瓶装乳酸菌饮料，无标签无文字' },
+  { name: '气泡水', stem: 'sparkling-water', category: '饮料', desc: '一个玻璃瓶装气泡水，无标签无文字' },
   { name: '茶叶', stem: 'tea-leaves', category: '饮料', desc: '一小堆绿茶叶' },
   { name: '红茶', stem: 'black-tea', category: '饮料', desc: '一小堆红茶叶' },
   { name: '茶包', stem: 'tea-bags', category: '饮料', desc: '几个茶包' },
   { name: '咖啡', stem: 'coffee', category: '饮料', desc: '一杯咖啡' },
-  { name: '速溶咖啡', stem: 'instant-coffee', category: '饮料', desc: '几条速溶咖啡' },
+  { name: '速溶咖啡', stem: 'instant-coffee', category: '饮料', desc: '几条独立包装的速溶咖啡，无标签无文字' },
   { name: '咖啡豆', stem: 'coffee-beans', category: '饮料', desc: '一把咖啡豆' },
 
   // ── 酒水 ──
-  { name: '啤酒', stem: 'beer', category: '酒水', desc: '一瓶啤酒' },
-  { name: '红酒', stem: 'red-wine', category: '酒水', desc: '一瓶红酒' },
-  { name: '白酒', stem: 'baijiu', category: '酒水', desc: '一瓶白酒' },
-  { name: '黄酒', stem: 'rice-wine', category: '酒水', desc: '一瓶黄酒' },
+  { name: '啤酒', stem: 'beer', category: '酒水', desc: '一个棕色玻璃瓶装啤酒，无标签无文字' },
+  { name: '红酒', stem: 'red-wine', category: '酒水', desc: '一个深色玻璃红酒瓶，无标签无文字' },
+  { name: '白酒', stem: 'baijiu', category: '酒水', desc: '一个白瓷瓶装白酒，无标签无文字' },
+  { name: '黄酒', stem: 'rice-wine', category: '酒水', desc: '一个陶瓷瓶装黄酒，无标签无文字' },
 
   // ── 烘焙 ──
-  { name: '酵母', stem: 'yeast', category: '烘焙', desc: '一包酵母粉' },
-  { name: '泡打粉', stem: 'baking-powder', category: '烘焙', desc: '一罐泡打粉' },
+  { name: '酵母', stem: 'yeast', category: '烘焙', desc: '一小袋酵母粉，无标签无文字' },
+  { name: '泡打粉', stem: 'baking-powder', category: '烘焙', desc: '一个小罐装泡打粉，无标签无文字' },
   { name: '可可粉', stem: 'cocoa-powder', category: '烘焙', desc: '一小堆可可粉' },
   { name: '糖粉', stem: 'powdered-sugar', category: '烘焙', desc: '一小堆糖粉' },
   { name: '吉利丁', stem: 'gelatin', category: '烘焙', desc: '几片吉利丁' },
 
   // ── 日用 ──
-  { name: '湿巾', stem: 'wet-wipes', category: '日用', desc: '一包抽取湿巾' },
+  { name: '湿巾', stem: 'wet-wipes', category: '日用', desc: '一包抽取式湿巾，无标签无文字' },
   { name: '餐巾纸', stem: 'napkins', category: '日用', desc: '一叠餐巾纸' },
-  { name: '洗衣液', stem: 'laundry-detergent', category: '日用', desc: '一瓶洗衣液' },
-  { name: '洗衣粉', stem: 'laundry-powder', category: '日用', desc: '一袋洗衣粉' },
-  { name: '消毒液', stem: 'disinfectant', category: '日用', desc: '一瓶蓝色消毒液' },
-  { name: '洁厕灵', stem: 'toilet-cleaner', category: '日用', desc: '一瓶洁厕液' },
-  { name: '柔顺剂', stem: 'fabric-softener', category: '日用', desc: '一瓶衣物柔顺剂' },
+  { name: '洗衣液', stem: 'laundry-detergent', category: '日用', desc: '一个塑料瓶装洗衣液，无标签无文字' },
+  { name: '洗衣粉', stem: 'laundry-powder', category: '日用', desc: '一袋洗衣粉，无标签无文字' },
+  { name: '消毒液', stem: 'disinfectant', category: '日用', desc: '一个塑料瓶装蓝色消毒液，无标签无文字' },
+  { name: '洁厕灵', stem: 'toilet-cleaner', category: '日用', desc: '一个弯颈塑料瓶装洁厕液，无标签无文字' },
+  { name: '柔顺剂', stem: 'fabric-softener', category: '日用', desc: '一个塑料瓶装衣物柔顺剂，无标签无文字' },
   { name: '抹布', stem: 'cleaning-cloth', category: '日用', desc: '一块抹布' },
   { name: '百洁布', stem: 'scrub-sponge', category: '日用', desc: '一块黄绿百洁布' },
   { name: '拖把', stem: 'mop', category: '日用', desc: '一把拖把' },
   { name: '扫把', stem: 'broom', category: '日用', desc: '一把扫把' },
   { name: '锡纸', stem: 'aluminum-foil', category: '日用', desc: '一卷锡纸' },
-  { name: '保鲜袋', stem: 'food-bags', category: '日用', desc: '一盒保鲜袋' },
-  { name: '一次性手套', stem: 'disposable-gloves', category: '日用', desc: '一盒一次性手套' },
-  { name: '牙签', stem: 'toothpicks', category: '日用', desc: '一盒牙签' },
+  { name: '保鲜袋', stem: 'food-bags', category: '日用', desc: '一盒保鲜袋，无标签无文字' },
+  { name: '一次性手套', stem: 'disposable-gloves', category: '日用', desc: '一盒一次性手套，无标签无文字' },
+  { name: '牙签', stem: 'toothpicks', category: '日用', desc: '一小盒牙签，无标签无文字' },
   { name: '密封袋', stem: 'ziplock-bags', category: '日用', desc: '几个密封袋' },
-  { name: '电池', stem: 'batteries', category: '日用', desc: '几节电池' },
+  { name: '电池', stem: 'batteries', category: '日用', desc: '几节圆柱形电池，无标签无文字' },
   { name: '垃圾桶', stem: 'trash-can', category: '日用', desc: '一个垃圾桶' },
 
   // ── 个护 ──
   { name: '香皂', stem: 'soap-bar', category: '个护', desc: '一块香皂' },
-  { name: '洗面奶', stem: 'face-wash', category: '个护', desc: '一支洗面奶' },
-  { name: '面霜', stem: 'face-cream', category: '个护', desc: '一罐面霜' },
-  { name: '身体乳', stem: 'body-lotion', category: '个护', desc: '一瓶身体乳' },
-  { name: '护手霜', stem: 'hand-cream', category: '个护', desc: '一支护手霜' },
-  { name: '防晒霜', stem: 'sunscreen', category: '个护', desc: '一支防晒霜' },
+  { name: '洗面奶', stem: 'face-wash', category: '个护', desc: '一支软管装洗面奶，无标签无文字' },
+  { name: '面霜', stem: 'face-cream', category: '个护', desc: '一个圆罐装面霜，无标签无文字' },
+  { name: '身体乳', stem: 'body-lotion', category: '个护', desc: '一个按压瓶装身体乳，无标签无文字' },
+  { name: '护手霜', stem: 'hand-cream', category: '个护', desc: '一支软管装护手霜，无标签无文字' },
+  { name: '防晒霜', stem: 'sunscreen', category: '个护', desc: '一支软管装防晒霜，无标签无文字' },
   { name: '剃须刀', stem: 'razor', category: '个护', desc: '一把剃须刀' },
-  { name: '棉签', stem: 'cotton-swabs', category: '个护', desc: '一盒棉签' },
+  { name: '棉签', stem: 'cotton-swabs', category: '个护', desc: '一盒棉签，无标签无文字' },
   { name: '化妆棉', stem: 'cotton-pads', category: '个护', desc: '一叠化妆棉' },
-  { name: '卫生巾', stem: 'sanitary-pads', category: '个护', desc: '一包卫生巾' },
-  { name: '漱口水', stem: 'mouthwash', category: '个护', desc: '一瓶漱口水' },
-  { name: '牙线', stem: 'dental-floss', category: '个护', desc: '一盒牙线' },
+  { name: '卫生巾', stem: 'sanitary-pads', category: '个护', desc: '一包卫生巾，无标签无文字' },
+  { name: '漱口水', stem: 'mouthwash', category: '个护', desc: '一个塑料瓶装漱口水，无标签无文字' },
+  { name: '牙线', stem: 'dental-floss', category: '个护', desc: '一小盒牙线，无标签无文字' },
   { name: '梳子', stem: 'comb', category: '个护', desc: '一把梳子' },
 ];

@@ -59,6 +59,8 @@ export const ICON_ITEMS: IconItem[] = [
   { name: '冰红茶', icon: 'iced-tea', category: '饮料' },
   { name: '桃汁', icon: 'peach-juice', category: '饮料' },
   { name: '矿泉水', icon: 'water', category: '饮料' },
+  // 水果
+  { name: '苹果', icon: 'apple', category: '水果' },
 ];
 
 export const UNIQUE_ICON_ITEMS = ICON_ITEMS;
