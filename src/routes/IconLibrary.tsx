@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
-import { useCustomIcons } from '@/hooks/useCustomIcons';
+import { useMyLibrary } from '@/hooks/useMyLibrary';
 import { NewIconSheet } from '@/components/NewIconSheet';
 import { deleteCustomIcon, getPublicIconUrl, generateIcon, type CustomIcon } from '@/lib/custom-icons';
 import { formatRelativeDate, formatSourceLabel } from '@/utils/date-format';
@@ -12,7 +12,7 @@ export default function IconLibrary() {
   const nav = useNavigate();
   const { uid } = useAuth();
   const { list, loading: listLoading } = useList(uid, null);
-  const { icons, refresh, loading: iconsLoading } = useCustomIcons(list?.id ?? null);
+  const { icons, refresh, loading: iconsLoading } = useMyLibrary(list?.account_id ?? null);
 
   const [showNewSheet, setShowNewSheet] = useState(false);
   const [newSheetInitialName, setNewSheetInitialName] = useState<string | undefined>(undefined);
@@ -414,6 +414,7 @@ export default function IconLibrary() {
         open={showNewSheet}
         uid={uid}
         listId={list.id}
+        accountId={list.account_id}
         initialName={newSheetInitialName}
         onClose={() => {
           setShowNewSheet(false);
