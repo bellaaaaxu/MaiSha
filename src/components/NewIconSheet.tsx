@@ -9,6 +9,7 @@ interface Props {
   open: boolean;
   uid: string;
   listId: string;
+  accountId: string;
   initialName?: string;
   onClose: () => void;
   onIconCreated: () => void | Promise<void>;
@@ -16,7 +17,7 @@ interface Props {
 
 type Stage = 'name' | 'preset_warn' | 'picker';
 
-export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCreated }: Props) {
+export function NewIconSheet({ open, uid, listId, accountId, initialName, onClose, onIconCreated }: Props) {
   const [stage, setStage] = useState<Stage>('name');
   const [name, setName] = useState('');
   const [remainingCredits, setRemainingCredits] = useState(5);
@@ -42,7 +43,7 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
       } else {
         setStage('name');
       }
-      getRemainingCredits(uid).then(setRemainingCredits).catch(() => {});
+      getRemainingCredits(accountId).then(setRemainingCredits).catch(() => {});
     } else {
       // Cleanup on close
       setAiModalOpen(false);
@@ -55,7 +56,7 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
       });
       setShowStylize(false);
     }
-  }, [open, uid, initialName]);
+  }, [open, uid, accountId, initialName]);
 
   if (!open) return null;
 
@@ -88,7 +89,7 @@ export function NewIconSheet({ open, uid, listId, initialName, onClose, onIconCr
       try {
         const cropped = await cropToSquare(file);
         const compressed = await processImageForUpload(cropped);
-        await uploadCustomIcon(listId, itemName, compressed, 'upload', uid);
+        await uploadCustomIcon(accountId, itemName, compressed, 'upload', uid);
         await onIconCreated();
         setUploadedPreviewUrl(URL.createObjectURL(compressed));
         setShowStylize(true);
