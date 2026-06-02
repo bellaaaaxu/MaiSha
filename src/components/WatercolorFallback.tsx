@@ -17,6 +17,13 @@ export const CATEGORY_WATERCOLORS: Record<string, WatercolorColors> = {
   '零食':   { gradient: 'radial-gradient(ellipse at 42% 40%, #f0d8e0 0%, #d4a0b0 60%, #c08090 100%)', textColor: '#4a2030' },
   '饮料':   { gradient: 'radial-gradient(ellipse at 38% 42%, #a8c8e8 0%, #6a9ec4 60%, #4a7ea0 100%)', textColor: '#1e3a52' },
   '日用':   { gradient: 'radial-gradient(ellipse at 42% 38%, #d4b8d4 0%, #9b8ec0 60%, #7a70a0 100%)', textColor: '#3a2e52' },
+  '海鲜':   { gradient: 'radial-gradient(ellipse at 40% 40%, #a8d8d0 0%, #5fa098 60%, #45827a 100%)', textColor: '#16352f' },
+  '豆制品': { gradient: 'radial-gradient(ellipse at 42% 38%, #e6eccc 0%, #c2cc92 60%, #a6b270 100%)', textColor: '#3c4420' },
+  '干货':   { gradient: 'radial-gradient(ellipse at 44% 38%, #e8cba8 0%, #c19a6b 60%, #a07d4e 100%)', textColor: '#422e18' },
+  '速冻':   { gradient: 'radial-gradient(ellipse at 38% 42%, #d4e4f0 0%, #a8c4dc 60%, #88a8c8 100%)', textColor: '#2a4258' },
+  '方便食品': { gradient: 'radial-gradient(ellipse at 45% 35%, #f0c8a8 0%, #d49a6e 60%, #b87c50 100%)', textColor: '#4a2e1a' },
+  '酒水':   { gradient: 'radial-gradient(ellipse at 40% 40%, #e0b8b0 0%, #b07068 60%, #8e5048 100%)', textColor: '#3e1e1a' },
+  '个护':   { gradient: 'radial-gradient(ellipse at 42% 40%, #f2dce8 0%, #d4aec6 60%, #b888a4 100%)', textColor: '#4a2840' },
   '其他':   { gradient: 'radial-gradient(ellipse at 40% 40%, #e8e2d8 0%, #d5d0c8 60%, #b8b0a5 100%)', textColor: '#4a4540' },
 };
 

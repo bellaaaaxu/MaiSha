@@ -10,7 +10,7 @@
 //
 // Returns: Array<{ index:number, name:string, stem:string, category:string|null, prompt:string }>
 
-const ITEM_RE = /^###\s*(\d+)\.\s*(.+?)\s*\(([a-z0-9-]+)\)\s*$/;
+const ITEM_RE = /^###\s*(\d+[a-z]*)\.\s*(.+?)\s*\(([a-z0-9-]+)\)\s*$/;
 
 /** Strip the 🆕 prefix and a trailing （…）annotation from a raw category heading. */
 export function cleanCategory(raw) {
@@ -37,7 +37,7 @@ export function parseIconPrompts(markdown) {
     // Item heading.
     const im = line.match(ITEM_RE);
     if (im) {
-      const index = Number(im[1]);
+      const index = parseInt(im[1], 10);
       const name = im[2].trim();
       const stem = im[3];
       let prompt = '';

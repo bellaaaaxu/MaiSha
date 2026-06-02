@@ -63,7 +63,7 @@ const CATEGORY_MAP = {
   '乳制品补充': '乳制品',
 };
 // categories the WatercolorFallback already has colors for
-const KNOWN_CATEGORIES = new Set(['蔬菜', '肉蛋', '乳制品', '饮料', '主食', '调料', '日用', '烘焙']);
+const KNOWN_CATEGORIES = new Set(['蔬菜', '水果', '肉蛋', '乳制品', '主食', '烘焙', '调料', '零食', '饮料', '日用', '海鲜', '豆制品', '干货', '速冻', '方便食品', '酒水', '个护', '其他']);
 
 const TAGS = {
   'gemini-2.5-flash-image': 'flash',

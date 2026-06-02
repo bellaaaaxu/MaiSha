@@ -61,6 +61,14 @@ describe('parseIconPrompts (sample)', () => {
   });
 });
 
+describe('letter-suffixed item numbers (e.g. 24a.)', () => {
+  it('parses items numbered like 24a. (was silently skipped)', () => {
+    const items = parseIconPrompts('## 调料\n\n### 24a. 老陈醋 (aged-vinegar)\n```\n物品：一瓶老陈醋\n```\n');
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ name: '老陈醋', stem: 'aged-vinegar', category: '调料', index: 24 });
+  });
+});
+
 describe('parseIconPrompts (real icon-prompts.md)', () => {
   const md = readFileSync(resolve(process.cwd(), 'icon-prompts.md'), 'utf8');
   const all = parseIconPrompts(md);

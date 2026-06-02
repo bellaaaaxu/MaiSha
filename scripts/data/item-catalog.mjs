@@ -131,7 +131,6 @@ export default [
   { name: '孜然', stem: 'cumin', category: '调料', desc: '一小堆孜然粒' },
   { name: '五香粉', stem: 'five-spice', category: '调料', desc: '一小堆五香粉' },
   { name: '辣椒酱', stem: 'chili-sauce', category: '调料', desc: '一个玻璃罐装红辣椒酱，无标签无文字' },
-  { name: '老干妈', stem: 'laoganma', category: '调料', desc: '一个红色瓶盖的玻璃罐辣酱，无标签无文字' },
   { name: '甜面酱', stem: 'sweet-bean-sauce', category: '调料', desc: '一碟甜面酱' },
   { name: '黄豆酱', stem: 'soybean-paste', category: '调料', desc: '一个玻璃罐装黄豆酱，无标签无文字' },
   { name: '淀粉', stem: 'cornstarch', category: '调料', desc: '一捧白淀粉' },
