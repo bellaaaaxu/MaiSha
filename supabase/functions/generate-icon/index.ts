@@ -6,8 +6,11 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')!;
 
-const DAILY_PER_USER_LIMIT = 5;
-const DAILY_GLOBAL_LIMIT = 100;
+const PRE_MATURITY_LIMIT = 2;     // brand-new account, first taste (keeps zero-reg first-use)
+const MATURE_DAILY_LIMIT = 5;     // per account/day once mature
+const DAILY_GLOBAL_LIMIT = 100;   // cost death-cap
+const MATURE_MIN_ITEMS = 3;
+const MATURE_MIN_AGE_MS = 60 * 60 * 1000; // 1h
 const BUCKET = 'custom-icons';
 
 const PROMPT_WITHOUT_REF = `生成一个手绘素描+柔和上色风格的日用品图标：
@@ -98,32 +101,53 @@ Deno.serve(async (req) => {
     // 3. Verify user is member of list
     const { data: list } = await supabaseService
       .from('lists')
-      .select('id')
+      .select('id, account_id')
       .eq('id', list_id)
       .contains('member_uids', [userUid])
       .maybeSingle();
     if (!list) {
       return jsonResponse({ error: 'Not a member of this list' }, 403);
     }
+    const accountId = list.account_id as string;
+    const clientIp = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim()
+      || req.headers.get('x-real-ip') || null;
 
-    // 4. Check rate limits
+    // 4. Rate limits — per ACCOUNT/day with a graduated maturity gate, plus the global cost cap.
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayISO = today.toISOString();
 
-    const { count: userCount } = await supabaseService
+    const { count: accountCount } = await supabaseService
       .from('ai_generation_log')
       .select('*', { count: 'exact', head: true })
-      .eq('user_uid', userUid)
+      .eq('account_id', accountId)
       .gte('created_at', todayISO);
 
-    if ((userCount ?? 0) >= DAILY_PER_USER_LIMIT) {
+    // Maturity gate: account age >= 1h OR >= 3 items across the account's lists.
+    const { data: acct } = await supabaseService
+      .from('accounts').select('created_at').eq('id', accountId).maybeSingle();
+    const ageMs = acct?.created_at ? Date.now() - new Date(acct.created_at).getTime() : 0;
+    let mature = ageMs >= MATURE_MIN_AGE_MS;
+    if (!mature) {
+      const { data: acctLists } = await supabaseService
+        .from('lists').select('id').eq('account_id', accountId);
+      const listIds = (acctLists ?? []).map((l: { id: string }) => l.id);
+      if (listIds.length) {
+        const { count: itemCount } = await supabaseService
+          .from('items').select('*', { count: 'exact', head: true }).in('list_id', listIds);
+        mature = (itemCount ?? 0) >= MATURE_MIN_ITEMS;
+      }
+    }
+    const effectiveLimit = mature ? MATURE_DAILY_LIMIT : PRE_MATURITY_LIMIT;
+
+    if ((accountCount ?? 0) >= effectiveLimit) {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
       return jsonResponse({
         error: 'limit_exceeded',
         remaining_today: 0,
         reset_at: tomorrow.toISOString(),
+        message: mature ? '今日额度已用完' : '新账号每日先开放 2 次，多加几样东西或稍后即可解锁更多',
       }, 429);
     }
 
@@ -131,12 +155,9 @@ Deno.serve(async (req) => {
       .from('ai_generation_log')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', todayISO);
-
     if ((globalCount ?? 0) >= DAILY_GLOBAL_LIMIT) {
       return jsonResponse({
-        error: 'limit_exceeded',
-        remaining_today: 0,
-        message: 'Global daily limit reached',
+        error: 'limit_exceeded', remaining_today: 0, message: '今日总额度已满，请明天再试',
       }, 429);
     }
 
@@ -198,13 +219,13 @@ Deno.serve(async (req) => {
 
     // 7. Upload to Storage
     const iconId = crypto.randomUUID();
-    const storagePath = `${list_id}/${iconId}.webp`;
+    const storagePath = `${accountId}/${iconId}.webp`;
 
     // Delete old icon file if exists (to avoid orphaned storage)
     const { data: existingIcon } = await supabaseService
-      .from('custom_icons')
+      .from('icon_library')
       .select('image_path')
-      .eq('list_id', list_id)
+      .eq('account_id', accountId)
       .eq('name', sanitizedName)
       .maybeSingle();
 
@@ -220,25 +241,25 @@ Deno.serve(async (req) => {
       });
     if (uploadErr) throw uploadErr;
 
-    // 8. Upsert custom_icons record
+    // 8. Upsert icon_library record
     const source = reference_image ? 'ai_stylized' : 'ai_generated';
     const { error: upsertErr } = await supabaseService
-      .from('custom_icons')
+      .from('icon_library')
       .upsert(
-        { list_id, name: sanitizedName, image_path: storagePath, source, created_by: userUid },
-        { onConflict: 'list_id,name' }
+        { account_id: accountId, name: sanitizedName, image_path: storagePath, source, created_by: userUid },
+        { onConflict: 'account_id,name' }
       );
     if (upsertErr) throw upsertErr;
 
     // 9. Log generation (only on success)
     await supabaseService
       .from('ai_generation_log')
-      .insert({ user_uid: userUid, item_name: sanitizedName });
+      .insert({ user_uid: userUid, item_name: sanitizedName, account_id: accountId, ip: clientIp });
 
     // 10. Return public URL
     const { data: urlData } = supabaseService.storage.from(BUCKET).getPublicUrl(storagePath);
 
-    const remaining = DAILY_PER_USER_LIMIT - (userCount ?? 0) - 1;
+    const remaining = effectiveLimit - (accountCount ?? 0) - 1;
 
     return jsonResponse({
       image_url: urlData.publicUrl,
