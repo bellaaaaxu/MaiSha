@@ -1,3 +1,5 @@
+import { normalizeName } from './normalize-name';
+
 export interface IconItem {
   name: string;
   icon: string;              // filename stem for /icons/{icon}.webp
@@ -266,9 +268,14 @@ export const ICON_ITEMS: IconItem[] = [
 export const UNIQUE_ICON_ITEMS = ICON_ITEMS;
 
 export function getIconPath(name: string): string | null {
-  const exact = ICON_ITEMS.find(i => i.name === name || i.aliases?.includes(name));
+  const key = normalizeName(name);
+  const exact = ICON_ITEMS.find(
+    i => normalizeName(i.name) === key || i.aliases?.some(a => normalizeName(a) === key)
+  );
   if (exact) return `/icons/${exact.icon}.webp`;
-  const partial = ICON_ITEMS.find(i => name.includes(i.name) || i.name.includes(name));
+  const partial = ICON_ITEMS.find(
+    i => key.includes(normalizeName(i.name)) || normalizeName(i.name).includes(key)
+  );
   if (partial) return `/icons/${partial.icon}.webp`;
   return null;
 }
@@ -283,7 +290,7 @@ export function resolveIconUrl(
 ): string | null {
   // 1. Custom icon (user's explicit choice for this list, may override preset)
   if (customIconMap) {
-    const custom = customIconMap.get(name);
+    const custom = customIconMap.get(normalizeName(name));
     if (custom) return custom;
   }
   // 2. Preset icon
