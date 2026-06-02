@@ -17,14 +17,14 @@ export default [
   // ── 蔬菜 ──
   { name: '茄子', stem: 'eggplant', category: '蔬菜', desc: '一根紫色长茄子，表皮光亮' },
   { name: '彩椒', stem: 'bell-pepper', category: '蔬菜', desc: '红黄绿三只甜椒' },
-  { name: '大白菜', stem: 'napa-cabbage', category: '蔬菜', desc: '一棵大白菜，叶片层叠' },
+  { name: '大白菜', stem: 'napa-cabbage', category: '蔬菜', desc: '一棵大棵大白菜，高大、浅黄绿、叶片紧实层叠（明显比娃娃菜大很多）' },
   { name: '卷心菜', stem: 'cabbage', category: '蔬菜', desc: '一颗圆球卷心菜' },
   { name: '冬瓜', stem: 'winter-melon', category: '蔬菜', desc: '一段带白霜的冬瓜' },
   { name: '南瓜', stem: 'pumpkin', category: '蔬菜', desc: '橙黄色小南瓜' },
   { name: '丝瓜', stem: 'luffa', category: '蔬菜', desc: '绿色长丝瓜' },
   { name: '苦瓜', stem: 'bitter-melon', category: '蔬菜', desc: '绿色带疙瘩的苦瓜' },
   { name: '四季豆', stem: 'green-beans', category: '蔬菜', desc: '一把翠绿四季豆' },
-  { name: '香菇', stem: 'shiitake', category: '蔬菜', desc: '几朵新鲜香菇' },
+  { name: '香菇', stem: 'shiitake', category: '蔬菜', desc: '几朵棕色香菇，厚伞盖、表面有香菇特有的白色裂纹花纹，短粗柄（区别于白蘑菇）' },
   { name: '金针菇', stem: 'enoki-mushroom', category: '蔬菜', desc: '一束白色金针菇' },
   { name: '木耳', stem: 'wood-ear', category: '蔬菜', desc: '泡发的黑木耳' },
   { name: '莲藕', stem: 'lotus-root', category: '蔬菜', desc: '一节莲藕，断面有孔' },
@@ -41,7 +41,7 @@ export default [
   { name: '毛豆', stem: 'edamame', category: '蔬菜', desc: '一把带荚毛豆' },
 
   // ── 水果 ──
-  { name: '橘子', stem: 'mandarin', category: '水果', desc: '几个小橘子' },
+  { name: '橘子', stem: 'mandarin', category: '水果', desc: '几个小橘子，扁圆、橙黄、果皮松软易剥（小个头蜜橘）' },
   { name: '猕猴桃', stem: 'kiwi', category: '水果', desc: '切开的绿心猕猴桃' },
   { name: '芒果', stem: 'mango', category: '水果', desc: '黄色芒果' },
   { name: '菠萝', stem: 'pineapple', category: '水果', desc: '带叶菠萝' },
@@ -106,7 +106,7 @@ export default [
   { name: '豆腐乳', stem: 'fermented-tofu', category: '豆制品', desc: '一块红色豆腐乳' },
 
   // ── 主食 ──
-  { name: '挂面', stem: 'dried-noodles', category: '主食', desc: '一把挂面' },
+  { name: '挂面', stem: 'dried-noodles', category: '主食', desc: '一把细直的干挂面，浅白色、整齐成束（不是金黄意面）' },
   { name: '方便面', stem: 'instant-noodles', category: '主食', desc: '一块干方便面饼' },
   { name: '米粉', stem: 'rice-noodles', category: '主食', desc: '一把细米粉' },
   { name: '馒头', stem: 'steamed-bun', category: '主食', desc: '两个白馒头' },
@@ -164,7 +164,6 @@ export default [
   { name: '八宝粥', stem: 'congee-can', category: '方便食品', desc: '一个圆罐装八宝粥，无标签无文字' },
 
   // ── 零食 ──
-  { name: '饼干', stem: 'biscuits', category: '零食', desc: '几块饼干' },
   { name: '蛋糕', stem: 'cake', category: '零食', desc: '一块奶油小蛋糕' },
   { name: '糖果', stem: 'candy', category: '零食', desc: '几颗彩色糖果' },
   { name: '果冻', stem: 'jelly', category: '零食', desc: '彩色果冻杯' },
