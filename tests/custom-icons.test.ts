@@ -18,9 +18,9 @@ vi.mock('@/lib/supabase', () => ({
 import { buildStoragePath, getPublicIconUrl } from '@/lib/custom-icons';
 
 describe('buildStoragePath', () => {
-  test('builds correct path', () => {
-    const path = buildStoragePath('list-uuid-123', 'icon-uuid-456');
-    expect(path).toBe('list-uuid-123/icon-uuid-456.webp');
+  test('builds account-scoped path', () => {
+    const path = buildStoragePath('account-uuid-123', 'icon-uuid-456');
+    expect(path).toBe('account-uuid-123/icon-uuid-456.webp');
   });
 });
 
