@@ -311,6 +311,16 @@ export function getIconPath(name: string): string | null {
   return null;
 }
 
+export function matchesIconQuery(
+  item: { name: string; aliases?: string[] },
+  query: string
+): boolean {
+  const q = normalizeName(query);
+  if (!q) return true;
+  if (normalizeName(item.name).includes(q)) return true;
+  return item.aliases?.some(a => normalizeName(a).includes(q)) ?? false;
+}
+
 /**
  * Resolve icon URL with custom icon support.
  * Priority: custom icon → preset icon → null (caller renders WatercolorFallback)

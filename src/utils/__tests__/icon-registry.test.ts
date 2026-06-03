@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getIconPath, resolveIconUrl } from '../icon-registry';
+import { getIconPath, resolveIconUrl, matchesIconQuery } from '../icon-registry';
 
 describe('getIconPath with normalization', () => {
   it('matches a simplified preset name', () => {
@@ -20,5 +20,22 @@ describe('resolveIconUrl with normalization', () => {
   });
   it('returns null when nothing matches', () => {
     expect(resolveIconUrl('___nope___', new Map())).toBeNull();
+  });
+});
+
+describe('matchesIconQuery', () => {
+  it('empty query matches everything', () => {
+    expect(matchesIconQuery({ name: '辣椒酱' }, '')).toBe(true);
+    expect(matchesIconQuery({ name: '辣椒酱' }, '   ')).toBe(true);
+  });
+  it('substring match on name', () => {
+    expect(matchesIconQuery({ name: '辣椒酱' }, '辣椒')).toBe(true);
+    expect(matchesIconQuery({ name: '牛奶' }, '酱')).toBe(false);
+  });
+  it('normalizes simp/trad both sides', () => {
+    expect(matchesIconQuery({ name: '辣椒酱' }, '辣椒醬')).toBe(true);
+  });
+  it('matches aliases', () => {
+    expect(matchesIconQuery({ name: '西红柿', aliases: ['番茄'] }, '番茄')).toBe(true);
   });
 });
