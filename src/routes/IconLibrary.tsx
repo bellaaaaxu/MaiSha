@@ -6,7 +6,7 @@ import { useMyLibrary } from '@/hooks/useMyLibrary';
 import { NewIconSheet } from '@/components/NewIconSheet';
 import { deleteCustomIcon, getPublicIconUrl, generateIcon, type CustomIcon } from '@/lib/custom-icons';
 import { formatRelativeDate, formatSourceLabel } from '@/utils/date-format';
-import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
+import { UNIQUE_ICON_ITEMS, matchesIconQuery, type IconItem } from '@/utils/icon-registry';
 
 export default function IconLibrary() {
   const nav = useNavigate();
@@ -21,6 +21,7 @@ export default function IconLibrary() {
   const [presetMenuItem, setPresetMenuItem] = useState<IconItem | null>(null);
   const [presetPreview, setPresetPreview] = useState<IconItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   if (listLoading || iconsLoading) {
     return <div className="p-8 text-center text-gray-500 text-sm">加载中…</div>;
@@ -42,6 +43,10 @@ export default function IconLibrary() {
   const visiblePresets = UNIQUE_ICON_ITEMS.filter(
     p => !customNames.has(p.name) && !p.aliases?.some(a => customNames.has(a))
   );
+
+  const q = query.trim();
+  const shownCustom = q ? sortedIcons.filter(i => matchesIconQuery(i, q)) : sortedIcons;
+  const shownPresets = q ? visiblePresets.filter(i => matchesIconQuery(i, q)) : visiblePresets;
 
   const onRegenerate = async (icon: CustomIcon) => {
     setMenuIcon(null);
@@ -120,18 +125,28 @@ export default function IconLibrary() {
         </button>
       </header>
 
+      <div className="px-4 pt-3">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="搜索图标"
+          className="w-full rounded-full px-4 py-2.5 text-sm outline-none"
+          style={{ background: 'rgba(255,252,247,0.8)', border: '1px solid rgba(215,205,188,0.4)', color: '#5a4e3c' }}
+        />
+      </div>
+
       <main className="p-4">
         {/* Custom icons section */}
-        {sortedIcons.length > 0 && (
+        {shownCustom.length > 0 && (
           <section className="mb-6">
             <div className="flex items-center gap-2 mb-2.5 px-1">
               <div className="w-1.5 h-4 rounded-full" style={{ background: '#7ca982' }} />
               <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-                自定义 · {sortedIcons.length}
+                自定义 · {shownCustom.length}
               </span>
               <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
             </div>
-            {sortedIcons.map(icon => (
+            {shownCustom.map(icon => (
               <button
                 key={icon.id}
                 onClick={() => setPreviewIcon(icon)}
@@ -186,11 +201,11 @@ export default function IconLibrary() {
           <div className="flex items-center gap-2 mb-2.5 px-1">
             <div className="w-1.5 h-4 rounded-full" style={{ background: '#c4b49a' }} />
             <span className="text-xs font-medium tracking-wider" style={{ color: '#7a6e5d' }}>
-              预设 · {visiblePresets.length}
+              预设 · {shownPresets.length}
             </span>
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, #e0d6c6 0%, transparent 100%)' }} />
           </div>
-          {visiblePresets.map(item => (
+          {shownPresets.map(item => (
             <button
               key={item.icon}
               onClick={() => setPresetPreview(item)}
