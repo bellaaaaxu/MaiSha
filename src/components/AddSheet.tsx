@@ -5,16 +5,18 @@ import { getTopFrequentItems } from '@/utils/frequent-items';
 import { usePurchaseHistory } from '@/hooks/usePurchaseHistory';
 import { calculateFrequentlyBought } from '@/utils/frequently-bought';
 import { mergeFrequentItems } from '@/utils/merge-frequent-items';
-import { UNIQUE_ICON_ITEMS, type IconItem } from '@/utils/icon-registry';
+import { UNIQUE_ICON_ITEMS, resolveIconUrl, type IconItem } from '@/utils/icon-registry';
 import type { NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
 import { IconPickerPanel } from '@/components/IconPickerPanel';
 import { AiPreviewModal } from '@/components/AiPreviewModal';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/image-utils';
-import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits } from '@/lib/custom-icons';
+import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits, fetchReusableIcons, setListIconAssignment, type ReusableIcon } from '@/lib/custom-icons';
 import { useLongPress } from '@/hooks/useLongPress';
 import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
+import { ReuseIconRow } from '@/components/ReuseIconRow';
+import { ReuseIconGrid } from '@/components/ReuseIconGrid';
 import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 
 interface Props {
@@ -102,6 +104,8 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
   const [selectedMarket, setSelectedMarket] = useState<string>('none');
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [pendingItemName, setPendingItemName] = useState('');
+  const [reusableIcons, setReusableIcons] = useState<ReusableIcon[]>([]);
+  const [showReuseGrid, setShowReuseGrid] = useState(false);
   const [remainingCredits, setRemainingCredits] = useState(5);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
@@ -156,6 +160,8 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
         return null;
       });
       setShowStylize(false);
+      setReusableIcons([]);
+      setShowReuseGrid(false);
     }
   }, [open]);
 
@@ -244,16 +250,12 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
     const name = value.trim();
     if (!name) return;
 
-    // Check if preset or custom icon exists
-    const hasPreset = UNIQUE_ICON_ITEMS.some(
-      i => i.name === name || i.aliases?.includes(name)
-    );
-    const hasCustom = customIconMap.has(name);
-
-    if (!hasPreset && !hasCustom) {
-      // Show icon picker panel
+    // No resolvable icon (preset/union, simp-trad aware) → offer reuse + create panel
+    const hasIcon = resolveIconUrl(name, customIconMap) !== null;
+    if (!hasIcon) {
       setPendingItemName(name);
       setShowIconPicker(true);
+      fetchReusableIcons(listId).then(setReusableIcons).catch(() => setReusableIcons([]));
       return;
     }
 
@@ -273,6 +275,26 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
     });
     setShowIconPicker(false);
     setPendingItemName('');
+    setValue('');
+  };
+
+  const handleReusePick = async (icon: ReusableIcon) => {
+    if (!pendingItemName) return;
+    try {
+      await setListIconAssignment(listId, pendingItemName, icon.id, uid);
+      await onIconsChanged();
+    } catch {
+      alert('设置失败，请重试');
+      return;
+    }
+    toggleItem(pendingItemName, {
+      name: pendingItemName, note: '', quantity: '',
+      supermarket: selectedMarket,
+    });
+    setShowReuseGrid(false);
+    setShowIconPicker(false);
+    setPendingItemName('');
+    setReusableIcons([]);
     setValue('');
   };
 
@@ -699,14 +721,22 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
 
               {/* custom icon picker */}
               {showIconPicker && pendingItemName && (
-                <IconPickerPanel
-                  itemName={pendingItemName}
-                  category="其他"
-                  remainingCredits={remainingCredits}
-                  onUpload={handleUploadPhoto}
-                  onAiGenerate={() => handleAiGenerate()}
-                  onSkip={handleSkipIcon}
-                />
+                <>
+                  <ReuseIconRow
+                    itemName={pendingItemName}
+                    reusable={reusableIcons}
+                    onPick={handleReusePick}
+                    onViewAll={() => setShowReuseGrid(true)}
+                  />
+                  <IconPickerPanel
+                    itemName={pendingItemName}
+                    category="其他"
+                    remainingCredits={remainingCredits}
+                    onUpload={handleUploadPhoto}
+                    onAiGenerate={() => handleAiGenerate()}
+                    onSkip={handleSkipIcon}
+                  />
+                </>
               )}
 
               {/* no results */}
@@ -761,6 +791,15 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
         itemName={previewIcon?.name || ''}
         subtitle={previewIcon?.subtitle}
       />
+
+      {showReuseGrid && (
+        <ReuseIconGrid
+          itemName={pendingItemName}
+          reusable={reusableIcons}
+          onPick={handleReusePick}
+          onClose={() => setShowReuseGrid(false)}
+        />
+      )}
     </div>
   );
 }
