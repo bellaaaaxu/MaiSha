@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION get_reusable_icons(p_list_id uuid)
 RETURNS TABLE(id uuid, name text, image_path text, created_at timestamptz)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
+#variable_conflict use_column
 DECLARE v_members uuid[];
 BEGIN
   SELECT member_uids INTO v_members FROM lists WHERE id = p_list_id;
