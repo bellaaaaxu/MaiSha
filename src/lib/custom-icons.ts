@@ -138,3 +138,32 @@ export async function getRemainingCredits(accountId: string): Promise<number> {
   if (error) throw error;
   return Math.max(0, PER_ACCOUNT_DAILY - (count ?? 0));
 }
+
+export interface ReusableIcon {
+  id: string;
+  name: string;
+  image_path: string;
+}
+
+/** Union of all list members' custom icons (with ids), for the reuse selector. */
+export async function fetchReusableIcons(listId: string): Promise<ReusableIcon[]> {
+  const { data, error } = await supabase.rpc('get_reusable_icons', { p_list_id: listId });
+  if (error) throw error;
+  return (data ?? []) as ReusableIcon[];
+}
+
+/** Pin (list, name) -> icon for this list (cross-name reuse). Upsert: re-pinning replaces. */
+export async function setListIconAssignment(
+  listId: string,
+  name: string,
+  iconId: string,
+  setBy: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('list_icon_assignments')
+    .upsert(
+      { list_id: listId, name, icon_id: iconId, set_by: setBy },
+      { onConflict: 'list_id,name' }
+    );
+  if (error) throw error;
+}
