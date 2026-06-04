@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { DEFAULT_STORES } from '@/utils/constants';
-import type { List } from '@/types/list';
+import type { List, ListState } from '@/types/list';
 import type { Item, NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
 
@@ -116,4 +116,67 @@ export async function clearAllItems(listId: string): Promise<number> {
   const { data, error } = await supabase.rpc('clear_all_items', { p_list_id: listId });
   if (error) throw error;
   return data as number;
+}
+
+/** 创建新清单（自动 active；自动 owner=member）。 */
+export async function createList(
+  accountId: string,
+  uid: string,
+  name: string,
+  supermarkets: Store[]
+): Promise<List> {
+  const { data, error } = await supabase
+    .from('lists')
+    .insert({
+      name,
+      owner_uid: uid,
+      member_uids: [uid],
+      account_id: accountId,
+      supermarkets,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as List;
+}
+
+/** 重命名（直接 update；RLS 允许成员写）。 */
+export async function renameList(listId: string, name: string): Promise<void> {
+  const { error } = await supabase
+    .from('lists')
+    .update({ name })
+    .eq('id', listId);
+  if (error) throw error;
+}
+
+/** 设置状态（pinned/active/archived），含 DB 护栏。 */
+export async function setListState(
+  listId: string,
+  state: ListState,
+  pinOrder?: number | null
+): Promise<List> {
+  const { data, error } = await supabase.rpc('set_list_state', {
+    p_list_id: listId,
+    p_state: state,
+    p_pin_order: pinOrder ?? null,
+  });
+  if (error) throw error;
+  return data as List;
+}
+
+/** 删除清单，含 DB 护栏（拒绝删最后一个 active+pinned）。 */
+export async function deleteList(listId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_list', { p_list_id: listId });
+  if (error) throw error;
+}
+
+/** 列出某账号下的所有清单（含 archived）。 */
+export async function fetchListsByAccount(accountId: string): Promise<List[]> {
+  const { data, error } = await supabase
+    .from('lists')
+    .select('*')
+    .eq('account_id', accountId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as List[];
 }
