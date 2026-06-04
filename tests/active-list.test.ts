@@ -13,6 +13,7 @@ const account: Account = {
 const list: List = {
   id: 'list-1', name: '家里', owner_uid: 'u1', member_uids: ['u1'],
   supermarkets: [], short_code: 'XY12Z9', account_id: 'acc-1',
+  state: 'active', pin_order: null,
   created_at: '', updated_at: '',
 };
 

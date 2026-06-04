@@ -9,7 +9,8 @@ function acc(id: string, code = 'CODE0001'): Account {
 function lst(id: string, account_id = 'acc-1'): List {
   return {
     id, name: '家里', owner_uid: 'u1', member_uids: ['u1'], supermarkets: [],
-    short_code: 'SC0001', account_id, created_at: '', updated_at: '',
+    short_code: 'SC0001', account_id, state: 'active', pin_order: null,
+    created_at: '', updated_at: '',
   };
 }
 
