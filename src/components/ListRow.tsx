@@ -72,13 +72,8 @@ export function ListRow({ list, isCurrent, summary, canArchive, canDelete, isPen
         {isCurrent && (
           <div style={{ position: 'absolute', left: 0, top: 11, bottom: 11, width: 3, borderRadius: '0 3px 3px 0', background: '#e8ae97' }} />
         )}
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#5a4e3c', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>{list.name}</span>
-          {isCurrent && (
-            <span style={{ fontSize: 10, color: '#c0805f', background: 'rgba(232,174,151,.22)', padding: '1px 7px', borderRadius: 8, fontWeight: 600 }}>
-              {t('myLists.currentTag')}
-            </span>
-          )}
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#5a4e3c' }}>
+          {list.name}
         </div>
         {summary && <div style={{ fontSize: 11, color: '#a0937e', marginTop: 3 }}>{summary}</div>}
       </div>

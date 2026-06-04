@@ -15,7 +15,8 @@
     "goShopping": "去购物",
     "addItem": "+ 添加物品",
     "emptyTitle": "还没有东西要买",
-    "emptySubtitle": "点下面的按钮开始添加吧"
+    "emptySubtitle": "点下面的按钮开始添加吧",
+    "currentPrefix": "当前 ·"
   },
   "shopping": {
     "back": "返回",

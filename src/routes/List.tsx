@@ -159,7 +159,7 @@ export default function ListRoute() {
       >
         {/* Header */}
         <div style={{
-          padding: '16px 20px 12px',
+          padding: '16px 20px 4px',
           display: 'flex',
           alignItems: 'center',
           gap: 8,
@@ -174,13 +174,13 @@ export default function ListRoute() {
           >≡</button>
           <span style={{
             fontFamily: 'var(--font-title)',
-            fontSize: 24,
+            fontSize: 28,
             color: 'var(--ink)',
-            letterSpacing: 1,
+            letterSpacing: 2,
             flex: 1,
             paddingLeft: 4,
           }}>
-            {list.name}
+            {t('app.title')}
           </span>
           <button
             onClick={() => nav('/my-lists')}
@@ -205,6 +205,33 @@ export default function ListRoute() {
             }}
           >
             <PaperPlaneIcon size={22} />
+          </button>
+        </div>
+
+        {/* Subtitle: washi tape style showing which list is current */}
+        <div style={{ padding: '0 20px 10px', paddingLeft: 40 }}>
+          <button
+            onClick={() => nav('/my-lists')}
+            aria-label={t('myLists.title')}
+            style={{
+              display: 'inline-block',
+              fontSize: 12,
+              color: 'var(--ink)',
+              padding: '3px 10px',
+              background: 'rgba(178,213,205,.45)',
+              border: 'none',
+              borderLeft: '2px solid rgba(124,169,130,.5)',
+              borderRight: '2px solid rgba(124,169,130,.3)',
+              borderRadius: 0,
+              transform: 'rotate(-0.5deg)',
+              transformOrigin: 'left',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            <span style={{ color: 'var(--ink-light)', fontWeight: 400 }}>{t('list.currentPrefix')}</span>
+            {' '}
+            <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{list.name}</span>
           </button>
         </div>
 

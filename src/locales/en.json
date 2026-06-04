@@ -15,7 +15,8 @@
     "goShopping": "Go shopping",
     "addItem": "+ Add item",
     "emptyTitle": "Nothing to buy yet",
-    "emptySubtitle": "Tap below to start adding items"
+    "emptySubtitle": "Tap below to start adding items",
+    "currentPrefix": "Now ·"
   },
   "shopping": {
     "back": "Back",
