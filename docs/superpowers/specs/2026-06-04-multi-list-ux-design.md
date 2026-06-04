@@ -17,7 +17,7 @@
 | 3 | 头部组合：`≡ ＋ 当前清单名 ＋ [一叠卡片图标] ＋ [纸飞机图标]`；`≡` 保留通用菜单符号；两颗水彩图标做成一对（由用户绘制） |
 | 4 | 行操作 = **混合手势**：左滑（置顶/归档/删除三色块，iOS Mail 风）+ 长按（完整面板含重命名、分享链接/邀请码） |
 | 5 | **无 emoji**——靠排版、暖色重点（橘色左条）、分区标题区分 |
-| 6 | **当前清单不能被自己删/归档**——必须先切到别的清单（DB + 前端双护栏） |
+| 6 | **最后一个 active+pinned 清单不能被删/归档**（防「无活动清单」状态，DB + 前端双护栏）；如果被删/归档的恰好是当前清单且仍有其它 active，bootstrap 自动 fallback 到下一个 active |
 | 7 | 新建清单 = 头部 **「＋」绿淡彩按钮** → 半屏小表单（名称 + 可选起始超市，复用 onboarding UI） |
 | 8 | **归档区默认折叠**（「N 个归档 ▸」） |
 | 9 | 视觉运动：B 出场用 **Animated List** 安静错峰浮现；A 出场用 **Bounce Cards** 弹簧入场（stagger ~60ms） |
@@ -133,7 +133,7 @@ GRANT EXECUTE ON FUNCTION set_list_state(uuid, text, integer) TO anon, authentic
 - 每行 = `<ListRow>`：名称 + （当前 tag，仅活跃指针所在）+ 总结行（`N 件待买 · 店铺前缀，最多 2 个`）。
 - 总结 `N 件待买` = `items.filter(!checked).length`（首次加载时全量；列表层做轻批量预取，避免 N+1）。
 - 当前活动清单：橘左条 + `[当前]` tag。
-- **归档段**默认 `collapsed=true`，状态存 `localStorage`（用户偏好）。
+- **归档段**默认 `collapsed=true`，展开状态存 `localStorage`（key: `maisha:archive-expanded`，per device）。
 
 **出场动画**：每行 fade-in + translateX(-12px → 0)，stagger 80ms。
 
@@ -168,11 +168,11 @@ GRANT EXECUTE ON FUNCTION set_list_state(uuid, text, integer) TO anon, authentic
 | 删除 | `#b06a5a` 暖红 | `delete_list(id)`（含护栏）+ 二次轻点确认 |
 
 行为细节：
-- 左滑展开时**禁用长按**；滚动期间长按延迟 350ms（沿用 `useLongPress` 默认）。
+- 左滑展开时**禁用长按**；长按触发时长沿用现有 `src/hooks/useLongPress.ts` 默认。
 - 删除色块：单击不删，再点一次或左滑超过 -180px 才执行（防误删）；显示「确认删除」红字。
 - 桌面鼠标无左滑：依赖长按面板提供同等操作。
 
-**长按行**（500ms） → `<ListActionSheet>` 半屏弹起：
+**长按行** → `<ListActionSheet>` 半屏弹起：
 - 重命名 · 置顶/取消置顶 · 分享链接/邀请码 · 归档 · 删除
 - 「分享链接/邀请码」= 现有 `onShareMenu` 但针对**那一行清单**（不限于当前）。
 - 命名风格沿用现有 `MoreMenu`：暖色背景、列表项 + 抓手条。
@@ -200,8 +200,7 @@ GRANT EXECUTE ON FUNCTION set_list_state(uuid, text, integer) TO anon, authentic
 
 | 文件 | 动作 | 责任 |
 |---|---|---|
-| `supabase/migrations/012_list_state.sql` | 新建 | `state` / `pin_order` 列 + 「家里」回填置顶 + 索引 |
-| `supabase/migrations/012_set_list_state_rpc.sql` | 新建 | `set_list_state` + `delete_list` RPC（含护栏） |
+| `supabase/migrations/012_multi_list.sql` | 新建 | `state` / `pin_order` 列 + 「家里」回填置顶 + 索引 + `set_list_state` / `delete_list` RPC（含护栏，单文件一次写） |
 | `src/lib/db.ts` | 改 | 新增 `createList(accountId, uid, name, stores)` / `renameList(id, name)` / `setListState(id, state, order?)` / `deleteList(id)` |
 | `src/hooks/useLists.ts` | 新建 | 拉账号名下所有清单，按 state 分组+排序；含 items count 批量预取 |
 | `src/components/ListSwitcherIcon.tsx` | 新建 | 一叠卡片 SVG，水彩描边 + 淡橘填充（由用户绘制） |
@@ -226,9 +225,10 @@ GRANT EXECUTE ON FUNCTION set_list_state(uuid, text, integer) TO anon, authentic
 5. 长按「测试 2」→ 面板；重命名为「测试」→ 立即反映 ✓
 6. 归档「测试」→ 进入折叠归档段（点 ▸ 展开可见）✓
 7. 在归档段长按「测试」→ 删除 → 二次点击确认 → 移除 ✓
-8. **护栏**：将「家里」也归档应被拒（最后一个 active）✓
-9. 「查看全部」→ A 视图 Bounce 入场 ✓
-10. 共享清单：邀请家人加入「家里」后，家人 B 视图能看到「家里」（与他的本地清单并列），家人无法对该行删除（仅 owner 可？此处沿用现有 RLS——`delete_list` 默认任何成员都能删；如要 owner-only，需在 RPC 加 `auth.uid() = owner_uid` 检查。**留作 follow-up，v1 沿用现有所有人可删模式**）。
+8. **删除当前清单**（在「测试」是当前的状态下从 B 删除）：app 静默 fallback 到「家里」，无错误 ✓
+9. **护栏**：在只剩「家里」一个清单时左滑归档 → 三色块里归档/删除应灰禁 + DB 拒绝（双重防御）✓
+10. 「查看全部」→ A 视图 Bounce 入场 ✓
+11. 共享清单：邀请家人加入「家里」后，家人 B 视图能看到「家里」（与他的本地清单并列），家人无法对该行删除（仅 owner 可？此处沿用现有 RLS——`delete_list` 默认任何成员都能删；如要 owner-only，需在 RPC 加 `auth.uid() = owner_uid` 检查。**留作 follow-up，v1 沿用现有所有人可删模式**）。
 
 **单元测试**：
 - `useLists` 排序：pinned (pin_order ASC, NULLS LAST) → active (updated_at DESC) → archived (updated_at DESC)
