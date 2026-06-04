@@ -6,7 +6,7 @@ ALTER TABLE lists
     CHECK (state IN ('active', 'pinned', 'archived')),
   ADD COLUMN pin_order integer;
 
-CREATE INDEX lists_account_state_idx ON lists (account_id, state);
+CREATE INDEX idx_lists_account_state ON lists (account_id, state);
 
 -- Existing 「家里」 lists default to pinned (users expect 「家里」 always on top).
 UPDATE lists SET state = 'pinned', pin_order = 0
@@ -28,6 +28,10 @@ BEGIN
   SELECT account_id INTO v_account_id FROM lists
   WHERE id = p_list_id AND auth.uid() = ANY(member_uids);
   IF v_account_id IS NULL THEN RAISE EXCEPTION 'not a member'; END IF;
+
+  IF p_state NOT IN ('active', 'pinned', 'archived') THEN
+    RAISE EXCEPTION 'invalid state: %', p_state;
+  END IF;
 
   IF p_state = 'archived' THEN
     SELECT count(*) INTO v_active_count FROM lists
@@ -72,7 +76,7 @@ BEGIN
     END IF;
   END IF;
 
-  DELETE FROM lists WHERE id = p_list_id;
+  DELETE FROM lists WHERE id = p_list_id AND auth.uid() = ANY(member_uids);
 END;
 $$;
 
