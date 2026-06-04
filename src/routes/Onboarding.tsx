@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { saveCurrency, getAllCurrencies, getOrDetectCurrency } from '@/utils/currency';
 import Wordmark from '@/components/Wordmark';
 import WashiTape from '@/components/WashiTape';
+import { StorePicker } from '@/components/StorePicker';
 import type { Store } from '@/types/store';
 
 const POPULAR_CURRENCIES = ['CNY', 'CAD', 'USD', 'EUR', 'GBP', 'AUD', 'JPY', 'HKD', 'TWD', 'SGD'];
@@ -18,7 +19,6 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [language, setLanguage] = useState(i18n.language || 'zh-CN');
   const [addedStores, setAddedStores] = useState<Store[]>([]);
-  const [newStoreName, setNewStoreName] = useState('');
   const detectedCurrency = getOrDetectCurrency();
   const [currencyCode, setCurrencyCode] = useState(detectedCurrency.code);
   const [finishing, setFinishing] = useState(false);
@@ -39,18 +39,6 @@ export default function Onboarding() {
 
   const goBack = () => {
     setStep(s => Math.max(0, s - 1));
-  };
-
-  const addStore = () => {
-    const name = newStoreName.trim();
-    if (!name) return;
-    const id = name.toLowerCase().replace(/\s+/g, '-');
-    setAddedStores(prev => [...prev, { id, name }]);
-    setNewStoreName('');
-  };
-
-  const removeStore = (index: number) => {
-    setAddedStores(prev => prev.filter((_, i) => i !== index));
   };
 
   const finish = () => {
@@ -140,10 +128,7 @@ export default function Onboarding() {
         {step === 1 && (
           <Step1Stores
             addedStores={addedStores}
-            newStoreName={newStoreName}
-            setNewStoreName={setNewStoreName}
-            addStore={addStore}
-            removeStore={removeStore}
+            setAddedStores={setAddedStores}
           />
         )}
         {step === 2 && <Step2Currency currencyCode={currencyCode} setCurrencyCode={setCurrencyCode} />}
@@ -301,23 +286,12 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
 
 function Step1Stores({
   addedStores,
-  newStoreName,
-  setNewStoreName,
-  addStore,
-  removeStore,
+  setAddedStores,
 }: {
   addedStores: Store[];
-  newStoreName: string;
-  setNewStoreName: (s: string) => void;
-  addStore: () => void;
-  removeStore: (i: number) => void;
+  setAddedStores: (stores: Store[]) => void;
 }) {
   const { t } = useTranslation();
-  const hasInput = newStoreName.trim().length > 0;
-
-  // Rotation and border color cycle per chip index
-  const chipRotations = [-0.3, 0.2, -0.15, 0.25, -0.2];
-  const chipBorderColors = ['var(--accent-soft)', 'var(--green-soft)', 'var(--blue)'];
 
   return (
     <div>
@@ -375,95 +349,11 @@ function Step1Stores({
         {t('onboarding.addStoresHint')}
       </p>
 
-      {/* Added stores list */}
-      {addedStores.map((store, i) => (
-        <div
-          key={`${store.id}-${i}`}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 10,
-            padding: '14px 16px',
-            background: 'white',
-            borderRadius: 14,
-            boxShadow: 'var(--shadow-card)',
-            borderLeft: `4px solid ${chipBorderColors[i % chipBorderColors.length]}`,
-            transform: `rotate(${chipRotations[i % chipRotations.length]}deg)`,
-          }}
-        >
-          <span
-            style={{
-              flex: 1,
-              fontFamily: 'var(--font-title)',
-              fontSize: 18,
-              letterSpacing: 1,
-              color: 'var(--ink)',
-            }}
-          >
-            {store.name}
-          </span>
-          <button
-            onClick={() => removeStore(i)}
-            aria-label="Remove store"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 22,
-              color: 'var(--ink-faint)',
-              padding: '0 4px',
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
-        </div>
-      ))}
-
-      {/* Input area: text input + always-visible + button */}
-      <div style={{ display: 'flex', gap: 8, marginTop: addedStores.length > 0 ? 16 : 0 }}>
-        <input
-          value={newStoreName}
-          onChange={e => setNewStoreName(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') addStore();
-          }}
-          placeholder={t('onboarding.storePlaceholder')}
-          style={{
-            flex: 1,
-            fontFamily: 'var(--font-body)',
-            fontSize: 15,
-            padding: '12px 16px',
-            borderRadius: 14,
-            border: '1px dashed var(--ink-faint)',
-            background: 'white',
-            color: 'var(--ink)',
-            outline: 'none',
-          }}
-        />
-        <button
-          onClick={addStore}
-          disabled={!hasInput}
-          aria-label="Add store"
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            border: 'none',
-            background: hasInput ? 'var(--accent)' : 'white',
-            color: hasInput ? 'white' : 'var(--ink-faint)',
-            fontSize: 24,
-            fontWeight: 300,
-            cursor: hasInput ? 'pointer' : 'not-allowed',
-            transition: 'background 0.2s, color 0.2s',
-            flexShrink: 0,
-            boxShadow: hasInput ? 'none' : '0 2px 8px rgba(74, 55, 40, 0.06)',
-          }}
-        >
-          +
-        </button>
-      </div>
+      <StorePicker
+        stores={addedStores}
+        onChange={setAddedStores}
+        placeholder={t('onboarding.storePlaceholder')}
+      />
       <p
         style={{
           fontFamily: 'var(--font-body)',
