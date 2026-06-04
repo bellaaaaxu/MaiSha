@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { fetchListsByAccount } from '@/lib/db';
 import { sortLists, type SortedLists } from '@/lib/list-sort';
@@ -20,21 +20,28 @@ export function useLists(accountId: string | null): UseListsReturn {
   const [summaries, setSummaries] = useState<ListSummary>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cancelRef = useRef({ cancelled: false });
 
-  const load = useCallback(async () => {
-    if (!accountId) return;
+  /** Internal: do the actual fetch. Guards against stale state via the passed token. */
+  const doLoad = useCallback(async (token: { cancelled: boolean }) => {
+    if (!accountId) { setLoading(false); return; }
     setLoading(true);
+    setError(null);
     try {
       const rows = await fetchListsByAccount(accountId);
+      if (token.cancelled) return;
       setGroups(sortLists(rows));
-      // batch items count: SELECT list_id, count(*) WHERE list_id IN (...) AND checked = false
       const ids = rows.map(r => r.id);
-      if (ids.length === 0) { setSummaries({}); return; }
+      if (ids.length === 0) {
+        if (!token.cancelled) setSummaries({});
+        return;
+      }
       const { data: items, error: e } = await supabase
         .from('items')
         .select('list_id, checked')
         .in('list_id', ids);
       if (e) throw e;
+      if (token.cancelled) return;
       const summary: ListSummary = {};
       for (const id of ids) summary[id] = { unchecked: 0 };
       for (const it of items ?? []) {
@@ -42,13 +49,26 @@ export function useLists(accountId: string | null): UseListsReturn {
       }
       setSummaries(summary);
     } catch (err) {
-      setError((err as Error).message);
+      if (!token.cancelled) setError((err as Error).message);
     } finally {
-      setLoading(false);
+      if (!token.cancelled) setLoading(false);
     }
   }, [accountId]);
 
-  useEffect(() => { load(); }, [load]);
+  /** Public refresh: re-runs against the latest accountId, ignoring any in-flight load. */
+  const refresh = useCallback(async () => {
+    cancelRef.current.cancelled = true;
+    const token = { cancelled: false };
+    cancelRef.current = token;
+    await doLoad(token);
+  }, [doLoad]);
 
-  return { groups, summaries, loading, error, refresh: load };
+  useEffect(() => {
+    const token = { cancelled: false };
+    cancelRef.current = token;
+    doLoad(token);
+    return () => { token.cancelled = true; };
+  }, [doLoad]);
+
+  return { groups, summaries, loading, error, refresh };
 }
