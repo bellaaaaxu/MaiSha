@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sortLists, canArchive, validateListName } from '../list-sort';
+import { sortLists, canArchive, canDelete, validateListName } from '../list-sort';
 import type { List } from '@/types/list';
 
 const mk = (over: Partial<List>): List => ({
@@ -74,6 +74,15 @@ describe('canArchive', () => {
   });
   it('true for an already-archived list (no-op, but allowed)', () => {
     expect(canArchive(c, [a, c])).toBe(true);
+  });
+});
+
+describe('canDelete', () => {
+  it('mirrors canArchive behavior', () => {
+    const a = mk({ id: 'a', state: 'pinned' });
+    const b = mk({ id: 'b', state: 'active' });
+    expect(canDelete(a, [a])).toBe(false);     // last active+pinned
+    expect(canDelete(a, [a, b])).toBe(true);   // others exist
   });
 });
 

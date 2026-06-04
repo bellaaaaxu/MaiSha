@@ -9,6 +9,7 @@ interface Props {
   summary?: string;           // e.g. "8 件待买 · 山姆"
   canArchive: boolean;
   canDelete: boolean;
+  isPendingDelete?: boolean;        // NEW
   onTap: () => void;
   onLongPress: () => void;
   onSwipeAction: (action: 'togglePin' | 'archive' | 'delete') => void;
@@ -16,7 +17,7 @@ interface Props {
 
 const ACTION_W = 126; // 3 × 42
 
-export function ListRow({ list, isCurrent, summary, canArchive, canDelete, onTap, onLongPress, onSwipeAction }: Props) {
+export function ListRow({ list, isCurrent, summary, canArchive, canDelete, isPendingDelete, onTap, onLongPress, onSwipeAction }: Props) {
   const { t } = useTranslation();
   const { handlers, offset, isOpen, close } = useSwipeable({ actionWidth: ACTION_W });
   const lp = useLongPress(() => { if (!isOpen) onLongPress(); });
@@ -49,8 +50,8 @@ export function ListRow({ list, isCurrent, summary, canArchive, canDelete, onTap
         <button onClick={() => canArchive && onSwipeAction('archive')} disabled={!canArchive} style={swipeBtnStyle('#b1a18a', !canArchive)}>
           {t('listActions.archive')}
         </button>
-        <button onClick={() => canDelete && onSwipeAction('delete')} disabled={!canDelete} style={swipeBtnStyle('#b06a5a', !canDelete)}>
-          {t('listActions.delete')}
+        <button onClick={() => canDelete && onSwipeAction('delete')} disabled={!canDelete} style={swipeBtnStyle(isPendingDelete ? '#8a3825' : '#b06a5a', !canDelete)}>
+          {isPendingDelete ? t('listActions.confirmDelete', { defaultValue: '确认' }) : t('listActions.delete')}
         </button>
       </div>
       <div

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,13 +6,14 @@ import { useLists } from '@/hooks/useLists';
 import { ListRow } from '@/components/ListRow';
 import { ListActionSheet, type ListAction } from '@/components/ListActionSheet';
 import { NewListSheet } from '@/components/NewListSheet';
-import { canArchive as canArchiveFn } from '@/lib/list-sort';
+import { canArchive as canArchiveFn, canDelete as canDeleteFn } from '@/lib/list-sort';
 import {
   createList, renameList, setListState, deleteList,
 } from '@/lib/db';
 import { findAccountForUid } from '@/lib/account';
-import { persistActiveList, getStoredListId } from '@/lib/active-list';
+import { persistActiveList, getStoredListId, clearStoredList } from '@/lib/active-list';
 import type { List } from '@/types/list';
+import type { Account } from '@/types/account';
 import type { Store } from '@/types/store';
 
 const ARCHIVE_FOLD_KEY = 'maisha:archive-expanded';
@@ -22,7 +23,8 @@ export default function MyLists() {
   const { t } = useTranslation();
   const { uid } = useAuth();
 
-  const [accountId, setAccountId] = useState<string | null>(null);
+  const [account, setAccount] = useState<Account | null>(null);
+  const accountId = account?.id ?? null;
   const [currentListId, setCurrentListId] = useState<string | null>(getStoredListId());
   const { groups, summaries, loading, refresh } = useLists(accountId);
   const allLists: List[] = [...groups.pinned, ...groups.active, ...groups.archived];
@@ -33,11 +35,18 @@ export default function MyLists() {
   const [actionTarget, setActionTarget] = useState<List | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const pendingDeleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!uid) return;
-    findAccountForUid(uid).then(a => setAccountId(a?.id ?? null));
+    findAccountForUid(uid).then(a => setAccount(a));
   }, [uid]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingDeleteTimerRef.current) clearTimeout(pendingDeleteTimerRef.current);
+    };
+  }, []);
 
   const toggleArchiveFold = () => {
     const next = !archiveOpen;
@@ -46,9 +55,8 @@ export default function MyLists() {
   };
 
   const onTap = async (list: List) => {
-    if (!uid) return;
-    const account = await findAccountForUid(uid);
-    if (account) await persistActiveList(account, list);
+    if (!uid || !account) return;
+    await persistActiveList(account, list);
     setCurrentListId(list.id);
     nav('/list');
   };
@@ -63,13 +71,17 @@ export default function MyLists() {
       } else if (action === 'delete') {
         if (pendingDelete !== list.id) {
           setPendingDelete(list.id);
-          setTimeout(() => setPendingDelete(null), 3000);
+          if (pendingDeleteTimerRef.current) clearTimeout(pendingDeleteTimerRef.current);
+          pendingDeleteTimerRef.current = setTimeout(() => {
+            setPendingDelete(null);
+            pendingDeleteTimerRef.current = null;
+          }, 3000);
           return;
         }
         await deleteList(list.id);
         setPendingDelete(null);
         if (currentListId === list.id) {
-          localStorage.removeItem('maisha:list-id');
+          clearStoredList();
         }
       }
       await refresh();
@@ -111,10 +123,9 @@ export default function MyLists() {
   };
 
   const onCreate = async (name: string, stores: Store[]) => {
-    if (!uid || !accountId) return;
+    if (!uid || !accountId || !account) return;
     const created = await createList(accountId, uid, name, stores);
-    const account = await findAccountForUid(uid);
-    if (account) await persistActiveList(account, created);
+    await persistActiveList(account, created);
     setCurrentListId(created.id);
     setShowNew(false);
     nav('/list');
@@ -134,7 +145,8 @@ export default function MyLists() {
         isCurrent={list.id === currentListId}
         summary={summary}
         canArchive={canArchiveFn(list, allLists)}
-        canDelete={canArchiveFn(list, allLists)}
+        canDelete={canDeleteFn(list, allLists)}
+        isPendingDelete={pendingDelete === list.id}
         onTap={() => onTap(list)}
         onLongPress={() => setActionTarget(list)}
         onSwipeAction={(a) => onSwipeAction(list, a)}
@@ -203,7 +215,7 @@ export default function MyLists() {
         open={!!actionTarget}
         list={actionTarget}
         canArchive={actionTarget ? canArchiveFn(actionTarget, allLists) : true}
-        canDelete={actionTarget ? canArchiveFn(actionTarget, allLists) : true}
+        canDelete={actionTarget ? canDeleteFn(actionTarget, allLists) : true}
         onClose={() => setActionTarget(null)}
         onPick={onActionPick}
       />

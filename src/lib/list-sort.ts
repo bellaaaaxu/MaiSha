@@ -34,6 +34,11 @@ export function canArchive(list: List, all: List[]): boolean {
   return othersAlive;
 }
 
+/** 是否允许删除：与 canArchive 同规则（不能是最后一个 active+pinned）。 */
+export function canDelete(list: List, all: List[]): boolean {
+  return canArchive(list, all);
+}
+
 /** 校验清单名：trim 后非空 ≤ 20 字符。 */
 export function validateListName(input: string): { ok: boolean; error?: string } {
   const v = input.trim();
