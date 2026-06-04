@@ -46,6 +46,19 @@ describe('sortLists', () => {
     ];
     expect(sortLists(rows).active.map(r => r.id)).toEqual(['new', 'old']);
   });
+
+  it('sorts correctly across mixed timestamp precisions (no localeCompare bug)', () => {
+    const rows = [
+      mk({ id: 'A', state: 'active', updated_at: '2026-01-01T00:00:00Z' }),       // 1 sec earlier
+      mk({ id: 'B', state: 'active', updated_at: '2026-01-01T00:00:00.500Z' }),   // 0.5 sec later
+    ];
+    // B is more recent; DESC means B first.
+    expect(sortLists(rows).active.map(r => r.id)).toEqual(['B', 'A']);
+  });
+
+  it('sortLists on empty array returns empty groups', () => {
+    expect(sortLists([])).toEqual({ pinned: [], active: [], archived: [] });
+  });
 });
 
 describe('canArchive', () => {

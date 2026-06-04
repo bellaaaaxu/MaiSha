@@ -9,7 +9,7 @@ export interface SortedLists {
 /** 排序：pinned 按 pin_order ASC NULLS LAST 再 updated_at DESC；active/archived 按 updated_at DESC。 */
 export function sortLists(rows: List[]): SortedLists {
   const cmpUpdatedDesc = (a: List, b: List) =>
-    b.updated_at.localeCompare(a.updated_at);
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   const pinned = rows
     .filter(r => r.state === 'pinned')
     .sort((a, b) => {
