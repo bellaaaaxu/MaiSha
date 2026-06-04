@@ -30,4 +30,14 @@ describe('computeSwipeState', () => {
     const r = computeSwipeState({ deltaX: ACTION_PX * 0.6, isOpen: true, actionWidth: ACTION_PX });
     expect(r.shouldOpen).toBe(false);
   });
+
+  it('exactly at threshold (50% of actionWidth) opens', () => {
+    expect(computeSwipeState({ deltaX: -COMMIT, isOpen: false, actionWidth: ACTION_PX }).shouldOpen).toBe(true);
+  });
+
+  it('leftward drag when already open stays at -actionWidth', () => {
+    const r = computeSwipeState({ deltaX: -50, isOpen: true, actionWidth: ACTION_PX });
+    expect(r.offset).toBe(-ACTION_PX);
+    expect(r.shouldOpen).toBe(true);
+  });
 });

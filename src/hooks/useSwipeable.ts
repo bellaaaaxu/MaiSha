@@ -69,7 +69,17 @@ export function useSwipeable({ actionWidth, onOpen, onClose }: UseSwipeableOpts)
     startXRef.current = null;
     draggingRef.current = false;
   };
-  const onPointerCancel = onPointerUp;
+  const onPointerCancel = (_e: React.PointerEvent) => {
+    // Cancel = user didn't intend to commit (system interrupt, force-touch, etc.)
+    // Snap back to whatever state we were in BEFORE the drag began.
+    if (isOpen) {
+      setOffset(-actionWidth);
+    } else {
+      setOffset(0);
+    }
+    startXRef.current = null;
+    draggingRef.current = false;
+  };
 
   return {
     handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel },
