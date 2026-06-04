@@ -139,5 +139,5 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - specs: `docs/superpowers/specs/`
 - plans: `docs/superpowers/plans/`
 - project design: `docs/project-design.md`
-- memory files: `.claude/projects/…/memory/`
-- repo: GitHub `bellaaaaxu/MaiSha`
+- brand-icon 审计: `docs/brand-icon-audit.md`
+- repo: GitHub [bellaaaaxu/MaiSha](https://github.com/bellaaaaxu/MaiSha)
