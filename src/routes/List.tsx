@@ -27,6 +27,8 @@ import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import type { Item, NewItemInput } from '@/types/item';
+import { ListSwitcherIcon } from '@/components/ListSwitcherIcon';
+import { PaperPlaneIcon } from '@/components/PaperPlaneIcon';
 
 export default function ListRoute() {
   const [params] = useSearchParams();
@@ -157,42 +159,52 @@ export default function ListRoute() {
       >
         {/* Header */}
         <div style={{
-          padding: '16px 24px 12px',
+          padding: '16px 20px 12px',
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
+          gap: 8,
         }}>
           <button
             onClick={() => setShowSettings(true)}
             aria-label={t('settings.title')}
             style={{
-              fontSize: 22,
-              color: 'var(--ink-light)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 4,
-              lineHeight: 1,
-              marginLeft: -4,
+              fontSize: 22, color: 'var(--ink-light)', background: 'none', border: 'none',
+              cursor: 'pointer', padding: 4, lineHeight: 1, marginLeft: -4,
             }}
-          >
-            ≡
-          </button>
+          >≡</button>
           <span style={{
             fontFamily: 'var(--font-title)',
-            fontSize: 34,
+            fontSize: 24,
             color: 'var(--ink)',
-            letterSpacing: 3,
+            letterSpacing: 1,
             flex: 1,
+            paddingLeft: 4,
           }}>
-            {t('app.title')}
+            {list.name}
           </span>
-          <button onClick={onShareMenu} style={{
-            fontFamily: 'var(--font-body)', fontSize: 15,
-            color: 'var(--ink-light)', background: 'none', border: 'none', cursor: 'pointer',
-            padding: '4px 8px',
-          }}>
-            {t('header.joinList')}
+          <button
+            onClick={() => nav('/my-lists')}
+            aria-label={t('myLists.title')}
+            style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: 'rgba(232,174,151,.13)', border: '1px solid rgba(232,174,151,.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', padding: 4,
+            }}
+          >
+            <ListSwitcherIcon size={22} />
+          </button>
+          <button
+            onClick={onShareMenu}
+            aria-label={t('header.joinList')}
+            style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: 'rgba(232,174,151,.13)', border: '1px solid rgba(232,174,151,.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', padding: 4,
+            }}
+          >
+            <PaperPlaneIcon size={22} />
           </button>
         </div>
 
