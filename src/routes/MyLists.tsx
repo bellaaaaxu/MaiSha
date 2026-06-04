@@ -6,7 +6,7 @@ import { useLists } from '@/hooks/useLists';
 import { ListRow } from '@/components/ListRow';
 import { ListActionSheet, type ListAction } from '@/components/ListActionSheet';
 import { NewListSheet } from '@/components/NewListSheet';
-import { canArchive as canArchiveFn, canDelete as canDeleteFn } from '@/lib/list-sort';
+import { canArchive as canArchiveFn, canDelete as canDeleteFn, validateListName } from '@/lib/list-sort';
 import {
   createList, renameList, setListState, deleteList,
 } from '@/lib/db';
@@ -97,8 +97,13 @@ export default function MyLists() {
     try {
       if (action === 'rename') {
         const next = prompt(t('listActions.renamePrompt') ?? 'Rename to:', target.name);
-        if (next && next.trim() && next.trim() !== target.name) {
-          await renameList(target.id, next.trim());
+        if (next && next.trim() !== target.name) {
+          const v = validateListName(next);
+          if (!v.ok) {
+            alert(v.error === 'empty' ? t('newList.errEmpty') : v.error === 'too-long' ? t('newList.errTooLong') : v.error);
+          } else {
+            await renameList(target.id, next.trim());
+          }
         }
       } else if (action === 'togglePin') {
         const next = target.state === 'pinned' ? 'active' : 'pinned';
@@ -193,7 +198,7 @@ export default function MyLists() {
           )}
           {groups.archived.length > 0 && (
             <>
-              <button onClick={toggleArchiveFold} style={{ ...sectionHeaderStyle, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={toggleArchiveFold} aria-expanded={archiveOpen} style={{ ...sectionHeaderStyle, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {t('myLists.sectionArchived', { n: groups.archived.length })}
                 <span style={{ fontSize: 9 }}>{archiveOpen ? '▾' : '▸'}</span>
               </button>

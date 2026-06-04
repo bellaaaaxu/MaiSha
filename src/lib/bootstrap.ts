@@ -41,6 +41,11 @@ export async function resolveActiveContext(
   if (listId) {
     list = await deps.joinOrGetList(listId);
   }
+  // If stored pointer resolved to an archived list (e.g. family member archived it),
+  // fall back to the account's primary live list — don't surface a stale list as "current."
+  if (list && list.state === 'archived') {
+    list = null;
+  }
   if (!list) {
     list = await deps.getOrCreatePrimaryList(account.id, uid);
   }

@@ -78,6 +78,20 @@ describe('resolveActiveContext', () => {
     expect(list.id).toBe('list-from-url');
   });
 
+  test('stored list id resolves to archived list -> falls back to primary list', async () => {
+    const archivedList = { ...lst('archived-id'), state: 'archived' as const };
+    const deps = makeDeps({
+      findAccountForUid: vi.fn().mockResolvedValue(acc('acc-1')),
+      getStoredListId: vi.fn().mockReturnValue('archived-id'),
+      joinOrGetList: vi.fn().mockResolvedValue(archivedList),
+      getOrCreatePrimaryList: vi.fn().mockResolvedValue(lst('list-primary', 'acc-1')),
+    });
+    const { list } = await resolveActiveContext(deps, { uid: 'u1', urlListId: null });
+    expect(deps.joinOrGetList).toHaveBeenCalledWith('archived-id');
+    expect(deps.getOrCreatePrimaryList).toHaveBeenCalledWith('acc-1', 'u1');
+    expect(list.id).toBe('list-primary');
+  });
+
   test('stale stored list id (joinOrGetList -> null) falls back to primary list', async () => {
     const deps = makeDeps({
       findAccountForUid: vi.fn().mockResolvedValue(acc('acc-1')),
