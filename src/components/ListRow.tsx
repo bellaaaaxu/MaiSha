@@ -29,12 +29,14 @@ export function ListRow({ list, isCurrent, summary, canArchive, canDelete, onTap
     onPointerMove: (e: React.PointerEvent) => { handlers.onPointerMove(e); lp.handlers.onPointerMove(e); },
     onPointerUp: (e: React.PointerEvent) => { handlers.onPointerUp(e); lp.handlers.onPointerUp(e); },
     onPointerCancel: (e: React.PointerEvent) => { handlers.onPointerCancel(e); lp.handlers.onPointerCancel(e); },
-    onPointerLeave: (e: React.PointerEvent) => { lp.handlers.onPointerLeave(e); },
+    onPointerLeave: (e: React.PointerEvent) => { lp.handlers.onPointerLeave(e); }, // useSwipeable has no leave handler
   };
 
-  const handleTap = (e: React.MouseEvent) => {
-    if (isOpen) { e.preventDefault(); close(); return; }
-    if (lp.isLongPressed) { e.preventDefault(); return; }
+  const handleTap = (_e: React.MouseEvent) => {
+    // The `return` does the actual suppression — divs have no default click action,
+    // and we don't need stopPropagation because no parent currently listens for clicks.
+    if (isOpen) { close(); return; }       // swipe panel is open — tap closes it
+    if (lp.isLongPressed) return;          // long-press already fired — suppress tap
     onTap();
   };
 
