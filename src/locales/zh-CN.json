@@ -89,6 +89,53 @@
   "item": {
     "notePlaceholder": "x1, 全脂…"
   },
+  "myLists": {
+    "title": "我的清单",
+    "sectionPinned": "固定",
+    "sectionActive": "进行中",
+    "sectionArchived": "已归档 ({{n}})",
+    "currentTag": "当前",
+    "uncheckedCount": "{{n}} 件待买",
+    "empty": "无待买",
+    "seeAll": "查看全部 {{n}} 个"
+  },
+  "allLists": {
+    "title": "全部清单",
+    "sectionLive": "固定 · 进行中",
+    "sectionArchived": "已归档",
+    "done": "已完成"
+  },
+  "newList": {
+    "title": "新建清单",
+    "nameLabel": "名称",
+    "namePlaceholder": "起个名字",
+    "storesLabel": "起始超市（可选）",
+    "cancel": "取消",
+    "create": "创建",
+    "creating": "创建中…",
+    "errEmpty": "名称不能为空",
+    "errTooLong": "名称过长（≤ 20 字）"
+  },
+  "listActions": {
+    "rename": "重命名",
+    "renamePrompt": "改名为：",
+    "pin": "置顶",
+    "unpin": "取消置顶",
+    "share": "分享链接 / 邀请码",
+    "shareCopied": "已复制邀请",
+    "shareCopy": "复制：",
+    "inviteCode": "邀请码",
+    "archive": "归档",
+    "unarchive": "恢复",
+    "delete": "删除",
+    "confirmDelete": "确认",
+    "confirmDeletePrompt": "确定删除清单「{{name}}」？此操作不可撤销。"
+  },
+  "storePicker": {
+    "placeholder": "店铺名",
+    "add": "加入",
+    "remove": "移除"
+  },
   "common": {
     "cancel": "取消",
     "confirm": "确认",

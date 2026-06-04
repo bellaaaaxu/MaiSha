@@ -89,6 +89,53 @@
   "item": {
     "notePlaceholder": "x1, type…"
   },
+  "myLists": {
+    "title": "My Lists",
+    "sectionPinned": "Pinned",
+    "sectionActive": "Active",
+    "sectionArchived": "Archived ({{n}})",
+    "currentTag": "current",
+    "uncheckedCount": "{{n}} to buy",
+    "empty": "Empty",
+    "seeAll": "See all {{n}}"
+  },
+  "allLists": {
+    "title": "All Lists",
+    "sectionLive": "Pinned · Active",
+    "sectionArchived": "Archived",
+    "done": "Done"
+  },
+  "newList": {
+    "title": "New List",
+    "nameLabel": "Name",
+    "namePlaceholder": "Give it a name",
+    "storesLabel": "Starting stores (optional)",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "errEmpty": "Name cannot be empty",
+    "errTooLong": "Name too long (≤ 20 chars)"
+  },
+  "listActions": {
+    "rename": "Rename",
+    "renamePrompt": "Rename to:",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "share": "Share / Invite code",
+    "shareCopied": "Invite copied",
+    "shareCopy": "Copy:",
+    "inviteCode": "Invite code",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "delete": "Delete",
+    "confirmDelete": "Confirm",
+    "confirmDeletePrompt": "Delete list \"{{name}}\"? This cannot be undone."
+  },
+  "storePicker": {
+    "placeholder": "Store name",
+    "add": "Add",
+    "remove": "Remove"
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",

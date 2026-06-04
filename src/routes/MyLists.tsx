@@ -112,7 +112,7 @@ export default function MyLists() {
       } else if (action === 'archive') {
         await setListState(target.id, target.state === 'archived' ? 'active' : 'archived');
       } else if (action === 'delete') {
-        if (confirm(t('listActions.confirmDelete', { name: target.name }) ?? `Delete ${target.name}?`)) {
+        if (confirm(t('listActions.confirmDeletePrompt', { name: target.name }) ?? `Delete ${target.name}?`)) {
           await deleteList(target.id);
         }
       }

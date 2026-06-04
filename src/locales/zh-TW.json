@@ -89,6 +89,53 @@
   "item": {
     "notePlaceholder": "x1, 全脂…"
   },
+  "myLists": {
+    "title": "我的清單",
+    "sectionPinned": "固定",
+    "sectionActive": "進行中",
+    "sectionArchived": "已封存 ({{n}})",
+    "currentTag": "目前",
+    "uncheckedCount": "{{n}} 項待買",
+    "empty": "無待買",
+    "seeAll": "檢視全部 {{n}} 個"
+  },
+  "allLists": {
+    "title": "全部清單",
+    "sectionLive": "固定 · 進行中",
+    "sectionArchived": "已封存",
+    "done": "已完成"
+  },
+  "newList": {
+    "title": "新增清單",
+    "nameLabel": "名稱",
+    "namePlaceholder": "起個名字",
+    "storesLabel": "起始商店（選填）",
+    "cancel": "取消",
+    "create": "建立",
+    "creating": "建立中…",
+    "errEmpty": "名稱不能為空",
+    "errTooLong": "名稱過長（≤ 20 字）"
+  },
+  "listActions": {
+    "rename": "重新命名",
+    "renamePrompt": "改名為：",
+    "pin": "釘選",
+    "unpin": "取消釘選",
+    "share": "分享連結 / 邀請碼",
+    "shareCopied": "已複製邀請",
+    "shareCopy": "複製：",
+    "inviteCode": "邀請碼",
+    "archive": "封存",
+    "unarchive": "復原",
+    "delete": "刪除",
+    "confirmDelete": "確認",
+    "confirmDeletePrompt": "確定刪除清單「{{name}}」？此操作無法復原。"
+  },
+  "storePicker": {
+    "placeholder": "商店名",
+    "add": "加入",
+    "remove": "移除"
+  },
   "common": {
     "cancel": "取消",
     "confirm": "確認",
