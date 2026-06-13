@@ -8,7 +8,8 @@
   },
   "header": {
     "joinList": "Invite",
-    "settings": "Settings"
+    "settings": "Settings",
+    "refresh": "Refresh"
   },
   "list": {
     "items": "{{count}} items",

@@ -29,6 +29,7 @@ import { recordItemUsage } from '@/utils/frequent-items';
 import type { Item, NewItemInput } from '@/types/item';
 import { ListSwitcherIcon } from '@/components/ListSwitcherIcon';
 import { PaperPlaneIcon } from '@/components/PaperPlaneIcon';
+import { RefreshIcon } from '@/components/RefreshIcon';
 
 export default function ListRoute() {
   const [params] = useSearchParams();
@@ -182,6 +183,18 @@ export default function ListRoute() {
           }}>
             {t('app.title')}
           </span>
+          <button
+            onClick={() => window.location.reload()}
+            aria-label={t('header.refresh')}
+            style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: 'rgba(232,174,151,.13)', border: '1px solid rgba(232,174,151,.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', padding: 4,
+            }}
+          >
+            <RefreshIcon size={22} />
+          </button>
           <button
             onClick={() => nav('/my-lists')}
             aria-label={t('myLists.title')}
