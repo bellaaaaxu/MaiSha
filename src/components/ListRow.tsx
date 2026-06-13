@@ -59,10 +59,11 @@ export function ListRow({ list, isCurrent, summary, canArchive, canDelete, isPen
         onClick={handleTap}
         style={{
           position: 'relative',
+          zIndex: 1,
           transform: `translateX(${offset}px)`,
           transition: offset === 0 || offset === -ACTION_W ? 'transform .22s ease' : 'none',
           padding: '11px 14px',
-          background: isCurrent ? 'rgba(232,174,151,.10)' : '#fffdf9',
+          background: isCurrent ? '#f9efe6' : '#fffdf9',
           border: `1px solid ${isCurrent ? 'rgba(232,174,151,.55)' : 'rgba(215,205,188,.5)'}`,
           borderRadius: 12,
           cursor: 'pointer',
