@@ -1,13 +1,15 @@
 # MaiSha 路线图
 
 > 一页纸看到「做过什么 / 在做什么 / 待办 / 推后」。功能聚合，不复刻 commit。
-> 最近更新：2026-06-04
+> 最近更新：2026-06-14
 
 ---
 
 ## 项目定位简述
 
 MaiSha（买啥）是面向华人家庭的轻量共享购物清单 iOS/PWA 应用，完全免费、零注册，扫码即协作。目标用户是管采购的一方（规划）+ 到店执行的一方（打勾），按超市分组，中餐食材为主。阶段目标：v1 上架 iOS App Store，积累首批真心喜欢的用户。
+
+> 市场研判（2026-06，详见 [project-design.md](project-design.md) §9）：**北美/加拿大华人是更现实的首发滩头**；护城河是「中餐 + 华人 + 微信零摩擦」niche；买啥是**规划层**（≠ Weee!/配送的履约层）；品类高流失，**留存是生死线**。
 
 ---
 
@@ -113,6 +115,10 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - **iOS App Store 提交流程** — 截图（iPhone 15 Pro / iPad）、隐私权限描述、构建上传、审核提交；spec 草案已在 [superpowers/specs/2026-05-24-app-store-optimization-design.md](superpowers/specs/2026-05-24-app-store-optimization-design.md)。
 - **端到端冒烟（真机）** — 多清单 v1 在 iOS Safari + 安装为 PWA 后的完整操作路径验证（创建清单 → 切换 → 归档 → 恢复）。
 - **Recovery code 展示打磨** — 当前 recovery code 仅在 Settings 露出，上架前确认曝光时机和文案对新用户足够清晰。
+- **留存埋点 + 周留存看板** — 上架前先把留存量起来（grocery 品类 D30 可低至约 2.4%，见 [project-design.md](project-design.md) §9）；在做更多功能前先知道「核心循环留不留得住人」。
+- **微信分享假设验证** — 找 5–10 户北美华人家庭，验证「发微信 → 点开即加入」裂变是否真成立（核心增长地基，调研未取得量化来源；最便宜也最关键）。
+- **吉祥物「小榕包」+ 食物小人班底（长尾图标体系）** — 设计已定（[project-design.md](project-design.md) §8）：队长小笼包「小榕包」+ 约 30 只中国各地美食图鉴；待 Gemini 出图 + 实现 `hash(商品名)→班底` 分配逻辑。生鲜仍走专属写实水彩。
+- **查超市 store-finder（v1 招牌）** — 用户 2026-06-14 定为 v1 招牌功能；spec [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md)。唯一原生 Swift + 定位权限、最不确定，**排首发线最后一棒，若临门卡住降级为 v1.1**（见 [project-design.md](project-design.md) §9.5）。
 
 ---
 
@@ -121,7 +127,7 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - **账号化图标库 v2 实时同步** — 家人新添加图标无需刷新即可在所有设备见到；与多清单实时同步一同考虑
 - **多清单实时同步** — 多设备同时打开时清单列表变化实时推送（v1 接受手动刷新）
 - **数据恢复 Phase 2** — iOS iCloud KVS 自动存储 recovery token，无感找回，不需要用户手动抄 recovery code
-- **收藏品（集印章 / 猫）** — 完成清单解锁 stamp / 猫咪，手账日记风收集；onboarding 稳定后单独 brainstorm
+- **收藏品（食物小人图鉴）** — 完成清单解锁食物小人班底（[project-design.md](project-design.md) §8）里的萌物，季节限定款（青团/粽子/月饼/汤圆）作图鉴；与吉祥物共用一套资产；onboarding 稳定后单独 brainstorm
 - **清单封面色 / 主题** — 每个清单可选 washi tape 颜色，与副标题主题联动，v2 视觉迭代
 - **菜谱一键加购** — 常见中餐菜谱食材批量加入清单；spec 草案 [superpowers/specs/2026-05-11-recipes-design.md](superpowers/specs/2026-05-11-recipes-design.md)（状态：Draft，尚未进入规划队列）
 
@@ -142,5 +148,8 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - specs: `docs/superpowers/specs/`
 - plans: `docs/superpowers/plans/`
 - project design: `docs/project-design.md`
+- 图标体系 / 吉祥物: `docs/project-design.md` §8（食物小人班底 + 小榕包 + prompt 模板）
+- 市场与竞争研判: `docs/project-design.md` §9（2026-06 数据调研）
+- 查超市 spec: `docs/superpowers/specs/2026-06-14-store-finder-design.md`
 - brand-icon 审计: `docs/brand-icon-audit.md`
 - repo: GitHub [bellaaaaxu/MaiSha](https://github.com/bellaaaaxu/MaiSha)
