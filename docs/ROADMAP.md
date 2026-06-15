@@ -115,10 +115,10 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - **iOS App Store 提交流程** — 截图（iPhone 15 Pro / iPad）、隐私权限描述、构建上传、审核提交；spec 草案已在 [superpowers/specs/2026-05-24-app-store-optimization-design.md](superpowers/specs/2026-05-24-app-store-optimization-design.md)。
 - **端到端冒烟（真机）** — 多清单 v1 在 iOS Safari + 安装为 PWA 后的完整操作路径验证（创建清单 → 切换 → 归档 → 恢复）。
 - **Recovery code 展示打磨** — 当前 recovery code 仅在 Settings 露出，上架前确认曝光时机和文案对新用户足够清晰。
-- **留存埋点 + 周留存看板** — 上架前先把留存量起来（grocery 品类 D30 可低至约 2.4%，见 [project-design.md](project-design.md) §9）；在做更多功能前先知道「核心循环留不留得住人」。
-- **微信分享假设验证** — 找 5–10 户北美华人家庭，验证「发微信 → 点开即加入」裂变是否真成立（核心增长地基，调研未取得量化来源；最便宜也最关键）。
+- **留存埋点 + 周留存看板** — 上架前先把留存量起来（清单类更贴「生产力类」代理 D30 约 12–18%，工具类下限约 2.4%；见 [project-design.md](project-design.md) §9.6）；在做更多功能前先知道「核心循环留不留得住人」。
+- **微信分享假设验证** — 找 5–10 户北美华人家庭，验证「发链接 → 点开即加入」裂变是否真成立（§9.6：一代华人微信占主导、二代偏 iMessage/SMS；但分享本就「发链接」渠道无关，真正要验的是「是否会用手机协调买菜」这个行为）。
 - **吉祥物「小榕包」+ 食物小人班底（长尾图标体系）** — 设计已定（[project-design.md](project-design.md) §8）：队长小笼包「小榕包」+ 约 30 只中国各地美食图鉴；待 Gemini 出图 + 实现 `hash(商品名)→班底` 分配逻辑。生鲜仍走专属写实水彩。
-- **查超市 store-finder（v1 招牌）** — 用户 2026-06-14 定为 v1 招牌功能；spec [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md)。唯一原生 Swift + 定位权限、最不确定，**排首发线最后一棒，若临门卡住降级为 v1.1**（见 [project-design.md](project-design.md) §9.5）。
+- **查超市 store-finder（v1 招牌）** — 用户 2026-06-14 定为 v1 招牌功能；spec [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md)。唯一原生 Swift + 定位权限、最不确定，**排首发线最后一棒，若临门卡住降级为 v1.1**（见 [project-design.md](project-design.md) §9.5）。冒烟须验证 `MKLocalSearch` 漏返（API 可能返回比 Maps app 少的店，Apple 已知问题，§9.6）。
 
 ---
 
