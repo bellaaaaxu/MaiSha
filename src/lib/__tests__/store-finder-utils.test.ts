@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { haversineMeters, selectSearchTerms } from '../store-finder-utils';
+import { haversineMeters, selectSearchTerms, dedupeAndRank } from '../store-finder-utils';
+import type { StoreSearchResult } from '@/types/store-finder';
 
 describe('haversineMeters', () => {
   it('returns ~0 for the same point', () => {
@@ -34,5 +35,37 @@ describe('selectSearchTerms', () => {
 
   it('dedups identical terms', () => {
     expect(selectSearchTerms([{ term: '超市', tier: 1 }, { term: '超市', tier: 2 }], 4)).toEqual(['超市']);
+  });
+});
+
+describe('dedupeAndRank', () => {
+  const user = { lat: 0, lng: 0 };
+  const mk = (o: Partial<StoreSearchResult>): StoreSearchResult => ({
+    name: 'X', lat: 0, lng: 0, address: '', matchedTerm: '超市', category: '', ...o,
+  });
+
+  it('attaches distance and sorts nearest first', () => {
+    const out = dedupeAndRank([
+      mk({ name: 'Far', lat: 0.02, lng: 0 }),
+      mk({ name: 'Near', lat: 0.001, lng: 0 }),
+    ], user);
+    expect(out.map((s) => s.name)).toEqual(['Near', 'Far']);
+    expect(out[0].distanceMeters).toBeGreaterThan(0);
+  });
+
+  it('drops same-name results within 50m of an already-kept one', () => {
+    const out = dedupeAndRank([
+      mk({ name: '大华超市', lat: 0.0001, lng: 0 }),
+      mk({ name: '大华超市', lat: 0.0002, lng: 0 }), // ~22m away → dup
+    ], user);
+    expect(out).toHaveLength(1);
+  });
+
+  it('keeps same-name results that are far apart (different branches)', () => {
+    const out = dedupeAndRank([
+      mk({ name: '大华超市', lat: 0, lng: 0 }),
+      mk({ name: '大华超市', lat: 0.05, lng: 0 }), // ~5.5km → different branch
+    ], user);
+    expect(out).toHaveLength(2);
   });
 });

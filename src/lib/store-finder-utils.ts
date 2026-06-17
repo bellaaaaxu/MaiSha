@@ -1,4 +1,5 @@
-import type { StoreTypeKeyword } from '@/types/store-finder';
+import { normalizeName } from '@/utils/normalize-name';
+import type { StoreTypeKeyword, StoreSearchResult, RankedStore } from '@/types/store-finder';
 
 export interface LatLng { lat: number; lng: number }
 
@@ -18,4 +19,19 @@ export function selectSearchTerms(keywords: StoreTypeKeyword[], max = 4): string
   const primary = sorted.filter((k) => k.tier <= 2).map((k) => k.term);
   const terms = primary.length ? primary : sorted.map((k) => k.term);
   return [...new Set(terms)].slice(0, max);
+}
+
+export function dedupeAndRank(raw: StoreSearchResult[], user: LatLng): RankedStore[] {
+  const kept: RankedStore[] = [];
+  for (const r of raw) {
+    const isDup = kept.some(
+      (k) =>
+        normalizeName(k.name) === normalizeName(r.name) &&
+        haversineMeters({ lat: k.lat, lng: k.lng }, { lat: r.lat, lng: r.lng }) < 50
+    );
+    if (isDup) continue;
+    kept.push({ ...r, distanceMeters: haversineMeters(user, { lat: r.lat, lng: r.lng }) });
+  }
+  kept.sort((a, b) => a.distanceMeters - b.distanceMeters);
+  return kept;
 }
