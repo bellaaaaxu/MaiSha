@@ -39,6 +39,9 @@ export function dedupeAndRank(raw: StoreSearchResult[], user: LatLng): RankedSto
 
 export function findMatchingStore(found: FoundStore, existing: Store[]): Store | null {
   for (const s of existing) {
+    // Name match is intentionally distance-agnostic: store identity in this app is
+    // coarse (name-based), so a same-named store is treated as the same store even
+    // if it's a different branch across town. Do not add a distance guard here.
     if (normalizeName(s.name) === normalizeName(found.name)) return s;
     if (
       s.lat != null && s.lng != null && found.lat != null && found.lng != null &&

@@ -88,4 +88,8 @@ describe('findMatchingStore', () => {
   it('returns null when neither name nor coords match', () => {
     expect(findMatchingStore({ name: 'T&T', lat: 1, lng: 1 }, existing)).toBeNull();
   });
+
+  it('returns null when there are no existing stores', () => {
+    expect(findMatchingStore({ name: '大华超市', lat: 0, lng: 0 }, [])).toBeNull();
+  });
 });
