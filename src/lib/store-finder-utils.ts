@@ -1,5 +1,6 @@
 import { normalizeName } from '@/utils/normalize-name';
-import type { StoreTypeKeyword, StoreSearchResult, RankedStore } from '@/types/store-finder';
+import type { StoreTypeKeyword, StoreSearchResult, RankedStore, FoundStore } from '@/types/store-finder';
+import type { Store } from '@/types/store';
 
 export interface LatLng { lat: number; lng: number }
 
@@ -34,4 +35,17 @@ export function dedupeAndRank(raw: StoreSearchResult[], user: LatLng): RankedSto
   }
   kept.sort((a, b) => a.distanceMeters - b.distanceMeters);
   return kept;
+}
+
+export function findMatchingStore(found: FoundStore, existing: Store[]): Store | null {
+  for (const s of existing) {
+    if (normalizeName(s.name) === normalizeName(found.name)) return s;
+    if (
+      s.lat != null && s.lng != null && found.lat != null && found.lng != null &&
+      haversineMeters({ lat: s.lat, lng: s.lng }, { lat: found.lat, lng: found.lng }) < 80
+    ) {
+      return s;
+    }
+  }
+  return null;
 }

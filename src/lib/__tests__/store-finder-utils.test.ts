@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { haversineMeters, selectSearchTerms, dedupeAndRank } from '../store-finder-utils';
+import { haversineMeters, selectSearchTerms, dedupeAndRank, findMatchingStore } from '../store-finder-utils';
 import type { StoreSearchResult } from '@/types/store-finder';
+import type { Store } from '@/types/store';
 
 describe('haversineMeters', () => {
   it('returns ~0 for the same point', () => {
@@ -67,5 +68,24 @@ describe('dedupeAndRank', () => {
       mk({ name: '大华超市', lat: 0.05, lng: 0 }), // ~5.5km → different branch
     ], user);
     expect(out).toHaveLength(2);
+  });
+});
+
+describe('findMatchingStore', () => {
+  const existing: Store[] = [
+    { id: 'sm_a', name: '大华超市', lat: 0, lng: 0 },
+    { id: 'sm_b', name: 'Costco' },
+  ];
+
+  it('matches by normalized name', () => {
+    expect(findMatchingStore({ name: '大华超市' }, existing)?.id).toBe('sm_a');
+  });
+
+  it('matches by coordinates within 80m even if name differs', () => {
+    expect(findMatchingStore({ name: 'DaHua', lat: 0.0003, lng: 0 }, existing)?.id).toBe('sm_a');
+  });
+
+  it('returns null when neither name nor coords match', () => {
+    expect(findMatchingStore({ name: 'T&T', lat: 1, lng: 1 }, existing)).toBeNull();
   });
 });
