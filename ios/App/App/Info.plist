@@ -47,5 +47,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>买啥需要你的位置，帮你找附近卖这件商品的超市。</string>
 </dict>
 </plist>
