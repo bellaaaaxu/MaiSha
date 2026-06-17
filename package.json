@@ -14,7 +14,8 @@
     "cap:build": "npm run build && npx cap sync",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
-    "generate-icons": "node scripts/generate-icons.mjs"
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "seed-store-types": "node --env-file=.env scripts/seed-store-types.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
