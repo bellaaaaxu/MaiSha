@@ -13,6 +13,7 @@ import JoinByCode from '@/routes/JoinByCode';
 import Privacy from '@/routes/Privacy';
 import MyLists from './routes/MyLists';
 import AllLists from './routes/AllLists';
+import StoreFinder from './routes/StoreFinder';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAuth } from './hooks/useAuth';
 
@@ -72,6 +73,7 @@ function AuthedApp() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/my-lists" element={<MyLists />} />
         <Route path="/all-lists" element={<AllLists />} />
+        <Route path="/store-finder" element={<StoreFinder />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>
