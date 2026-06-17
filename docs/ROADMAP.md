@@ -1,7 +1,7 @@
 # MaiSha 路线图
 
 > 一页纸看到「做过什么 / 在做什么 / 待办 / 推后」。功能聚合，不复刻 commit。
-> 最近更新：2026-06-14
+> 最近更新：2026-06-17
 
 ---
 
@@ -104,6 +104,9 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 
 ## 🚧 进行中
 
+- **查超市 store-finder v1 — 代码已实现并合并（2026-06-17）** — 反向入口：输入商品 → AI 映射店类型（Gemini 文本 + `store_type_hints` 共享缓存 + 276 预填脚本）→ 原生 MapKit `MKLocalSearch` 搜附近（iOS 独占，国内走高德/北美走 Apple，免费）→ 一键把店+商品落进清单。单元 A–E 全部完成，136 单测通过、typecheck/build 干净，每单元经 spec + 代码质量双审。
+  - spec: [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md) · plan: [superpowers/plans/2026-06-14-store-finder.md](superpowers/plans/2026-06-14-store-finder.md)
+  - **待执行（Windows 无法编译 iOS / 部署 Supabase）**：① `npx supabase db push` 应用 migration 013 ② `npx supabase functions deploy resolve-store-types` ③ `npm run seed-store-types`（需 `.env`：GEMINI_API_KEY / SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）④ Xcode 把 `StoreSearch.swift`+`.m` 加入 App target → ⌘B 编译 ⑤ iOS 真机端到端冒烟（plan Task 16，注意验 `MKLocalSearch` 漏返）
 - **多清单 UX v1 冒烟验证** — 浏览器 11 项端到端冒烟测试待完成（2026-06-04 计划中）
 
 ---
@@ -118,7 +121,7 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - **留存埋点 + 周留存看板** — 上架前先把留存量起来（清单类更贴「生产力类」代理 D30 约 12–18%，工具类下限约 2.4%；见 [project-design.md](project-design.md) §9.6）；在做更多功能前先知道「核心循环留不留得住人」。
 - **微信分享假设验证** — 找 5–10 户北美华人家庭，验证「发链接 → 点开即加入」裂变是否真成立（§9.6：一代华人微信占主导、二代偏 iMessage/SMS；但分享本就「发链接」渠道无关，真正要验的是「是否会用手机协调买菜」这个行为）。
 - **吉祥物「小榕包」+ 食物小人班底（长尾图标体系）** — 设计已定（[project-design.md](project-design.md) §8）：队长小笼包「小榕包」+ 约 30 只中国各地美食图鉴；待 Gemini 出图 + 实现 `hash(商品名)→班底` 分配逻辑。生鲜仍走专属写实水彩。
-- **查超市 store-finder（v1 招牌）** — 用户 2026-06-14 定为 v1 招牌功能；spec [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md)。唯一原生 Swift + 定位权限、最不确定，**排首发线最后一棒，若临门卡住降级为 v1.1**（见 [project-design.md](project-design.md) §9.5）。冒烟须验证 `MKLocalSearch` 漏返（API 可能返回比 Maps app 少的店，Apple 已知问题，§9.6）。
+- **查超市 store-finder（v1 招牌）** — 用户 2026-06-14 定为 v1 招牌功能。**代码已实现并合并（2026-06-17，见「进行中」）**；剩部署 + iOS 真机冒烟。唯一原生 Swift + 定位权限、最不确定，**排首发线最后一棒，若临门卡住降级为 v1.1**（见 [project-design.md](project-design.md) §9.5）。冒烟须验证 `MKLocalSearch` 漏返（API 可能返回比 Maps app 少的店，Apple 已知问题，§9.6）。
 
 ---
 
