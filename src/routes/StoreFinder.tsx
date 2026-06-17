@@ -9,7 +9,7 @@ import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import type { RankedStore } from '@/types/store-finder';
 
-type Phase = 'input' | 'loading' | 'results' | 'empty' | 'denied' | 'offline';
+type Phase = 'input' | 'loading' | 'results' | 'empty' | 'denied' | 'offline' | 'error';
 
 export default function StoreFinder() {
   const { t } = useTranslation();
@@ -20,6 +20,7 @@ export default function StoreFinder() {
   const [product, setProduct] = useState('');
   const [phase, setPhase] = useState<Phase>('input');
   const [stores, setStores] = useState<RankedStore[]>([]);
+  const [committing, setCommitting] = useState(false);
 
   async function run(name: string) {
     if (!name.trim()) return;
@@ -39,19 +40,25 @@ export default function StoreFinder() {
       setStores(found);
       setPhase(found.length ? 'results' : 'empty');
     } catch {
-      setPhase(navigator.onLine ? 'denied' : 'offline');
+      setPhase(!navigator.onLine ? 'offline' : 'error');
     }
   }
 
   async function pick(s: RankedStore) {
-    if (!list || !uid) return;
-    await commitStoreChoice(list, uid, product, {
-      name: s.name,
-      lat: s.lat,
-      lng: s.lng,
-      address: s.address,
-    });
-    navigate('/list');
+    if (!list || !uid || committing) return;
+    setCommitting(true);
+    try {
+      await commitStoreChoice(list, uid, product, {
+        name: s.name,
+        lat: s.lat,
+        lng: s.lng,
+        address: s.address,
+      });
+      navigate('/list');
+    } catch {
+      setCommitting(false);
+      alert(t('storeFinder.saveFailed'));
+    }
   }
 
   const pageStyle: React.CSSProperties = {
@@ -190,6 +197,30 @@ export default function StoreFinder() {
         </div>
       )}
 
+      {/* Error phase */}
+      {phase === 'error' && (
+        <div style={{ textAlign: 'center', paddingTop: 48 }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+          <p style={{ fontSize: 15, color: '#5a4e3c', marginBottom: 20 }}>
+            {t('storeFinder.searchError')}
+          </p>
+          <button
+            onClick={() => setPhase('input')}
+            style={{
+              padding: '10px 24px',
+              borderRadius: 'var(--radius-card)',
+              background: 'none',
+              border: '1.5px solid rgba(215,205,188,0.6)',
+              color: 'var(--ink-light)',
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            {t('common.back')}
+          </button>
+        </div>
+      )}
+
       {/* Empty phase */}
       {phase === 'empty' && (
         <div style={{ textAlign: 'center', paddingTop: 48 }}>
@@ -247,9 +278,9 @@ export default function StoreFinder() {
               border: '1px solid rgba(215,205,188,0.4)',
             }}
           >
-            {resolveIconUrl(product) ? (
+            {(() => { const iconUrl = resolveIconUrl(product); return iconUrl ? (
               <img
-                src={resolveIconUrl(product)!}
+                src={iconUrl}
                 width={36}
                 height={36}
                 alt=""
@@ -257,7 +288,7 @@ export default function StoreFinder() {
               />
             ) : (
               <WatercolorFallback name={product} category="其他" size={36} />
-            )}
+            ); })()}
             <strong style={{ fontSize: 15, color: '#5a4e3c' }}>{product}</strong>
           </div>
 
@@ -267,6 +298,7 @@ export default function StoreFinder() {
               <button
                 key={`${s.name}-${i}`}
                 onClick={() => pick(s)}
+                disabled={committing}
                 style={{
                   textAlign: 'left',
                   padding: 14,
@@ -274,8 +306,9 @@ export default function StoreFinder() {
                   borderRadius: 'var(--radius-card)',
                   boxShadow: 'var(--shadow-card)',
                   border: '1px solid rgba(215,205,188,0.35)',
-                  cursor: 'pointer',
+                  cursor: committing ? 'default' : 'pointer',
                   transition: 'transform 150ms ease',
+                  opacity: committing ? 0.6 : 1,
                 }}
               >
                 <div style={{ fontWeight: 600, fontSize: 15, color: '#5a4e3c' }}>

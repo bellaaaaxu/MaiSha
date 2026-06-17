@@ -139,6 +139,7 @@
     "remove": "移除"
   },
   "common": {
+    "back": "返回",
     "cancel": "取消",
     "confirm": "確認",
     "delete": "刪除",
@@ -159,6 +160,8 @@
     "distanceKm": "{{km}} 公里",
     "noResults": "附近沒找到賣「{{item}}」的店",
     "addManually": "手動新增超市",
-    "added": "已把「{{item}}」加到「{{store}}」"
+    "added": "已把「{{item}}」加到「{{store}}」",
+    "searchError": "出錯了，請重試",
+    "saveFailed": "儲存失敗，請重試"
   }
 }

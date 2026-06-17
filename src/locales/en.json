@@ -139,6 +139,7 @@
     "remove": "Remove"
   },
   "common": {
+    "back": "Back",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete",
@@ -159,6 +160,8 @@
     "distanceKm": "{{km}} km",
     "noResults": "No nearby store found for \"{{item}}\"",
     "addManually": "Add a store manually",
-    "added": "Added \"{{item}}\" to \"{{store}}\""
+    "added": "Added \"{{item}}\" to \"{{store}}\"",
+    "searchError": "Something went wrong. Please try again.",
+    "saveFailed": "Couldn't save. Please try again."
   }
 }
