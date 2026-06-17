@@ -18,6 +18,7 @@ import { IconPreviewOverlay } from '@/components/IconPreviewOverlay';
 import { ReuseIconRow } from '@/components/ReuseIconRow';
 import { ReuseIconGrid } from '@/components/ReuseIconGrid';
 import { UNDELETABLE_STORE_ID } from '@/utils/constants';
+import { isStoreFinderAvailable } from '@/lib/platform';
 
 interface Props {
   open: boolean;
@@ -471,6 +472,22 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
               </div>
             </div>
             <div className="flex flex-col gap-3">
+              {isStoreFinderAvailable() && (
+                <button
+                  type="button"
+                  onClick={() => { onClose(); nav('/store-finder'); }}
+                  className="w-full py-4 px-5 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                  style={{
+                    background: 'rgba(255,252,247,0.7)',
+                    border: '1.5px dashed rgba(215,205,188,0.6)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 15,
+                    color: '#5a4e3c',
+                  }}
+                >
+                  🔍 {t('storeFinder.entryHint')}
+                </button>
+              )}
               {sortedSupermarkets.map(m => (
                 <button
                   key={m.id}
