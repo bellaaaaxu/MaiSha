@@ -25,9 +25,27 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-// Same lightweight trad→simp normalization spirit as src/utils/normalize-name.ts.
+// Trad→simp folding table. MUST stay byte-identical to src/utils/normalize-name.ts.
+// If you add entries there, add them here and in scripts/seed-store-types.mjs too.
+const TRAD_TO_SIMP: Record<string, string> = {
+  '醬': '酱', '漿': '浆', '鹽': '盐',
+  '雞': '鸡', '鴨': '鸭', '鵝': '鹅', '魚': '鱼', '蝦': '虾', '蠔': '蚝',
+  '鱈': '鳕', '鮭': '鲑', '鮮': '鲜', '鱸': '鲈', '鯽': '鲫',
+  '豬': '猪', '醃': '腌', '滷': '卤', '燉': '炖',
+  '蘿': '萝', '蔔': '卜', '蔥': '葱', '薑': '姜',
+  '麵': '面', '飯': '饭', '餅': '饼', '餃': '饺', '麥': '麦', '饅': '馒',
+  '蘋': '苹', '檸': '柠', '蕎': '荞', '蘆': '芦', '薺': '荠',
+  '鵪': '鹌', '鶉': '鹑', '黃': '黄', '蓮': '莲', '筍': '笋',
+  '凍': '冻', '糰': '团', '餛': '馄', '飩': '饨', '腸': '肠',
+};
+
+// normalize: trim, collapse whitespace, fold trad→simp, truncate to 40 chars.
+// Ensures zh-TW and zh-CN queries for the same item share one cache key.
 function normalize(name: string): string {
-  return name.trim().replace(/\s+/g, '').slice(0, 40);
+  const stripped = name.trim().replace(/\s+/g, '');
+  let out = '';
+  for (const ch of stripped) out += TRAD_TO_SIMP[ch] ?? ch;
+  return out.slice(0, 40);
 }
 
 const PROMPT = `你是购物助手。用户想买一件商品，告诉我哪些"店类型"最可能卖它。
@@ -40,6 +58,9 @@ const PROMPT = `你是购物助手。用户想买一件商品，告诉我哪些"
 - 6~8 项，按 tier 升序
 只返回 JSON 数组本身，不要其它文字。`;
 
+// parseKeywords: parse + validate + clamp Gemini output into a safe Keyword[].
+// MUST stay in sync with the parseKeywords copy in scripts/seed-store-types.mjs —
+// both writers share the same store_type_hints table, so the output shape must match.
 function parseKeywords(text: string): Keyword[] {
   try {
     const arr = JSON.parse(text);
@@ -78,6 +99,8 @@ Deno.serve(async (req) => {
     if (cached) return jsonResponse({ keywords: cached.keywords, source: 'cache' });
 
     // 2. Global daily backstop → degrade to generic, don't hard-fail
+    // count-then-insert is intentionally non-atomic; the 100/day cap is an approximate
+    // soft backstop — cache hits make real misses rare, so races don't matter here.
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const { count } = await service
       .from('store_type_query_log').select('*', { count: 'exact', head: true })
@@ -108,7 +131,7 @@ Deno.serve(async (req) => {
 
     // 4. Persist to shared cache + counter (best-effort; ignore write races)
     await service.from('store_type_hints')
-      .upsert({ name_normalized: key, keywords, source: 'ai' }, { onConflict: 'name_normalized' });
+      .upsert({ name_normalized: key, keywords, source: 'ai', updated_at: new Date().toISOString() }, { onConflict: 'name_normalized' });
     await service.from('store_type_query_log').insert({ user_uid: user.id, name_normalized: key });
 
     return jsonResponse({ keywords, source: 'ai' });

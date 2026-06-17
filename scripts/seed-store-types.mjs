@@ -40,7 +40,28 @@ const PROMPT = `你是购物助手。用户想买一件商品，告诉我哪些"
 返回一个 JSON 数组，每项 {"term": 店类型搜索词, "tier": 1|2|3}（tier1最专门，tier3兜底通用），
 中英文都要，6~8 项按 tier 升序。只返回 JSON 数组。`;
 
-const normalize = (s) => s.trim().replace(/\s+/g, '').slice(0, 40);
+// Trad→simp folding table. MUST stay byte-identical to src/utils/normalize-name.ts.
+// If you add entries there, add them here and in supabase/functions/resolve-store-types/index.ts too.
+const TRAD_TO_SIMP = {
+  '醬': '酱', '漿': '浆', '鹽': '盐',
+  '雞': '鸡', '鴨': '鸭', '鵝': '鹅', '魚': '鱼', '蝦': '虾', '蠔': '蚝',
+  '鱈': '鳕', '鮭': '鲑', '鮮': '鲜', '鱸': '鲈', '鯽': '鲫',
+  '豬': '猪', '醃': '腌', '滷': '卤', '燉': '炖',
+  '蘿': '萝', '蔔': '卜', '蔥': '葱', '薑': '姜',
+  '麵': '面', '飯': '饭', '餅': '饼', '餃': '饺', '麥': '麦', '饅': '馒',
+  '蘋': '苹', '檸': '柠', '蕎': '荞', '蘆': '芦', '薺': '荠',
+  '鵪': '鹌', '鶉': '鹑', '黃': '黄', '蓮': '莲', '筍': '笋',
+  '凍': '冻', '糰': '团', '餛': '馄', '飩': '饨', '腸': '肠',
+};
+
+// normalize: trim, collapse whitespace, fold trad→simp, truncate to 40 chars.
+// Ensures zh-TW and zh-CN queries for the same item share one cache key.
+const normalize = (s) => {
+  const stripped = s.trim().replace(/\s+/g, '');
+  let out = '';
+  for (const ch of stripped) out += TRAD_TO_SIMP[ch] ?? ch;
+  return out.slice(0, 40);
+};
 
 // Load items from both sources, deduped by stem (same logic as generate-item-icons.mjs).
 function loadAllItems() {
@@ -48,6 +69,21 @@ function loadAllItems() {
   const seen = new Set(md.map((i) => i.stem));
   const fromCatalog = catalog.filter((c) => !seen.has(c.stem));
   return [...md, ...fromCatalog];
+}
+
+// parseKeywords: parse + validate + clamp Gemini output into a safe keyword array.
+// MUST stay in sync with the parseKeywords copy in supabase/functions/resolve-store-types/index.ts —
+// both writers share the same store_type_hints table, so the output shape must match.
+function parseKeywords(text) {
+  try {
+    const arr = JSON.parse(text);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((k) => k && typeof k.term === 'string' && Number.isFinite(k.tier))
+      .map((k) => ({ term: String(k.term).slice(0, 40), tier: Math.min(3, Math.max(1, k.tier)) }));
+  } catch {
+    return [];
+  }
 }
 
 async function resolveViaGemini(name) {
@@ -65,7 +101,7 @@ async function resolveViaGemini(name) {
   if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
-  return JSON.parse(text);
+  return parseKeywords(text);
 }
 
 async function main() {
@@ -92,10 +128,10 @@ async function main() {
 
     try {
       const keywords = await resolveViaGemini(name);
-      if (Array.isArray(keywords) && keywords.length) {
+      if (keywords.length) {
         const { error } = await supabase
           .from('store_type_hints')
-          .upsert({ name_normalized: key, keywords, source: 'seed' }, { onConflict: 'name_normalized' });
+          .upsert({ name_normalized: key, keywords, source: 'seed', updated_at: new Date().toISOString() }, { onConflict: 'name_normalized' });
         if (error) console.error(`  DB error for "${name}":`, error.message);
       } else {
         console.warn(`  empty keywords for "${name}", skipping`);
