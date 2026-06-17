@@ -4,6 +4,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('isStoreFinderAvailable', () => {
   it('true on ios', async () => {
+    vi.resetModules();
     vi.doMock('@capacitor/core', () => ({ Capacitor: { getPlatform: () => 'ios' } }));
     const { isStoreFinderAvailable } = await import('../platform');
     expect(isStoreFinderAvailable()).toBe(true);
