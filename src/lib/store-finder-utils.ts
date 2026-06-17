@@ -1,3 +1,5 @@
+import type { StoreTypeKeyword } from '@/types/store-finder';
+
 export interface LatLng { lat: number; lng: number }
 
 export function haversineMeters(a: LatLng, b: LatLng): number {
@@ -9,4 +11,11 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
   const lat2 = toRad(b.lat);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+export function selectSearchTerms(keywords: StoreTypeKeyword[], max = 4): string[] {
+  const sorted = [...keywords].sort((a, b) => a.tier - b.tier);
+  const primary = sorted.filter((k) => k.tier <= 2).map((k) => k.term);
+  const terms = primary.length ? primary : sorted.map((k) => k.term);
+  return [...new Set(terms)].slice(0, max);
 }
