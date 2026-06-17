@@ -146,5 +146,19 @@
     "edit": "Edit",
     "save": "Save",
     "loading": "Loading…"
+  },
+  "storeFinder": {
+    "title": "Where to buy",
+    "entryHint": "Not sure where? Find a store",
+    "searchPlaceholder": "What do you want to buy?",
+    "locating": "Locating…",
+    "searching": "Finding nearby stores…",
+    "locationDenied": "Location is needed to find nearby stores",
+    "openSettings": "Enable location",
+    "offline": "Finding stores needs an internet connection",
+    "distanceKm": "{{km}} km",
+    "noResults": "No nearby store found for \"{{item}}\"",
+    "addManually": "Add a store manually",
+    "added": "Added \"{{item}}\" to \"{{store}}\""
   }
 }

@@ -146,5 +146,19 @@
     "edit": "编辑",
     "save": "保存",
     "loading": "加载中…"
+  },
+  "storeFinder": {
+    "title": "去哪买",
+    "entryHint": "不知道去哪买？帮我找",
+    "searchPlaceholder": "想买什么？",
+    "locating": "正在定位…",
+    "searching": "正在找附近的店…",
+    "locationDenied": "需要定位才能找附近超市",
+    "openSettings": "去开启定位",
+    "offline": "查超市需要联网",
+    "distanceKm": "{{km}} 公里",
+    "noResults": "附近没找到卖「{{item}}」的店",
+    "addManually": "手动添加超市",
+    "added": "已把「{{item}}」加到「{{store}}」"
   }
 }
