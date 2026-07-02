@@ -71,7 +71,7 @@
     "welcome": "歡迎使用買啥",
     "wordmark": "買啥",
     "wordmarkLatin": "MaiSha",
-    "slogan": "去哪買，買點什麼",
+    "slogan": "你的買菜手帳 · 按店記，不漏買",
     "addStores": "常去的店",
     "addStoresHint": "你常去哪幾家？之後可以隨時改",
     "storePlaceholder": "輸入店家名稱",
@@ -83,9 +83,10 @@
   },
   "share": {
     "title": "一起買",
-    "description": "分享連結，邀請家人一起編輯清單",
+    "description": "把清單傳給家人，點開就能一起勾——不用註冊",
     "copyLink": "複製連結",
     "copied": "已複製",
+    "orOpenLink": "或打開連結：",
     "orCode": "或輸入邀請碼加入"
   },
   "item": {

@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { useItems } from '@/hooks/useItems';
 import { generateShareText } from '@/utils/share-text';
 import { getCachedAccount } from '@/lib/active-list';
+import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
 
 export default function Settings() {
   const nav = useNavigate();
+  const { t } = useTranslation();
   const { uid } = useAuth();
   const { list } = useList(uid, null);
   const { items } = useItems(list?.id ?? null);
@@ -25,15 +28,12 @@ export default function Settings() {
 
   const copyInviteLink = async () => {
     if (!list) return;
-    const code = list.short_code;
-    const text = code
-      ? `邀请码：${code}\n或打开链接：${location.origin}/list?list=${list.id}`
-      : `${location.origin}/list?list=${list.id}`;
+    const text = buildInviteText(t, list.id, list.short_code, location.origin);
     try {
       await navigator.clipboard.writeText(text);
-      alert(code ? `邀请码已复制！\n\n${code}\n\n发给老公，输入邀请码即可加入` : '邀请链接已复制！');
+      alert(buildCopiedNotice(t, list.short_code));
     } catch {
-      prompt('复制：', text);
+      prompt(t('listActions.shareCopy'), text);
     }
   };
 

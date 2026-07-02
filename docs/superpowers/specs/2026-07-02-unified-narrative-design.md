@@ -91,6 +91,8 @@
 
 `share.title`「一起买」保留。`share-text.ts` 的剪贴板导出**不改**：那是清单内容本身，不是叙事文案。
 
+> **落地补记（2026-07-02）**：实现时发现 `share.*` 原是无代码引用的死 key——真实分享入口是三处「复制 + 原生 alert」流（`List.tsx onShareMenu` / `Settings.tsx copyInviteLink` / `MyLists.tsx` share action），文案硬编码中文（Settings 里还写着「发给老公」，与统一叙事直接冲突）。已抽 `src/utils/invite-text.ts`（`buildInviteText` 邀请文本 / `buildCopiedNotice` 复制确认）统一三处并接入 i18n：确认提示末行即上表 `share.description` 终稿；邀请文本复用 `listActions.inviteCode`，新增 `share.orOpenLink`（三语）。原生 alert/prompt 替换为自定义水彩弹层已挂 ROADMAP 推后项。
+
 ## 5. Non-goals
 
 - 不改任何功能、交互、UI 结构。
@@ -102,7 +104,7 @@
 
 - [x] 三份文档一句话定位一致（宪法 §1 = ROADMAP 简述 = 本 spec 内核句）
 - [x] App Store 表单必填文案（名称/副标题/关键词/描述/截图叙事）三语草案齐备
-- [ ] `onboarding.slogan` + `share.description` 两个 i18n key 按终稿落地（独立小任务）
+- [x] `onboarding.slogan` + `share.description` 两个 i18n key 按终稿落地（2026-07-02，含三处分享入口接线 + invite-text util + 浏览器实测）
 - [ ] 提审时名称唯一性核实通过
 
 ---

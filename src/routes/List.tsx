@@ -26,6 +26,7 @@ import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
+import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
 import type { Item, NewItemInput } from '@/types/item';
 import { ListSwitcherIcon } from '@/components/ListSwitcherIcon';
 import { PaperPlaneIcon } from '@/components/PaperPlaneIcon';
@@ -97,15 +98,12 @@ export default function ListRoute() {
   };
 
   const onShareMenu = async () => {
-    const code = list.short_code;
-    const text = code
-      ? `邀请码：${code}\n或打开链接：${location.origin}/list?list=${list.id}`
-      : `${location.origin}/list?list=${list.id}`;
+    const text = buildInviteText(t, list.id, list.short_code, location.origin);
     try {
       await navigator.clipboard.writeText(text);
-      alert(code ? `邀请码已复制！\n\n${code}\n\n发给家人，输入邀请码即可加入` : '邀请链接已复制！');
+      alert(buildCopiedNotice(t, list.short_code));
     } catch {
-      prompt('复制：', text);
+      prompt(t('listActions.shareCopy'), text);
     }
   };
 

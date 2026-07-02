@@ -28,7 +28,7 @@ describe('Wordmark', () => {
         <Wordmark variant="hero" />
       </I18nextProvider>
     );
-    expect(screen.getByText('去哪买，买点啥')).toBeInTheDocument();
+    expect(screen.getByText('你的买菜手账 · 按店记，不漏买')).toBeInTheDocument();
   });
 
   it('does not render the slogan in mini variant', () => {
@@ -37,6 +37,6 @@ describe('Wordmark', () => {
         <Wordmark variant="mini" />
       </I18nextProvider>
     );
-    expect(screen.queryByText('去哪买，买点啥')).not.toBeInTheDocument();
+    expect(screen.queryByText('你的买菜手账 · 按店记，不漏买')).not.toBeInTheDocument();
   });
 });

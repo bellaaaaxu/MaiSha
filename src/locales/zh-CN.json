@@ -71,7 +71,7 @@
     "welcome": "欢迎使用买啥",
     "wordmark": "买啥",
     "wordmarkLatin": "MaiSha",
-    "slogan": "去哪买，买点啥",
+    "slogan": "你的买菜手账 · 按店记，不漏买",
     "addStores": "常去的店",
     "addStoresHint": "你常去哪几家？后面可以随时改",
     "storePlaceholder": "输入店铺名称",
@@ -83,9 +83,10 @@
   },
   "share": {
     "title": "一起买",
-    "description": "分享链接，邀请家人一起编辑清单",
+    "description": "把清单发给家人，点开就能一起勾——不用注册",
     "copyLink": "复制链接",
     "copied": "已复制",
+    "orOpenLink": "或打开链接：",
     "orCode": "或输入邀请码加入"
   },
   "item": {

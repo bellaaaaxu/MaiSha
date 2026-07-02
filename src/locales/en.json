@@ -71,7 +71,7 @@
     "welcome": "Welcome to MaiSha",
     "wordmark": "MaiSha",
     "wordmarkLatin": "买啥",
-    "slogan": "Where to go, what to get",
+    "slogan": "Your grocery journal — shop by store",
     "addStores": "Where you shop",
     "addStoresHint": "Pick a few stores you visit often — you can change this anytime",
     "storePlaceholder": "Store name",
@@ -83,9 +83,10 @@
   },
   "share": {
     "title": "Invite",
-    "description": "Share a link so others can edit this list with you",
+    "description": "Send it to family — they tap the link and check things off. No sign-up.",
     "copyLink": "Copy link",
     "copied": "Copied!",
+    "orOpenLink": "Or open the link: ",
     "orCode": "Or join with a code"
   },
   "item": {

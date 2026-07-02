@@ -12,6 +12,7 @@ import {
 } from '@/lib/db';
 import { findAccountForUid } from '@/lib/account';
 import { persistActiveList, getStoredListId, clearStoredList } from '@/lib/active-list';
+import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
 import type { List } from '@/types/list';
 import type { Account } from '@/types/account';
 import type { Store } from '@/types/store';
@@ -109,10 +110,8 @@ export default function MyLists() {
         const next = target.state === 'pinned' ? 'active' : 'pinned';
         await setListState(target.id, next, next === 'pinned' ? 0 : null);
       } else if (action === 'share') {
-        const text = target.short_code
-          ? `${t('listActions.inviteCode')}：${target.short_code}\n${location.origin}/list?list=${target.id}`
-          : `${location.origin}/list?list=${target.id}`;
-        try { await navigator.clipboard.writeText(text); alert(t('listActions.shareCopied')); }
+        const text = buildInviteText(t, target.id, target.short_code, location.origin);
+        try { await navigator.clipboard.writeText(text); alert(buildCopiedNotice(t, target.short_code)); }
         catch { prompt(t('listActions.shareCopy') ?? '复制：', text); }
       } else if (action === 'archive') {
         await setListState(target.id, target.state === 'archived' ? 'active' : 'archived');
