@@ -13,6 +13,8 @@ import {
 import { findAccountForUid } from '@/lib/account';
 import { persistActiveList, getStoredListId, clearStoredList } from '@/lib/active-list';
 import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { NoticeModal } from '@/components/NoticeModal';
 import type { List } from '@/types/list';
 import type { Account } from '@/types/account';
 import type { Store } from '@/types/store';
@@ -37,6 +39,8 @@ export default function MyLists() {
   const [showNew, setShowNew] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const pendingDeleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [notice, setNotice] = useState<{ title?: string; message: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<List | null>(null);
 
   useEffect(() => {
     if (!uid) return;
@@ -87,7 +91,7 @@ export default function MyLists() {
       }
       await refresh();
     } catch (err) {
-      alert((err as Error).message);
+      setNotice({ message: (err as Error).message });
     }
   };
 
@@ -101,7 +105,7 @@ export default function MyLists() {
         if (next && next.trim() !== target.name) {
           const v = validateListName(next);
           if (!v.ok) {
-            alert(v.error === 'empty' ? t('newList.errEmpty') : v.error === 'too-long' ? t('newList.errTooLong') : v.error);
+            setNotice({ message: v.error === 'empty' ? t('newList.errEmpty') : v.error === 'too-long' ? t('newList.errTooLong') : (v.error ?? '') });
           } else {
             await renameList(target.id, next.trim());
           }
@@ -111,18 +115,29 @@ export default function MyLists() {
         await setListState(target.id, next, next === 'pinned' ? 0 : null);
       } else if (action === 'share') {
         const text = buildInviteText(t, target.id, target.short_code, location.origin);
-        try { await navigator.clipboard.writeText(text); alert(buildCopiedNotice(t, target.short_code)); }
-        catch { prompt(t('listActions.shareCopy') ?? '复制：', text); }
+        try { await navigator.clipboard.writeText(text); setNotice({ message: buildCopiedNotice(t, target.short_code) }); }
+        catch { setNotice({ title: t('listActions.shareCopy'), message: text }); }
       } else if (action === 'archive') {
         await setListState(target.id, target.state === 'archived' ? 'active' : 'archived');
       } else if (action === 'delete') {
-        if (confirm(t('listActions.confirmDeletePrompt', { name: target.name }) ?? `Delete ${target.name}?`)) {
-          await deleteList(target.id);
-        }
+        setConfirmDelete(target);
+        return;
       }
       await refresh();
     } catch (err) {
-      alert((err as Error).message);
+      setNotice({ message: (err as Error).message });
+    }
+  };
+
+  const onConfirmedDelete = async () => {
+    if (!confirmDelete) return;
+    try {
+      await deleteList(confirmDelete.id);
+      await refresh();
+    } catch (err) {
+      setNotice({ message: (err as Error).message });
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -224,6 +239,23 @@ export default function MyLists() {
         onPick={onActionPick}
       />
       <NewListSheet open={showNew} onClose={() => setShowNew(false)} onSubmit={onCreate} />
+
+      <ConfirmModal
+        open={!!confirmDelete}
+        title={t('listActions.delete')}
+        message={confirmDelete ? t('listActions.confirmDeletePrompt', { name: confirmDelete.name }) : ''}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        onConfirm={onConfirmedDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
+      <NoticeModal
+        open={!!notice}
+        title={notice?.title}
+        message={notice?.message ?? ''}
+        closeText={t('common.ok')}
+        onClose={() => setNotice(null)}
+      />
     </div>
   );
 }

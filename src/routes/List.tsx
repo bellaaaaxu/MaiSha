@@ -22,6 +22,7 @@ import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { UndoToast } from '@/components/UndoToast';
 import { ImportSheet } from '@/components/ImportSheet';
 import { RecoveryCodeCard } from '@/components/RecoveryCodeCard';
+import { NoticeModal } from '@/components/NoticeModal';
 import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
@@ -50,6 +51,7 @@ export default function ListRoute() {
   const [activeTab, setActiveTab] = useState<'list' | 'history'>('list');
   const { t } = useTranslation();
   const undoToast = useUndoToast();
+  const [notice, setNotice] = useState<{ title?: string; message: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -101,9 +103,9 @@ export default function ListRoute() {
     const text = buildInviteText(t, list.id, list.short_code, location.origin);
     try {
       await navigator.clipboard.writeText(text);
-      alert(buildCopiedNotice(t, list.short_code));
+      setNotice({ message: buildCopiedNotice(t, list.short_code) });
     } catch {
-      prompt(t('listActions.shareCopy'), text);
+      setNotice({ title: t('listActions.shareCopy'), message: text });
     }
   };
 
@@ -396,6 +398,14 @@ export default function ListRoute() {
           onClearList={async () => {
             await clearAllItems(list.id);
           }}
+        />
+
+        <NoticeModal
+          open={!!notice}
+          title={notice?.title}
+          message={notice?.message ?? ''}
+          closeText={t('common.ok')}
+          onClose={() => setNotice(null)}
         />
       </div>
 

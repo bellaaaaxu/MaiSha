@@ -65,7 +65,8 @@
     "privacy": "Privacy & Terms",
     "contact": "Contact us",
     "clearList": "Clear list",
-    "confirmClearList": "Clear all items? Stores will be kept."
+    "confirmClearList": "Clear all items? Stores will be kept.",
+    "clearFailed": "Couldn't clear the list — please try again"
   },
   "onboarding": {
     "welcome": "Welcome to MaiSha",
@@ -145,6 +146,7 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "done": "Done",
+    "ok": "OK",
     "edit": "Edit",
     "save": "Save",
     "loading": "Loading…"

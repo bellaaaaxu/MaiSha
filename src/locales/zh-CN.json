@@ -65,7 +65,8 @@
     "privacy": "隐私与条款",
     "contact": "联系我们",
     "clearList": "清空清单",
-    "confirmClearList": "确定清空所有商品吗？超市分类会保留"
+    "confirmClearList": "确定清空所有商品吗？超市分类会保留",
+    "clearFailed": "清空失败，请重试"
   },
   "onboarding": {
     "welcome": "欢迎使用买啥",
@@ -145,6 +146,7 @@
     "confirm": "确认",
     "delete": "删除",
     "done": "完成",
+    "ok": "好",
     "edit": "编辑",
     "save": "保存",
     "loading": "加载中…"

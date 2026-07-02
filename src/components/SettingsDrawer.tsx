@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from './ConfirmModal';
+import { NoticeModal } from './NoticeModal';
 
 interface Props {
   open: boolean;
@@ -15,6 +16,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
   const nav = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [clearFailed, setClearFailed] = useState(false);
 
   const items = [
     { label: t('settings.language'), action: () => nav('/settings/language') },
@@ -32,7 +34,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
       setConfirmOpen(false);
       onClose();
     } catch {
-      alert('清空失败');
+      setClearFailed(true);
     } finally {
       setClearing(false);
     }
@@ -125,6 +127,12 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
         cancelText={t('history.cancel')}
         onConfirm={handleClear}
         onCancel={() => setConfirmOpen(false)}
+      />
+      <NoticeModal
+        open={clearFailed}
+        message={t('settings.clearFailed')}
+        closeText={t('common.ok')}
+        onClose={() => setClearFailed(false)}
       />
     </>
   );

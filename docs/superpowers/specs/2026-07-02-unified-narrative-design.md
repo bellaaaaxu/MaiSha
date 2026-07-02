@@ -91,7 +91,7 @@
 
 `share.title`「一起买」保留。`share-text.ts` 的剪贴板导出**不改**：那是清单内容本身，不是叙事文案。
 
-> **落地补记（2026-07-02）**：实现时发现 `share.*` 原是无代码引用的死 key——真实分享入口是三处「复制 + 原生 alert」流（`List.tsx onShareMenu` / `Settings.tsx copyInviteLink` / `MyLists.tsx` share action），文案硬编码中文（Settings 里还写着「发给老公」，与统一叙事直接冲突）。已抽 `src/utils/invite-text.ts`（`buildInviteText` 邀请文本 / `buildCopiedNotice` 复制确认）统一三处并接入 i18n：确认提示末行即上表 `share.description` 终稿；邀请文本复用 `listActions.inviteCode`，新增 `share.orOpenLink`（三语）。原生 alert/prompt 替换为自定义水彩弹层已挂 ROADMAP 推后项。
+> **落地补记（2026-07-02）**：实现时发现 `share.*` 原是无代码引用的死 key——真实分享入口是三处「复制 + 原生 alert」流（`List.tsx onShareMenu` / `Settings.tsx copyInviteLink` / `MyLists.tsx` share action），文案硬编码中文（Settings 里还写着「发给老公」，与统一叙事直接冲突）。已抽 `src/utils/invite-text.ts`（`buildInviteText` 邀请文本 / `buildCopiedNotice` 复制确认）统一三处并接入 i18n：确认提示末行即上表 `share.description` 终稿；邀请文本复用 `listActions.inviteCode`，新增 `share.orOpenLink`（三语）。原生 alert/prompt 替换为自定义水彩弹层已于 2026-07-02 完成（NoticeModal + ConfirmModal，覆盖分享/确认主链路）；Settings.tsx 经查是无入口的孤儿路由（全页硬编码中文），未做无用装修，处置方案见 ROADMAP 待办「设置区死链修复」。
 
 ## 5. Non-goals
 
