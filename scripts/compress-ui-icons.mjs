@@ -6,8 +6,8 @@ import { mkdir, stat } from 'fs/promises';
 // boost = multiply 自叠加次数：浅色水彩在 22px 会与暖粉按钮底融掉，
 // 自乘可按比例加深中间调（近白处几乎不动），保留水彩质感
 const JOBS = [
-  ['mascot-staging/ListSwitcherIcon.png', 'public/ui/list-switcher.webp', { boost: 2 }],
-  ['mascot-staging/PaperPlaneIcon.png', 'public/ui/paper-plane.webp', { boost: 2 }],
+  ['mascot-staging/ListSwitcherIcon.png', 'public/ui/list-switcher.webp', { boost: 0 }],
+  ['mascot-staging/PaperPlaneIcon.png', 'public/ui/paper-plane.webp', { boost: 0 }],
   ['mascot-staging/RefreshIcon.png', 'public/ui/refresh.webp', { boost: 0 }],
 ];
 const SIZE = 128;   // 显示 22px（头部按钮），128 覆盖到未来 44px@2x
