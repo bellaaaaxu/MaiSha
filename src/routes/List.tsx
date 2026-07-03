@@ -28,6 +28,7 @@ import { groupItemsByStore } from '@/utils/group-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
+import { generateShareText } from '@/utils/share-text';
 import type { Item, NewItemInput } from '@/types/item';
 import { ListSwitcherIcon } from '@/components/ListSwitcherIcon';
 import { PaperPlaneIcon } from '@/components/PaperPlaneIcon';
@@ -104,6 +105,16 @@ export default function ListRoute() {
     try {
       await navigator.clipboard.writeText(text);
       setNotice({ message: buildCopiedNotice(t, list.short_code) });
+    } catch {
+      setNotice({ title: t('listActions.shareCopy'), message: text });
+    }
+  };
+
+  const onCopyText = async () => {
+    const text = generateShareText(items, list.supermarkets);
+    try {
+      await navigator.clipboard.writeText(text);
+      setNotice({ message: t('settings.textCopied') });
     } catch {
       setNotice({ title: t('listActions.shareCopy'), message: text });
     }
@@ -398,6 +409,8 @@ export default function ListRoute() {
           onClearList={async () => {
             await clearAllItems(list.id);
           }}
+          onOpenImport={() => setShowImport(true)}
+          onCopyText={onCopyText}
         />
 
         <NoticeModal

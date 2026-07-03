@@ -3,7 +3,6 @@ import Onboarding from './routes/Onboarding';
 import ListRoute from './routes/List';
 import EditItem from './routes/EditItem';
 import ManageStores from './routes/ManageStores';
-import Settings from './routes/Settings';
 import IconPreview from './routes/IconPreview';
 import IconLibrary from './routes/IconLibrary';
 import ShoppingMode from '@/routes/ShoppingMode';
@@ -64,7 +63,6 @@ function AuthedApp() {
         <Route path="/list" element={<ListRoute />} />
         <Route path="/edit-item/:id" element={<EditItem />} />
         <Route path="/manage-stores" element={<ManageStores />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="/icons" element={<IconLibrary />} />
         <Route path="/shopping/:marketId" element={<ShoppingMode />} />
         <Route path="/history" element={<PurchaseHistory />} />

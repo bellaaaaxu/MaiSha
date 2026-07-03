@@ -16,9 +16,11 @@ export function ConfirmModal({
 }: Props) {
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors ${
+      className={`fixed inset-0 flex items-center justify-center transition-colors ${
         open ? 'bg-black/30 pointer-events-auto' : 'bg-black/0 pointer-events-none'
       }`}
+      /* z 必须压过 SettingsDrawer(z1000)，否则从抽屉里打开时被背板盖住 */
+      style={{ zIndex: 1100 }}
       onClick={onCancel}
     >
       <div

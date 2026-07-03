@@ -3,26 +3,55 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from './ConfirmModal';
 import { NoticeModal } from './NoticeModal';
+import { LanguageSheet } from './LanguageSheet';
+import { getCachedAccount } from '@/lib/active-list';
 
 interface Props {
   open: boolean;
   itemCount: number;
   onClose: () => void;
   onClearList: () => Promise<void>;
+  onOpenImport: () => void;
+  onCopyText: () => void;
 }
 
-export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props) {
+interface MenuItem {
+  label: string;
+  action: () => void;
+  // 弹层类动作（语言/找回码）不关抽屉——弹层在抽屉上层，关掉后回到抽屉上下文
+  keepOpen?: boolean;
+}
+
+export function SettingsDrawer({ open, itemCount, onClose, onClearList, onOpenImport, onCopyText }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const [clearFailed, setClearFailed] = useState(false);
+  const [notice, setNotice] = useState<{ title?: string; message: string } | null>(null);
+  const [langOpen, setLangOpen] = useState(false);
 
-  const items = [
-    { label: t('settings.language'), action: () => nav('/settings/language') },
+  const account = getCachedAccount();
+
+  const copyRecoveryCode = async () => {
+    if (!account) return;
+    try {
+      await navigator.clipboard.writeText(account.recovery_code);
+      setNotice({
+        message: `${t('settings.recoveryCopied')}\n\n${account.recovery_code}\n\n${t('settings.recoveryHint')}`,
+      });
+    } catch {
+      setNotice({ title: t('settings.recoveryCode'), message: account.recovery_code });
+    }
+  };
+
+  const items: MenuItem[] = [
+    { label: t('settings.language'), action: () => setLangOpen(true), keepOpen: true },
     { label: t('settings.iconLibrary'), action: () => nav('/icons') },
-    { label: t('settings.importExport'), action: () => nav('/settings/import-export') },
+    { label: t('settings.importText'), action: onOpenImport },
+    { label: t('settings.exportText'), action: onCopyText },
     { label: t('settings.personalPresets'), action: () => nav('/manage-stores') },
+    ...(account ? [{ label: t('settings.recoveryCode'), action: copyRecoveryCode, keepOpen: true }] : []),
+    { label: t('settings.joinByCode'), action: () => nav('/join') },
     { label: t('settings.privacy'), action: () => nav('/privacy') },
     { label: t('settings.contact'), action: () => window.open('mailto:support@maisha.app') },
   ];
@@ -34,7 +63,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
       setConfirmOpen(false);
       onClose();
     } catch {
-      setClearFailed(true);
+      setNotice({ message: t('settings.clearFailed') });
     } finally {
       setClearing(false);
     }
@@ -66,6 +95,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
         display: 'flex',
         flexDirection: 'column',
         gap: 0,
+        overflowY: 'auto',
       }}>
         <h2 style={{
           fontFamily: 'var(--font-title)',
@@ -79,7 +109,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
         {items.map((item, i) => (
           <button
             key={i}
-            onClick={() => { item.action(); onClose(); }}
+            onClick={() => { item.action(); if (!item.keepOpen) onClose(); }}
             style={{
               fontFamily: 'var(--font-body)',
               fontSize: 16,
@@ -129,11 +159,13 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList }: Props)
         onCancel={() => setConfirmOpen(false)}
       />
       <NoticeModal
-        open={clearFailed}
-        message={t('settings.clearFailed')}
+        open={!!notice}
+        title={notice?.title}
+        message={notice?.message ?? ''}
         closeText={t('common.ok')}
-        onClose={() => setClearFailed(false)}
+        onClose={() => setNotice(null)}
       />
+      <LanguageSheet open={langOpen} onClose={() => setLangOpen(false)} />
     </>
   );
 }
