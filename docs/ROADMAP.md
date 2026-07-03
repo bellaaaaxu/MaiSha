@@ -131,8 +131,8 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 
 - **查超市 store-finder v1 — 代码已实现并合并（2026-06-17）** — 反向入口：输入商品 → AI 映射店类型（Gemini 文本 + `store_type_hints` 共享缓存 + 276 预填脚本）→ 原生 MapKit `MKLocalSearch` 搜附近（iOS 独占，国内走高德/北美走 Apple，免费）→ 一键把店+商品落进清单。单元 A–E 全部完成，136 单测通过、typecheck/build 干净，每单元经 spec + 代码质量双审。
   - spec: [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md) · plan: [superpowers/plans/2026-06-14-store-finder.md](superpowers/plans/2026-06-14-store-finder.md)
-  - 2026-07-03 部署进展：① migration 013 已 push ✓ ② edge function `resolve-store-types` 已部署 ✓（GEMINI_API_KEY 项目 secret 2026-05-20 起已在）③ seed 差一把钥匙——`.env` 已补 `SUPABASE_URL`，**还缺 `SUPABASE_SERVICE_ROLE_KEY`**（Dashboard → Project Settings → API → service_role，填入 `.env` 后跑 `npm run seed-store-types`，脚本可断点续跑）
-  - **剩余（需 Mac）**：④ Xcode 把 `StoreSearch.swift`+`.m` 加入 App target → ⌘B 编译 ⑤ iOS 真机端到端冒烟（plan Task 16，注意验 `MKLocalSearch` 漏返）
+  - 2026-07-03 云端部署**全部完成**：① migration 013 已 push ✓ ② edge function `resolve-store-types` 已部署 ✓ ③ seed 已跑完 ✓——277/277 处理、`store_type_hints` 入库 276 行（source='seed'，中英双语 tier1–3），抽查「生抽」结构正确
+  - **剩余（需 Mac，最后两步）**：④ Xcode 把 `StoreSearch.swift`+`.m` 加入 App target → ⌘B 编译 ⑤ iOS 真机端到端冒烟（plan Task 16，注意验 `MKLocalSearch` 漏返）
 - **多清单 UX v1 冒烟验证** — 浏览器 11 项端到端冒烟测试待完成（2026-06-04 计划中）
 
 ---
