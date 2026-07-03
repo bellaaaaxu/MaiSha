@@ -3,10 +3,12 @@
 import sharp from 'sharp';
 import { mkdir, stat } from 'fs/promises';
 
+// boost = multiply 自叠加次数：浅色水彩在 22px 会与暖粉按钮底融掉，
+// 自乘可按比例加深中间调（近白处几乎不动），保留水彩质感
 const JOBS = [
-  ['mascot-staging/ListSwitcherIcon.png', 'public/ui/list-switcher.webp'],
-  ['mascot-staging/PaperPlaneIcon.png', 'public/ui/paper-plane.webp'],
-  ['mascot-staging/RefreshIcon.png', 'public/ui/refresh.webp'],
+  ['mascot-staging/ListSwitcherIcon.png', 'public/ui/list-switcher.webp', { boost: 2 }],
+  ['mascot-staging/PaperPlaneIcon.png', 'public/ui/paper-plane.webp', { boost: 2 }],
+  ['mascot-staging/RefreshIcon.png', 'public/ui/refresh.webp', { boost: 0 }],
 ];
 const SIZE = 128;   // 显示 22px（头部按钮），128 覆盖到未来 44px@2x
 const QUALITY = 85;
@@ -53,10 +55,19 @@ async function stripOuterWhite(input) {
 }
 
 await mkdir('public/ui', { recursive: true });
-for (const [src, out] of JOBS) {
-  const img = await stripOuterWhite(src);
+for (const [src, out, opts] of JOBS) {
+  const stripped = await (await stripOuterWhite(src)).png().toBuffer();
+  let buf = stripped;
+  for (let i = 0; i < (opts?.boost ?? 0); i++) {
+    buf = await sharp(buf)
+      .composite([{ input: buf, blend: 'multiply' }])
+      .png()
+      .toBuffer();
+  }
+  let img = sharp(buf);
+  if (opts?.boost) img = img.modulate({ saturation: 1.3 });
   await img.resize(SIZE, SIZE, { fit: 'inside' }).webp({ quality: QUALITY }).toFile(out);
   const oldKB = (await stat(src)).size / 1024;
   const newKB = (await stat(out)).size / 1024;
-  console.log(`${src} → ${out}  ${oldKB.toFixed(0)}KB → ${newKB.toFixed(1)}KB`);
+  console.log(`${src} → ${out}  ${oldKB.toFixed(0)}KB → ${newKB.toFixed(1)}KB  boost=${opts?.boost ?? 0}`);
 }
