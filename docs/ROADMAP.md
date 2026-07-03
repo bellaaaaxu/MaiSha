@@ -122,6 +122,9 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 
 ## 🚧 进行中
 
+- **留存埋点 + Sentry 错误监控 — 代码已实现并合并（2026-07-03）** — `events` 表（migration 014：RLS 只进不出 + `env` 列隔离 dev/prod）+ 三个分析视图（北极星=每周完成采购的清单数 / 周活 / W1·W4 留存 cohort，仅统计 prod）；五个核心事件全部接线：`add_item` / `complete_trip` / `share_link_open`（ua_env 自动识别微信 webview）/ `list_join` / `store_finder_used`；Sentry errors-only、仅生产构建初始化。149 单测全过；preview 实测事件请求发出、远端表未建时 404 静默且主流程零受影响；隐私政策页同步四处更新（含修正「不追踪地理位置」与查超市定位权限的失实冲突）。
+  - spec（含 SQL 查询手册）: [superpowers/specs/2026-07-03-analytics-sentry-design.md](superpowers/specs/2026-07-03-analytics-sentry-design.md)
+  - **待执行（用户侧）**：① `npx supabase db push`（应用 migration 014）② Sentry 注册 React 项目拿 DSN → Cloudflare 构建环境变量加 `VITE_SENTRY_DSN` ③ 部署后线上触发一次事件 → Dashboard 跑 `select * from events order by id desc limit 10;` 见行即通
 - **查超市 store-finder v1 — 代码已实现并合并（2026-06-17）** — 反向入口：输入商品 → AI 映射店类型（Gemini 文本 + `store_type_hints` 共享缓存 + 276 预填脚本）→ 原生 MapKit `MKLocalSearch` 搜附近（iOS 独占，国内走高德/北美走 Apple，免费）→ 一键把店+商品落进清单。单元 A–E 全部完成，136 单测通过、typecheck/build 干净，每单元经 spec + 代码质量双审。
   - spec: [superpowers/specs/2026-06-14-store-finder-design.md](superpowers/specs/2026-06-14-store-finder-design.md) · plan: [superpowers/plans/2026-06-14-store-finder.md](superpowers/plans/2026-06-14-store-finder.md)
   - **待执行（Windows 无法编译 iOS / 部署 Supabase）**：① `npx supabase db push` 应用 migration 013 ② `npx supabase functions deploy resolve-store-types` ③ `npm run seed-store-types`（需 `.env`：GEMINI_API_KEY / SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY）④ Xcode 把 `StoreSearch.swift`+`.m` 加入 App target → ⌘B 编译 ⑤ iOS 真机端到端冒烟（plan Task 16，注意验 `MKLocalSearch` 漏返）
@@ -136,7 +139,6 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 - **iOS App Store 提交流程** — 截图（iPhone 15 Pro / iPad）、隐私权限描述、构建上传、审核提交；spec 草案已在 [superpowers/specs/2026-05-24-app-store-optimization-design.md](superpowers/specs/2026-05-24-app-store-optimization-design.md)；名称/副标题/关键词/描述/截图五帧叙事三语草案已定稿在 [统一叙事 spec](superpowers/specs/2026-07-02-unified-narrative-design.md) 附录 C。
 - **端到端冒烟（真机）** — 多清单 v1 在 iOS Safari + 安装为 PWA 后的完整操作路径验证（创建清单 → 切换 → 归档 → 恢复）。
 - **Recovery code 展示打磨** — 常驻入口已解决（2026-07-02：抽屉「找回码」项，点击复制 + 弹层展示）；剩余打磨点：新用户首曝时机与文案（RecoveryCodeCard 的出现条件 / 可永久 dismiss 逻辑）是否足够清晰。
-- **留存埋点 + Sentry 错误监控 + 周留存看板**（2026-07-02 确认必做）— 上架后无监控 = 盲飞。最小集合：Sentry 免费层 + 五个核心事件（`add_item` / `complete_trip` / `share_link_open` / `list_join` / `store_finder_used`）；主指标用 **W1/W4 周留存**（买菜是周行为，D1/D30 基准对周频工具偏悲观；代理见 [project-design.md](project-design.md) §9.6）。
 - **微信 webview 身份分裂修复**（2026-07-02 确认必做，须先于种子验证）— 微信内置浏览器 localStorage 隔离：链接在微信里打开 → 匿名 token 写进 webview 独立存储，之后装 App/用 Safari 是另一个身份（成员重复、图标库/常买/recovery 锚点分裂）。修法：① 微信 UA 检测 → 「用 Safari 打开」引导条 ② 邀请落地页先展示清单内容再引导安装 ③ 接入现成 join/recovery code 做跨 webview 身份迁移 ④ 上架后配 Universal Links 直接唤起 App。
 - **微信分享假设验证** — 找 5–10 户北美华人家庭，验证「发链接 → 点开即加入」裂变是否真成立（§9.6：一代华人微信占主导、二代偏 iMessage/SMS；但分享本就「发链接」渠道无关，真正要验的是「是否会用手机协调买菜」这个行为）。**前置依赖：微信 webview 身份分裂修复**，否则验证结果被 webview 体验污染。
 - **吉祥物「小榕包」+ 食物小人班底（长尾图标体系）** — 设计已定（[project-design.md](project-design.md) §8）：队长小笼包「小榕包」+ 约 30 只中国各地美食图鉴；待 Gemini 出图 + 实现 `hash(商品名)→班底` 分配逻辑。生鲜仍走专属写实水彩。

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { savePurchaseHistory } from '@/lib/purchase-history';
+import { track } from '@/lib/analytics';
 import { getOrDetectCurrency, getSavedCurrency, saveCurrency, getAllCurrencies, type CurrencyConfig } from '@/utils/currency';
 import type { Item } from '@/types/item';
 import type { HistoryItemSnapshot } from '@/types/purchase-history';
@@ -56,6 +57,7 @@ export function ShoppingEndModal({
       }));
       const amount = amountStr ? parseFloat(amountStr) : null;
       await savePurchaseHistory(listId, supermarketId, supermarketName, snapshot, amount, currency.code);
+      track('complete_trip', { listId, props: { items: snapshot.length, store: supermarketName } });
     } catch {
       alert('保存失败，请重试');
       setSaving(false);

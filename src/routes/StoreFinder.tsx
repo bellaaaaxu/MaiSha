@@ -5,6 +5,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { findStoresFor, commitStoreChoice } from '@/lib/store-finder';
+import { track } from '@/lib/analytics';
 import { WatercolorFallback } from '@/components/WatercolorFallback';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import type { RankedStore } from '@/types/store-finder';
@@ -26,6 +27,7 @@ export default function StoreFinder() {
     if (!name.trim()) return;
     setProduct(name.trim());
     setPhase('loading');
+    track('store_finder_used', { listId: list?.id, props: { query: name.trim() } });
     try {
       const perm = await Geolocation.requestPermissions();
       if (perm.location === 'denied') {

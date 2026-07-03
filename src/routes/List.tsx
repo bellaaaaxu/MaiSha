@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -29,6 +29,7 @@ import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
 import { generateShareText } from '@/utils/share-text';
+import { track } from '@/lib/analytics';
 import type { Item, NewItemInput } from '@/types/item';
 import { ListSwitcherIcon } from '@/components/ListSwitcherIcon';
 import { PaperPlaneIcon } from '@/components/PaperPlaneIcon';
@@ -53,6 +54,15 @@ export default function ListRoute() {
   const { t } = useTranslation();
   const undoToast = useUndoToast();
   const [notice, setNotice] = useState<{ title?: string; message: string } | null>(null);
+
+  // 邀请链接打开即记录（ua_env 自动区分微信/其他）；清单解析成功≈加入或回访，
+  // 分析侧按 (uid, list_id) 去重后即真实加入数
+  useEffect(() => {
+    if (joinListId) track('share_link_open', { listId: joinListId });
+  }, [joinListId]);
+  useEffect(() => {
+    if (joinListId && list?.id === joinListId) track('list_join', { listId: list.id });
+  }, [joinListId, list?.id]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -86,6 +96,7 @@ export default function ListRoute() {
   const onAdd = async (input: NewItemInput): Promise<string> => {
     const item = await addItem(list.id, uid, input);
     optimisticAdd(item);
+    track('add_item', { listId: list.id, props: { source: 'sheet', count: 1 } });
     recordItemUsage(uid, {
       name: input.name,
       note: input.note ?? '',
@@ -129,6 +140,7 @@ export default function ListRoute() {
       } catch { /* skip failed */ }
     }
     if (count > 0) {
+      track('add_item', { listId: list.id, props: { source: 'import', count } });
       undoToast.show(`已导入 ${count} 项`, () => {});
     }
   };

@@ -11,7 +11,7 @@ export default function Privacy() {
       </header>
 
       <div className="bg-white rounded-xl p-5 text-sm leading-relaxed space-y-4" style={{ color: '#5a4e3c' }}>
-        <p className="text-xs" style={{ color: '#a0937e' }}>最后更新：2025 年 5 月</p>
+        <p className="text-xs" style={{ color: '#a0937e' }}>最后更新：2026 年 7 月</p>
 
         <section>
           <h2 className="font-semibold mb-1">我们是谁</h2>
@@ -25,6 +25,8 @@ export default function Privacy() {
             <li><strong>购物清单数据</strong> — 你添加的商品名称、数量、备注、所属超市等信息。</li>
             <li><strong>采购历史</strong> — 每次结账时的商品快照和可选的花费金额。</li>
             <li><strong>自定义图标</strong> — 你上传或通过 AI 生成的食材图标。</li>
+            <li><strong>匿名使用统计</strong> — 少量功能使用事件（如添加商品、完成采购），仅关联匿名标识，用于改进产品；不含设备指纹，不用于广告。</li>
+            <li><strong>错误诊断日志</strong> — 应用出错时收集错误堆栈与设备环境信息（经 Sentry），仅用于定位和修复问题。</li>
           </ul>
         </section>
 
@@ -32,7 +34,7 @@ export default function Privacy() {
           <h2 className="font-semibold mb-1">我们不收集什么</h2>
           <ul className="list-disc pl-4 space-y-1">
             <li>不收集真实姓名、邮箱、电话号码</li>
-            <li>不追踪地理位置</li>
+            <li>不后台追踪地理位置——仅在你主动使用「查超市」时，于设备本地读取位置用于附近搜索（Apple 地图）；我们的服务器不接收、不存储你的位置</li>
             <li>不投放广告、不使用广告追踪</li>
             <li>不将数据出售给第三方</li>
           </ul>
@@ -53,6 +55,7 @@ export default function Privacy() {
           <ul className="list-disc pl-4 space-y-1">
             <li><strong>Supabase</strong> — 数据库、认证、实时同步</li>
             <li><strong>Cloudflare</strong> — 应用托管与内容分发</li>
+            <li><strong>Sentry</strong> — 错误诊断（仅在应用出错时收集技术信息）</li>
             <li><strong>AI 图标生成</strong> — 可选功能，仅在你主动使用时调用</li>
           </ul>
         </section>
