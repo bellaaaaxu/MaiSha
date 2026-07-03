@@ -104,6 +104,30 @@
     "note": "Data inside WeChat can be lost when you switch phones. In a browser you can add MaiSha to your home screen and stay in sync.",
     "ok": "Got it"
   },
+  "recoveryCard": {
+    "title": "Save your recovery code",
+    "hint": "Use it to get this list back on a new phone or after reinstalling (always available in Settings)",
+    "entryList": "Already have a list? Restore with your recovery code",
+    "entryOnboarding": "Used MaiSha before? Restore with your recovery code"
+  },
+  "joinPage": {
+    "joinTitle": "Join a list",
+    "joinSubtitle": "Enter the invite code your family shared",
+    "joinPlaceholder": "e.g. A3F7K2",
+    "joinCta": "Join",
+    "joining": "Joining…",
+    "joinIncomplete": "Enter the full invite code",
+    "joinNotFound": "List not found — check the invite code",
+    "joinFailed": "Couldn't join — please try again",
+    "recoverTitle": "Restore your lists",
+    "recoverSubtitle": "Enter the recovery code you saved",
+    "recoverPlaceholder": "e.g. A3F7K2M9",
+    "recoverCta": "Restore",
+    "recovering": "Restoring…",
+    "recoverIncomplete": "Enter the full recovery code",
+    "recoverNotFound": "Recovery code not found — check and try again",
+    "recoverFailed": "Couldn't restore — please try again"
+  },
   "item": {
     "notePlaceholder": "x1, type…"
   },
@@ -161,6 +185,7 @@
     "delete": "Delete",
     "done": "Done",
     "ok": "OK",
+    "close": "Close",
     "edit": "Edit",
     "save": "Save",
     "loading": "Loading…"

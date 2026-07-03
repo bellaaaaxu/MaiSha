@@ -329,7 +329,7 @@ export default function ListRoute() {
                     padding: 8,
                   }}
                 >
-                  已经有清单？输入找回码恢复
+                  {t('recoveryCard.entryList')}
                 </button>
               </div>
             ) : (

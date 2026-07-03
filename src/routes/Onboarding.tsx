@@ -203,7 +203,7 @@ export default function Onboarding() {
               padding: '8px 0',
             }}
           >
-            已经用过买啥？输入找回码恢复清单
+            {t('recoveryCard.entryOnboarding')}
           </button>
         )}
       </div>

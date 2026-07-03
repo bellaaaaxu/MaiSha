@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getCachedAccount } from '@/lib/active-list';
 
 const DISMISS_KEY = 'maisha:recovery-card-dismissed';
 
-/** ≥3 商品后出现一次的温和找回码提醒，可关掉不再来。 */
+/** ≥3 商品后出现一次的温和找回码提醒，可关掉不再来（抽屉「找回码」是常驻入口）。 */
 export function RecoveryCodeCard({ itemCount }: { itemCount: number }) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem(DISMISS_KEY) === '1'
   );
@@ -31,7 +33,7 @@ export function RecoveryCodeCard({ itemCount }: { itemCount: number }) {
     >
       <button
         onClick={dismiss}
-        aria-label="关闭"
+        aria-label={t('common.close')}
         style={{
           position: 'absolute', top: 8, right: 10, background: 'none', border: 'none',
           cursor: 'pointer', fontSize: 20, lineHeight: 1, color: 'var(--ink-faint)', padding: 2,
@@ -40,7 +42,7 @@ export function RecoveryCodeCard({ itemCount }: { itemCount: number }) {
         ×
       </button>
       <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink)', fontWeight: 600 }}>
-        记下你的找回码
+        {t('recoveryCard.title')}
       </div>
       <div
         style={{
@@ -51,7 +53,7 @@ export function RecoveryCodeCard({ itemCount }: { itemCount: number }) {
         {account.recovery_code}
       </div>
       <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--ink-light)', marginTop: 4 }}>
-        换手机或重装也能用它找回这份清单（设置里随时能看到）
+        {t('recoveryCard.hint')}
       </div>
     </div>
   );

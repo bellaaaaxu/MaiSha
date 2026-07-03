@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { joinByCode } from '@/lib/db';
 import { claimAccount } from '@/lib/account';
 import { cacheAccount, clearStoredList } from '@/lib/active-list';
@@ -8,6 +9,7 @@ const STORAGE_KEY = 'maisha:list-id';
 
 export default function JoinByCode() {
   const nav = useNavigate();
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const recover = params.get('mode') === 'recover';
 
@@ -20,7 +22,7 @@ export default function JoinByCode() {
   const handleSubmit = async () => {
     const trimmed = code.trim().toUpperCase();
     if (trimmed.length < 4) {
-      setError(recover ? '请输入完整的找回码' : '请输入完整的邀请码');
+      setError(recover ? t('joinPage.recoverIncomplete') : t('joinPage.joinIncomplete'));
       return;
     }
     setError('');
@@ -29,7 +31,7 @@ export default function JoinByCode() {
       if (recover) {
         const account = await claimAccount(trimmed);
         if (!account) {
-          setError('找不到这个找回码，请检查后重试');
+          setError(t('joinPage.recoverNotFound'));
           setLoading(false);
           return;
         }
@@ -39,7 +41,7 @@ export default function JoinByCode() {
       } else {
         const list = await joinByCode(trimmed);
         if (!list) {
-          setError('找不到这个清单，请检查邀请码');
+          setError(t('joinPage.joinNotFound'));
           setLoading(false);
           return;
         }
@@ -47,7 +49,7 @@ export default function JoinByCode() {
         nav('/list', { replace: true });
       }
     } catch {
-      setError(recover ? '找回失败，请稍后重试' : '加入失败，请稍后重试');
+      setError(recover ? t('joinPage.recoverFailed') : t('joinPage.joinFailed'));
       setLoading(false);
     }
   };
@@ -59,10 +61,10 @@ export default function JoinByCode() {
     >
       <div className="text-5xl mb-4">{recover ? '🌿' : '🔑'}</div>
       <h1 className="text-xl font-semibold mb-1" style={{ color: '#5a4e3c' }}>
-        {recover ? '找回清单' : '加入清单'}
+        {recover ? t('joinPage.recoverTitle') : t('joinPage.joinTitle')}
       </h1>
       <p className="text-sm mb-8" style={{ color: '#a0937e' }}>
-        {recover ? '输入你的找回码' : '输入家人分享的邀请码'}
+        {recover ? t('joinPage.recoverSubtitle') : t('joinPage.joinSubtitle')}
       </p>
 
       <div className="w-full max-w-xs space-y-4">
@@ -73,7 +75,7 @@ export default function JoinByCode() {
             setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, maxLen));
             setError('');
           }}
-          placeholder={recover ? '例如 A3F7K2M9' : '例如 A3F7K2'}
+          placeholder={recover ? t('joinPage.recoverPlaceholder') : t('joinPage.joinPlaceholder')}
           maxLength={maxLen}
           className="w-full text-center text-2xl font-mono tracking-[0.3em] py-4 rounded-xl outline-none"
           style={{
@@ -96,7 +98,7 @@ export default function JoinByCode() {
           className="w-full h-12 rounded-xl font-semibold text-base text-white active:opacity-90 disabled:opacity-40"
           style={{ background: '#7ca982' }}
         >
-          {loading ? (recover ? '找回中…' : '加入中…') : (recover ? '找回' : '加入')}
+          {loading ? (recover ? t('joinPage.recovering') : t('joinPage.joining')) : (recover ? t('joinPage.recoverCta') : t('joinPage.joinCta'))}
         </button>
 
         <button
@@ -104,7 +106,7 @@ export default function JoinByCode() {
           className="w-full text-sm py-2 active:opacity-60"
           style={{ color: '#a0937e' }}
         >
-          返回
+          {t('common.back')}
         </button>
       </div>
     </div>

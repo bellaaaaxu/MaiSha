@@ -104,6 +104,30 @@
     "note": "微信里的记录换手机会丢；浏览器打开后可「添加到主屏幕」，全家永远同步。",
     "ok": "我知道了"
   },
+  "recoveryCard": {
+    "title": "记下你的找回码",
+    "hint": "换手机或重装也能用它找回这份清单（设置里随时能看到）",
+    "entryList": "已经有清单？输入找回码恢复",
+    "entryOnboarding": "已经用过买啥？输入找回码恢复清单"
+  },
+  "joinPage": {
+    "joinTitle": "加入清单",
+    "joinSubtitle": "输入家人分享的邀请码",
+    "joinPlaceholder": "例如 A3F7K2",
+    "joinCta": "加入",
+    "joining": "加入中…",
+    "joinIncomplete": "请输入完整的邀请码",
+    "joinNotFound": "找不到这个清单，请检查邀请码",
+    "joinFailed": "加入失败，请稍后重试",
+    "recoverTitle": "找回清单",
+    "recoverSubtitle": "输入你之前记下的找回码",
+    "recoverPlaceholder": "例如 A3F7K2M9",
+    "recoverCta": "找回",
+    "recovering": "找回中…",
+    "recoverIncomplete": "请输入完整的找回码",
+    "recoverNotFound": "找不到这个找回码，请检查后重试",
+    "recoverFailed": "找回失败，请稍后重试"
+  },
   "item": {
     "notePlaceholder": "x1, 全脂…"
   },
@@ -161,6 +185,7 @@
     "delete": "删除",
     "done": "完成",
     "ok": "好",
+    "close": "关闭",
     "edit": "编辑",
     "save": "保存",
     "loading": "加载中…"

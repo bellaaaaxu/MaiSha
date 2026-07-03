@@ -104,6 +104,30 @@
     "note": "微信裡的記錄換手機會丟；瀏覽器開啟後可「加入主畫面」，全家永遠同步。",
     "ok": "我知道了"
   },
+  "recoveryCard": {
+    "title": "記下你的找回碼",
+    "hint": "換手機或重裝也能用它找回這份清單（設定裡隨時能看到）",
+    "entryList": "已經有清單？輸入找回碼恢復",
+    "entryOnboarding": "已經用過買啥？輸入找回碼恢復清單"
+  },
+  "joinPage": {
+    "joinTitle": "加入清單",
+    "joinSubtitle": "輸入家人分享的邀請碼",
+    "joinPlaceholder": "例如 A3F7K2",
+    "joinCta": "加入",
+    "joining": "加入中…",
+    "joinIncomplete": "請輸入完整的邀請碼",
+    "joinNotFound": "找不到這個清單，請檢查邀請碼",
+    "joinFailed": "加入失敗，請稍後重試",
+    "recoverTitle": "找回清單",
+    "recoverSubtitle": "輸入你之前記下的找回碼",
+    "recoverPlaceholder": "例如 A3F7K2M9",
+    "recoverCta": "找回",
+    "recovering": "找回中…",
+    "recoverIncomplete": "請輸入完整的找回碼",
+    "recoverNotFound": "找不到這個找回碼，請檢查後重試",
+    "recoverFailed": "找回失敗，請稍後重試"
+  },
   "item": {
     "notePlaceholder": "x1, 全脂…"
   },
@@ -161,6 +185,7 @@
     "delete": "刪除",
     "done": "完成",
     "ok": "好",
+    "close": "關閉",
     "edit": "編輯",
     "save": "儲存",
     "loading": "載入中…"
