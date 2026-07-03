@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { DEFAULT_STORES } from '@/utils/constants';
+import { buildExampleItems } from '@/utils/example-items';
 import type { List, ListState } from '@/types/list';
 import type { Item, NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
@@ -36,6 +37,27 @@ export async function getOrCreatePrimaryList(accountId: string, uid: string): Pr
     .select()
     .single();
   if (e2) throw e2;
+
+  // 新用户首单预置 3 件示例商品当零成本引导（勾掉/删掉即毕业）；失败不阻断建单。
+  // 邀请加入者走 joinOrGetList，永不到达这里；db 层插入也天然绕过埋点与常买记录。
+  try {
+    const lang = localStorage.getItem('maisha:language');
+    const firstStore = supermarkets.find(s => s.id !== 'none')?.id ?? 'none';
+    const rows = buildExampleItems(lang, firstStore).map(r => ({
+      list_id: (created as List).id,
+      name: r.name,
+      note: r.note,
+      quantity: r.quantity,
+      supermarket: r.supermarket,
+      category: '其他',
+      category_emoji: '📦',
+      checked: false,
+      checked_at: null,
+      created_by: uid,
+    }));
+    await supabase.from('items').insert(rows);
+  } catch { /* 示例商品非关键 */ }
+
   return created as List;
 }
 

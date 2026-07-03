@@ -11,6 +11,13 @@ const POPULAR_CURRENCIES = ['CNY', 'CAD', 'USD', 'EUR', 'GBP', 'AUD', 'JPY', 'HK
 
 const TOTAL_STEPS = 3;
 
+// 店铺快选：按界面语言三套、北美滩头优先（专有名词数据，不进 locale 文件）
+const STORE_SUGGESTIONS: Record<string, string[]> = {
+  'zh-CN': ['大统华 T&T', '大华 99 Ranch', 'H Mart', 'Costco', 'Walmart', '盒马', '山姆', '菜市场'],
+  'zh-TW': ['大統華 T&T', '大華 99 Ranch', 'H Mart', 'Costco', 'Walmart', '全聯', '家樂福', '菜市場'],
+  en: ['T&T', '99 Ranch', 'H Mart', 'Costco', 'Walmart', 'Superstore', "Trader Joe's", 'Whole Foods'],
+};
+
 const PAPER_TEXTURE = `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"), linear-gradient(180deg, var(--paper) 0%, #F7F0E6 100%)`;
 
 export default function Onboarding() {
@@ -129,6 +136,7 @@ export default function Onboarding() {
           <Step1Stores
             addedStores={addedStores}
             setAddedStores={setAddedStores}
+            suggestions={STORE_SUGGESTIONS[i18n.resolvedLanguage ?? ''] ?? STORE_SUGGESTIONS.en}
           />
         )}
         {step === 2 && <Step2Currency currencyCode={currencyCode} setCurrencyCode={setCurrencyCode} />}
@@ -287,9 +295,11 @@ function Step0Language({ language, setLanguage }: { language: string; setLanguag
 function Step1Stores({
   addedStores,
   setAddedStores,
+  suggestions,
 }: {
   addedStores: Store[];
   setAddedStores: (stores: Store[]) => void;
+  suggestions: string[];
 }) {
   const { t } = useTranslation();
 
@@ -353,6 +363,7 @@ function Step1Stores({
         stores={addedStores}
         onChange={setAddedStores}
         placeholder={t('onboarding.storePlaceholder')}
+        suggestions={suggestions}
       />
       <p
         style={{

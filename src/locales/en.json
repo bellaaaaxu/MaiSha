@@ -96,6 +96,14 @@
     "orOpenLink": "Or open the link: ",
     "orCode": "Or join with a code"
   },
+  "wechat": {
+    "banner": "Open in browser so your list is never lost",
+    "title": "Open in your browser",
+    "step1": "Tap ⋯ at the top right",
+    "step2": "Choose \"Open in browser\" or \"Open in Safari\"",
+    "note": "Data inside WeChat can be lost when you switch phones. In a browser you can add MaiSha to your home screen and stay in sync.",
+    "ok": "Got it"
+  },
   "item": {
     "notePlaceholder": "x1, type…"
   },

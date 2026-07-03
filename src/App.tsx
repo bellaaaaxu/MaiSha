@@ -14,6 +14,7 @@ import MyLists from './routes/MyLists';
 import AllLists from './routes/AllLists';
 import StoreFinder from './routes/StoreFinder';
 import { UpdatePrompt } from './components/UpdatePrompt';
+import { WechatBanner } from './components/WechatBanner';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
@@ -57,6 +58,7 @@ function AuthedApp() {
 
   return (
     <div className="mx-auto max-w-mobile min-h-screen">
+      <WechatBanner />
       <Routes>
         <Route path="/" element={<FirstOpenRedirect />} />
         <Route path="/onboarding" element={<Onboarding />} />
