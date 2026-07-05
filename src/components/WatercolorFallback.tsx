@@ -48,6 +48,10 @@ export function getCategoryColor(category: string): WatercolorColors {
   return CATEGORY_WATERCOLORS[category] ?? CATEGORY_WATERCOLORS['其他'];
 }
 
+export function getBlobShape(name: string): string {
+  return BLOB_SHAPES[hashCode(name) % BLOB_SHAPES.length];
+}
+
 interface Props {
   name: string;
   category: string;
@@ -57,7 +61,7 @@ interface Props {
 export function WatercolorFallback({ name, category, size = 48 }: Props) {
   const label = getAdaptiveLabel(name);
   const colors = getCategoryColor(category);
-  const shape = BLOB_SHAPES[hashCode(name) % BLOB_SHAPES.length];
+  const shape = getBlobShape(name);
   const fontSize = label.length <= 1 ? size * 0.45 : label.length <= 2 ? size * 0.36 : size * 0.28;
 
   return (
