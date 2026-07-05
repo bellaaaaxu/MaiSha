@@ -1,42 +1,51 @@
 # 买啥 MaiSha
 
-> 为中餐家庭做的轻量共享购物清单 PWA。两人实时同步，按超市分组，到店不漏买。
-> 可"添加到主屏幕"像原生 APP 一样使用。
+> 一个人的买菜手账 + 家庭共享清单。完全免费、零注册；按店记录、到店打勾不漏买；
+> 链接发给家人，点开即一起勾。暖色手账风 + 手绘水彩图标。
+> React PWA + Capacitor 封装，目标 iOS App Store 上架（首发滩头：北美华人家庭）。
+
+**项目进展与全部设计索引 → [docs/ROADMAP.md](docs/ROADMAP.md)**（一页纸：已上线 / 进行中 / 待办 / 推后）
+**产品宪法（定位、设计哲学、图标体系、市场研判）→ [docs/project-design.md](docs/project-design.md)**
 
 ---
 
 ## 特性
 
-### 共享与同步
-- 🛒 **按超市分组**：T&T / 元初 / Costco / 未分类，可自定义
-- 👫 **两人共享，实时同步**：Supabase Realtime，对方操作 1 秒内可见
-- 🔗 **零注册零登录**：复制链接邀请，对方点开即加入
-- 📲 **PWA 可安装**：添加到主屏幕，离线浏览已加载清单
-- 🔄 **新版本自动提醒**：检测到新部署时弹"刷新"提示
+### 清单与共享
+- 🏪 **按店铺分组**：T&T / 大统华 / Costco……自定义店铺，扁平分组
+- 📚 **多清单**：旅行、聚会、年货 + 长期家用；置顶 / 活跃 / 归档三段状态
+- 👫 **家庭实时共享**：Supabase Realtime；复制链接或短邀请码，对方点开即加入，零注册
+- 🔑 **账号找回**：轻量账号锚点 + 找回码，清缓存/换设备不丢数据
+- 📲 **PWA 可安装 + 离线**：离线操作进队列，恢复网络自动同步；新版本自动提醒
+- 🌐 **三语 i18n**：简中 / 繁中 / English，onboarding 选定、随时可换
+- 💬 **微信引导条**：微信内打开时引导跳转浏览器（webview 身份分裂对策）
 
-### 添加物品
-- 🎨 **水彩手绘图标库**：60+ 食材手绘水彩插画，告别 emoji 同质化
-- 🎯 **点击 toggle 添加/删除**：点第一下添加（✓ 标记），点第二下删除
-- 🏪 **添加前选超市**：sheet 顶部选超市，后续添加都进这家
-- 🔁 **批量添加**：sheet 不自动关闭，可连续添加多个物品
-- ⌨️ **手输兜底**：图标里没有的可以打字添加，自动归类
+### 添加与图标
+- 🎨 **水彩手绘图标**：277 个预设食材/日用图标（Gemini 批量生成 + sharp/WebP 压缩）
+- 🤖 **AI 生成图标**：预设没有的物品可现场 AI 生成（Edge Function → Gemini），全局限额
+- 🗂️ **账号图标库**：AI 图标归属账号、家人并集共享，可从「全家图库」借用
+- 🔁 **批量添加 / 文本导入**：sheet 连续添加；粘贴一段文字自动拆条导入
 
-### 清单操作
-- 🖐️ **长按拖拽换超市**："白菜我在元初买了，拖过去"
-- ✅ **轻点勾选/取消**：勾选后划线变灰
-- 🛍️ **一键完成采购**：清掉所有已勾选，未勾选保留
-- 📋 **导出纯文本**：给不用 app 的家人发微信
+### 采购
+- 🛍️ **购物模式**：进店逐项打勾、进度条、一键完成采购
+- 📜 **采购历史**：每次采购留档，可回看、可删
+- 🖐️ **长按拖拽换店**："白菜我在元初买了，拖过去"
+- ↩️ **Undo Toast**：删除/勾选 5 秒可撤销，无原生弹窗
+- 📍 **查超市（v1 招牌）**：输入商品 → AI 映射店类型 → 原生 MapKit 搜附近门店 → 一键落进清单（iOS 独占）
 
 ---
 
 ## 技术栈
 
-- **前端**：React 18 + TypeScript + Vite
-- **样式**：Tailwind CSS + inline style（暖色系日系手绘风）
-- **后端**：Supabase（Postgres + Realtime + Anonymous Auth + RLS）
-- **拖拽**：@dnd-kit/core（移动端触摸友好）
+- **前端**：React 18 + TypeScript + Vite + react-router
+- **样式**：Tailwind CSS + inline style（暖色手账风，WashiTape / 水彩组件）
+- **i18n**：i18next（zh-CN / zh-TW / en）
+- **后端**：Supabase（Postgres + Realtime + Anonymous Auth + RLS + Edge Functions + Storage），migration 001–014
+- **原生封装**：Capacitor 8（iOS / Android），查超市走自写 Swift `MKLocalSearch` 插件
+- **监控**：Sentry（errors-only，仅生产）+ 自建 events 埋点表（北极星 / 周活 / W1·W4 留存视图）
+- **拖拽**：@dnd-kit（移动端触摸友好）
 - **PWA**：vite-plugin-pwa（manifest + service worker + 更新提示）
-- **测试**：Vitest + Testing Library（utils 单测）
+- **测试**：Vitest + Testing Library（159 单测 / 32 文件）
 - **部署**：Cloudflare Workers + Static Assets（GitHub 推送自动部署）
 
 ---
@@ -57,11 +66,20 @@ npm run dev           # dev server (http://localhost:5173)
 npm test              # vitest 单测
 npm run typecheck     # tsc --noEmit
 npm run build         # 生产构建
+
+# iOS / Android（原生构建需 Mac + Xcode）
+npm run cap:build     # build + cap sync
+npm run cap:open:ios  # 打开 Xcode 工程
 ```
 
 ### 开发用页面
 - `/list` — 主清单页
 - `/icon-preview` — 图标库预览（不需要登录）
+
+### 常用脚本（`scripts/`）
+- `generate-item-icons.mjs` — Gemini 批量生成预设图标
+- `compress-icons.mjs` / `compress-ui-icons.mjs` — sharp + WebP q85 压缩（**所有 `public/` 视觉资产必须先过这一步**，PWA precache 有 2 MiB 上限）
+- `seed-store-types.mjs` — 查超市 `store_type_hints` 预填种子
 
 ---
 
@@ -72,40 +90,27 @@ npm run build         # 生产构建
 
 ---
 
-## 添加新图标
-
-完整流程在 [project-design.md §7.2](docs/project-design.md#72-新图标怎么加)，简版：
-
-1. 决定食材名和 icon 文件名（kebab-case）
-2. 在 `icon-prompts.md` 写一段 Gemini 生成 prompt
-3. 生成 PNG 存到 `public/icons/<name>.png`
-4. 在 `src/utils/icon-registry.ts` 加条目；同义词作为 `aliases`
-
----
-
-## 文档
+## 文档地图
 
 | 文档 | 用途 |
 |---|---|
-| [project-design.md](docs/project-design.md) | 项目宪法：定位、设计哲学、技术架构 |
-| [v1 设计文档](docs/superpowers/specs/2026-04-23-maisha-design.md) | v1 完整 spec |
-| [菜谱功能设计](docs/superpowers/specs/2026-05-11-recipes-design.md) | v2.0 菜谱 spec |
-| [v1 实施计划](docs/superpowers/plans/2026-04-23-maisha-v1.md) | v1 step-by-step |
-| [Supabase 配置](docs/dev/supabase-setup.md) | 从零搭建后端 |
-| [Cloudflare 部署](docs/dev/cloudflare-deploy.md) | 部署到生产 |
-| [icon-prompts.md](icon-prompts.md) | 所有图标的 Gemini 生成 prompt |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | **进度总览**：已上线 / 进行中 / 待办 / 推后，每条挂 spec/plan 链接 |
+| [docs/project-design.md](docs/project-design.md) | **项目宪法**：定位叙事金字塔、设计哲学、图标体系与吉祥物（§8）、市场研判（§9） |
+| `docs/superpowers/specs/` | 18 份功能 spec（按日期命名，ROADMAP 有索引） |
+| `docs/superpowers/plans/` | 12 份实施计划 |
+| [docs/dev/](docs/dev) | Supabase / Cloudflare 环境搭建 |
+| [icon-prompts.md](icon-prompts.md) | 图标 Gemini 生成 prompt 目录 |
 
 ---
 
-## 路线图
+## 当前状态（2026-07-04）
 
-- ✅ **v1.x** — 购物清单 + 分享邀请 + PWA + 拖拽换超市 + 水彩图标库 + toggle 添加
-- 🚧 **v2.0** — 菜谱功能（官方种子库 + 家庭 fork 定制）
-- ⏸️ **v2.1+** — 菜谱按人数缩放、周菜单规划
-- ⏸️ **v3** — 库存追踪 + 过期提醒、社区菜谱
-- ⏸️ **v∞** — Capacitor.js 包装为 iOS/Android 原生 APP
+- ✅ 核心循环全部在线：多清单、共享加入、账号找回、图标库、购物模式、历史、离线、三语、埋点 + Sentry（生产已验证）
+- 🚧 **上架冲刺**：查超市代码已合并、云端已部署，剩 Xcode target 挂载 + iOS 真机冒烟（需 Mac）；随后 App Store 截图 / 元数据提交（三语文案已定稿）
+- 📋 上架后验证：北美华人家庭种子用户裂变假设、W1/W4 留存
+- 🎨 进行中素材：吉祥物「小榕包」定妆照已入库（`docs/brand/`），食物小人班底原图在 `mascot-staging/`（未跟踪，待压缩 + hash 分配引擎实现）
 
-详见 [project-design.md §4 功能演进](docs/project-design.md#4-功能演进)。
+完整版见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
 ---
 
