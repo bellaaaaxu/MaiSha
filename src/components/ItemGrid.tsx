@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useTranslation } from 'react-i18next';
 import { resolveIconUrl } from '@/utils/icon-registry';
-import { WatercolorFallback } from './WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 import type { Item } from '@/types/item';
 import type { Store } from '@/types/store';
 
@@ -87,7 +87,7 @@ function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
         }}>
           {iconUrl
             ? <img src={iconUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <WatercolorFallback name={item.name} size={52} category="其他" />}
+            : <MascotFallback name={item.name} size={52} category="其他" />}
         </div>
       </div>
       <span style={{

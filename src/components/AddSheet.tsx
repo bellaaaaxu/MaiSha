@@ -10,7 +10,7 @@ import type { NewItemInput } from '@/types/item';
 import type { Store } from '@/types/store';
 import { IconPickerPanel } from '@/components/IconPickerPanel';
 import { AiPreviewModal } from '@/components/AiPreviewModal';
-import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 import { cropToSquare, processImageForUpload, sanitizeItemName } from '@/utils/image-utils';
 import { uploadCustomIcon, generateIcon, findExistingIcon, getRemainingCredits, fetchReusableIcons, setListIconAssignment, type ReusableIcon } from '@/lib/custom-icons';
 import { useLongPress } from '@/hooks/useLongPress';
@@ -659,7 +659,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
                                 transition: 'opacity 0.3s',
                                 filter: disabled ? 'grayscale(1)' : 'none',
                               }}>
-                                <WatercolorFallback name={f.name} category="其他" size={40} />
+                                <MascotFallback name={f.name} category="其他" size={40} />
                               </div>
                             )}
                             {added && (
@@ -718,7 +718,7 @@ export function AddSheet({ open, uid, listId, supermarkets, customIconMap, exist
                               />
                             ) : (
                               <div style={{ opacity: added ? 0.45 : 1, transition: 'opacity 0.3s' }}>
-                                <WatercolorFallback name={item.name} category={item.category} size={56} />
+                                <MascotFallback name={item.name} category={item.category} size={56} />
                               </div>
                             )}
                             {added && (

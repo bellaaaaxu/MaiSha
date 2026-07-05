@@ -1,5 +1,5 @@
 // src/components/IconPickerPanel.tsx
-import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 interface Props {
   itemName: string;
   category: string;
@@ -40,7 +40,7 @@ export function IconPickerPanel({
           }}
         >
           <div className="mb-1">
-            <WatercolorFallback name={itemName} category={category} size={28} />
+            <MascotFallback name={itemName} category={category} size={28} />
           </div>
           <span className="text-[11px] font-medium" style={{ color: '#5a4e3c' }}>使用文字</span>
           <span className="text-[9px] mt-0.5" style={{ color: '#a0937e' }}>免费</span>

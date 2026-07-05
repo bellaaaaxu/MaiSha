@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useList } from '@/hooks/useList';
 import { findStoresFor, commitStoreChoice } from '@/lib/store-finder';
 import { track } from '@/lib/analytics';
-import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 import { resolveIconUrl } from '@/utils/icon-registry';
 import type { RankedStore } from '@/types/store-finder';
 
@@ -289,7 +289,7 @@ export default function StoreFinder() {
                 style={{ borderRadius: 8, objectFit: 'cover' }}
               />
             ) : (
-              <WatercolorFallback name={product} category="其他" size={36} />
+              <MascotFallback name={product} category="其他" size={36} />
             ); })()}
             <strong style={{ fontSize: 15, color: '#5a4e3c' }}>{product}</strong>
           </div>

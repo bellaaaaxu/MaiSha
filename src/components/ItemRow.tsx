@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { resolveIconUrl } from '@/utils/icon-registry';
-import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 import type { Item } from '@/types/item';
 
 interface Props {
@@ -54,7 +54,7 @@ export function ItemRow({ item, customIconMap, onToggle, onMenu }: Props) {
             onError={() => setIconErr(true)}
           />
         ) : (
-          <WatercolorFallback name={item.name} category={item.category} size={48} />
+          <MascotFallback name={item.name} category={item.category} size={48} />
         )}
       </div>
 

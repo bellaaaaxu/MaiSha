@@ -8,7 +8,7 @@ import { useCustomIcons } from '@/hooks/useCustomIcons';
 import { updateItem } from '@/lib/db';
 import { UNDELETABLE_STORE_ID } from '@/utils/constants';
 import { resolveIconUrl } from '@/utils/icon-registry';
-import { WatercolorFallback } from '@/components/WatercolorFallback';
+import { MascotFallback } from '@/components/MascotFallback';
 import { ShoppingEndModal } from '@/components/ShoppingEndModal';
 import type { Item } from '@/types/item';
 
@@ -142,7 +142,7 @@ export default function ShoppingMode() {
               }}>
                 {iconUrl
                   ? <img src={iconUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <WatercolorFallback name={item.name} size={46} category="其他" />
+                  : <MascotFallback name={item.name} size={46} category="其他" />
                 }
               </div>
 
@@ -225,7 +225,7 @@ export default function ShoppingMode() {
                     }}>
                       {iconUrl
                         ? <img src={iconUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <WatercolorFallback name={item.name} size={36} category="其他" />}
+                        : <MascotFallback name={item.name} size={36} category="其他" />}
                     </div>
                     <span style={{
                       fontFamily: 'var(--font-body)', fontSize: 15,
