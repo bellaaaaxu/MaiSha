@@ -41,7 +41,6 @@ export function MascotFallback({ name, category, size = 48 }: Props) {
         role="presentation"
         width={Math.round(size * 0.82)}
         height={Math.round(size * 0.82)}
-        loading="lazy"
         onError={() => setFailed(true)}
         style={{ objectFit: 'contain' }}
       />
