@@ -429,7 +429,9 @@ export default function ListRoute() {
             // 未被用户改动的示例商品跟随新语言重写（用户数据绝不触碰）
             for (const { id, patch } of relocalizeExampleItems(items, lang)) {
               optimisticUpdate(id, patch);
-              updateItem(id, patch).catch(() => { /* 非关键，失败保持原文 */ });
+              // 非关键，失败保持原文；但要留痕——后台标签页 token 过期时
+              // 写入会静默丢失（乐观更新已上屏，刷新即回退），别让它无迹可查
+              updateItem(id, patch).catch(err => console.warn('[relocalize] 写入失败', id, err));
             }
           }}
         />
