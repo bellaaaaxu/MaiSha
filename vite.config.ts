@@ -61,6 +61,12 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') }
   },
+  // 双栈监听：Node ≥17 下 vite 默认只绑 ::1，浏览器把 localhost 解析成
+  // 127.0.0.1 时会连接被拒（本机实测）；host: true 同时开 IPv4/IPv6
+  // 与局域网（以后 iOS 真机冒烟直接连）
+  server: {
+    host: true
+  },
   test: {
     globals: true,
     environment: 'jsdom',
