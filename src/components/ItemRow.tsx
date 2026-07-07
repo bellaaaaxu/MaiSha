@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { resolveIconUrl } from '@/utils/icon-registry';
-import { MascotFallback } from '@/components/MascotFallback';
+import { DecorFallback } from '@/components/DecorFallback';
 import type { Item } from '@/types/item';
 
 interface Props {
@@ -54,7 +54,7 @@ export function ItemRow({ item, customIconMap, onToggle, onMenu }: Props) {
             onError={() => setIconErr(true)}
           />
         ) : (
-          <MascotFallback name={item.name} category={item.category} size={48} />
+          <DecorFallback name={item.name} category={item.category} size={48} />
         )}
       </div>
 
