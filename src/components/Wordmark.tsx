@@ -14,7 +14,8 @@ export default function Wordmark({ variant }: WordmarkProps) {
     <div style={{ textAlign: 'center', position: 'relative' }}>
       <div
         style={{
-          fontFamily: 'var(--font-title)',
+          fontFamily: 'var(--font-wordmark)',
+          fontWeight: 700,
           fontSize: isHero ? 56 : 28,
           color: 'var(--ink)',
           letterSpacing: isHero ? 8 : 4,

@@ -17,6 +17,8 @@
 
   /* Typography */
   --font-title: 'ZCOOL KuaiLe', 'Nunito', sans-serif;
+  /* 字标专用：文楷 TC 子集只含 买/啥/買，其余字符自动落回快乐体 */
+  --font-wordmark: 'LXGW WenKai TC', 'ZCOOL KuaiLe', 'Nunito', sans-serif;
   --font-body: 'Noto Sans SC', 'Nunito', sans-serif;
   --font-en: 'Nunito', sans-serif;
 

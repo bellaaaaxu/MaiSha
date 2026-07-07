@@ -198,7 +198,8 @@ export default function ListRoute() {
             }}
           >≡</button>
           <span style={{
-            fontFamily: 'var(--font-title)',
+            fontFamily: 'var(--font-wordmark)',
+            fontWeight: 700,
             fontSize: 28,
             color: 'var(--ink)',
             letterSpacing: 2,
