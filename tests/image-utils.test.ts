@@ -1,6 +1,6 @@
 // tests/image-utils.test.ts
 import { describe, test, expect } from 'vitest';
-import { getAdaptiveLabel, detectLanguage } from '@/utils/image-utils';
+import { getAdaptiveLabel, detectLanguage, getMonogram } from '@/utils/image-utils';
 
 describe('detectLanguage', () => {
   test('Chinese characters → zh', () => {
@@ -38,5 +38,17 @@ describe('getAdaptiveLabel', () => {
   });
   test('long English → first 3', () => {
     expect(getAdaptiveLabel('Shampoo')).toBe('Sha');
+  });
+});
+
+describe('getMonogram', () => {
+  test('中文取首字', () => {
+    expect(getMonogram('老干妈辣酱')).toBe('老');
+  });
+  test('拉丁取首字母大写', () => {
+    expect(getMonogram('shampoo')).toBe('S');
+  });
+  test('空串返回 ·', () => {
+    expect(getMonogram('  ')).toBe('·');
   });
 });

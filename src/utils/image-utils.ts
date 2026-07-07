@@ -55,3 +55,11 @@ export function sanitizeItemName(name: string): string {
     .slice(0, 30)
     .replace(/[<>{}[\]\\`$]/g, '');
 }
+
+// 首字角标（DecorFallback 用）：CJK 取首字，拉丁取首字母大写，空串兜底 ·
+export function getMonogram(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed) return '·';
+  const first = Array.from(trimmed)[0];
+  return /[a-z]/i.test(first) ? first.toUpperCase() : first;
+}
