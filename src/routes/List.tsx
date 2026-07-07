@@ -25,6 +25,7 @@ import { RecoveryCodeCard } from '@/components/RecoveryCodeCard';
 import { NoticeModal } from '@/components/NoticeModal';
 import PurchaseHistory from '@/routes/PurchaseHistory';
 import { groupItemsByStore } from '@/utils/group-items';
+import { relocalizeExampleItems } from '@/utils/example-items';
 import { addItem, updateItem, deleteItem, clearAllItems } from '@/lib/db';
 import { recordItemUsage } from '@/utils/frequent-items';
 import { buildInviteText, buildCopiedNotice } from '@/utils/invite-text';
@@ -423,6 +424,13 @@ export default function ListRoute() {
           }}
           onOpenImport={() => setShowImport(true)}
           onCopyText={onCopyText}
+          onLanguageChanged={(lang) => {
+            // 未被用户改动的示例商品跟随新语言重写（用户数据绝不触碰）
+            for (const { id, patch } of relocalizeExampleItems(items, lang)) {
+              optimisticUpdate(id, patch);
+              updateItem(id, patch).catch(() => { /* 非关键，失败保持原文 */ });
+            }
+          }}
         />
 
         <NoticeModal

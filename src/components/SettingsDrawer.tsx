@@ -13,6 +13,7 @@ interface Props {
   onClearList: () => Promise<void>;
   onOpenImport: () => void;
   onCopyText: () => void;
+  onLanguageChanged?: (lang: string) => void;
 }
 
 interface MenuItem {
@@ -22,7 +23,7 @@ interface MenuItem {
   keepOpen?: boolean;
 }
 
-export function SettingsDrawer({ open, itemCount, onClose, onClearList, onOpenImport, onCopyText }: Props) {
+export function SettingsDrawer({ open, itemCount, onClose, onClearList, onOpenImport, onCopyText, onLanguageChanged }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -165,7 +166,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList, onOpenIm
         closeText={t('common.ok')}
         onClose={() => setNotice(null)}
       />
-      <LanguageSheet open={langOpen} onClose={() => setLangOpen(false)} />
+      <LanguageSheet open={langOpen} onClose={() => setLangOpen(false)} onChanged={onLanguageChanged} />
     </>
   );
 }

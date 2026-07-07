@@ -10,9 +10,11 @@ const LANGS = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** 语言切换成功后回调（示例商品跟随重写等副作用挂这里） */
+  onChanged?: (lang: string) => void;
 }
 
-export function LanguageSheet({ open, onClose }: Props) {
+export function LanguageSheet({ open, onClose, onChanged }: Props) {
   const { t, i18n } = useTranslation();
   const current = i18n.resolvedLanguage ?? i18n.language;
 
@@ -45,7 +47,7 @@ export function LanguageSheet({ open, onClose }: Props) {
               <button
                 key={lang.code}
                 aria-pressed={active}
-                onClick={() => { i18n.changeLanguage(lang.code); onClose(); }}
+                onClick={() => { i18n.changeLanguage(lang.code); onChanged?.(lang.code); onClose(); }}
                 className="w-full h-11 rounded-xl text-sm font-medium flex items-center justify-between px-4 active:opacity-80"
                 style={active
                   ? { background: 'rgba(232,174,151,.18)', border: '1px solid rgba(232,174,151,.5)', color: '#5a4e3c' }
