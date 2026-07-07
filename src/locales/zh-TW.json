@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "買啥"
+    "title": "买啥"
   },
   "nav": {
     "list": "清單",
@@ -76,7 +76,7 @@
   },
   "onboarding": {
     "welcome": "歡迎使用買啥",
-    "wordmark": "買啥",
+    "wordmark": "买啥",
     "wordmarkLatin": "MaiSha",
     "slogan": "你的買菜手帳 · 按店記，不漏買",
     "addStores": "常去的店",
