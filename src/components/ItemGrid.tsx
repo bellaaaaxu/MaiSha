@@ -68,7 +68,7 @@ function ItemCell({ item, customIconMap, isEditing, onTap }: CellProps) {
             borderRadius: 6,
             lineHeight: '14px',
             whiteSpace: 'nowrap',
-            maxWidth: 92,
+            maxWidth: 100,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
           }}>

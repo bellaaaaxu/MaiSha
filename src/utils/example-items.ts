@@ -8,18 +8,24 @@ export interface ExampleItemSeed {
 // 商品名是种子数据，必须与 icon-registry 的 name/alias 匹配才能命中水彩图标
 // （zh-TW 经 normalizeName 繁→简折叠命中；en 无 alias 走装饰兜底，属既定三层降级），
 // 因此内嵌三语常量而不走 locale 文件。
-// 提示文案受 ItemGrid 备注 chip 宽度约束（92px @ 9px 字号），保持短句。
+// 提示文案约束：① 打勾的圆圈只存在于购物模式，清单页物品只有改/删——
+// 提示必须指向「去购物」这一步而不是描述清单页没有的控件；② 备注会跟随
+// 商品显示在购物模式行内，文案在两个页面都要读得通；③ 受 ItemGrid 备注
+// chip 宽度约束（100px @ 9px 字号），保持短句。
 const SEEDS: Record<string, { items: [string, string, string]; hint: string }> = {
-  'zh-CN': { items: ['鸡蛋', '牛奶', '西红柿'], hint: '点圆圈打勾' },
-  'zh-TW': { items: ['雞蛋', '牛奶', '番茄'], hint: '點圓圈打勾' },
-  en: { items: ['Eggs', 'Milk', 'Tomatoes'], hint: 'Tap circle to check' },
+  'zh-CN': { items: ['鸡蛋', '牛奶', '西红柿'], hint: '去购物试试打勾' },
+  'zh-TW': { items: ['雞蛋', '牛奶', '番茄'], hint: '去購物試試打勾' },
+  en: { items: ['Eggs', 'Milk', 'Tomatoes'], hint: 'Check off in Shopping' },
 };
 
-// 升级前种下的清单用的是长文案——relocalize 时也要认得它们
+// 历史版本种下的提示文案——relocalize 时也要认得它们
 const LEGACY_HINTS = [
   '点左边圆圈试试打勾',
   '點左邊圓圈試試打勾',
   'Tap the circle to check it off',
+  '点圆圈打勾',
+  '點圓圈打勾',
+  'Tap circle to check',
 ];
 
 export function buildExampleItems(lang: string | null, supermarketId: string): ExampleItemSeed[] {
