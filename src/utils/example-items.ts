@@ -8,17 +8,15 @@ export interface ExampleItemSeed {
 // 商品名是种子数据，必须与 icon-registry 的 name/alias 匹配才能命中水彩图标
 // （zh-TW 经 normalizeName 繁→简折叠命中；en 无 alias 走装饰兜底，属既定三层降级），
 // 因此内嵌三语常量而不走 locale 文件。
-// 提示文案约束：① 打勾的圆圈只存在于购物模式，清单页物品只有改/删——
-// 提示必须指向「去购物」这一步而不是描述清单页没有的控件；② 备注会跟随
-// 商品显示在购物模式行内，文案在两个页面都要读得通；③ 受 ItemGrid 备注
-// chip 宽度约束（100px @ 9px 字号），保持短句。
-const SEEDS: Record<string, { items: [string, string, string]; hint: string }> = {
-  'zh-CN': { items: ['鸡蛋', '牛奶', '西红柿'], hint: '去购物试试打勾' },
-  'zh-TW': { items: ['雞蛋', '牛奶', '番茄'], hint: '去購物試試打勾' },
-  en: { items: ['Eggs', 'Milk', 'Tomatoes'], hint: 'Check off in Shopping' },
+// 示例商品不再带引导备注（2026-07-08 用户决定：示例清单本身即引导，无需教「打勾」）。
+const SEEDS: Record<string, { items: [string, string, string] }> = {
+  'zh-CN': { items: ['鸡蛋', '牛奶', '西红柿'] },
+  'zh-TW': { items: ['雞蛋', '牛奶', '番茄'] },
+  en: { items: ['Eggs', 'Milk', 'Tomatoes'] },
 };
 
-// 历史版本种下的提示文案——relocalize 时也要认得它们
+// 历史版本种下的引导备注——relocalize 时把它们清掉（连同已删的当前文案），
+// 让升级前建的清单也去掉备注；商品名照常跟随语言重写。
 const LEGACY_HINTS = [
   '点左边圆圈试试打勾',
   '點左邊圓圈試試打勾',
@@ -26,13 +24,16 @@ const LEGACY_HINTS = [
   '点圆圈打勾',
   '點圓圈打勾',
   'Tap circle to check',
+  '去购物试试打勾',
+  '去購物試試打勾',
+  'Check off in Shopping',
 ];
 
 export function buildExampleItems(lang: string | null, supermarketId: string): ExampleItemSeed[] {
   const seed = SEEDS[lang ?? ''] ?? SEEDS['zh-CN'];
-  return seed.items.map((name, i) => ({
+  return seed.items.map(name => ({
     name,
-    note: i === 0 ? seed.hint : '',
+    note: '',
     quantity: '',
     supermarket: supermarketId,
   }));
@@ -45,8 +46,8 @@ export interface RelocalizePatch {
 
 /**
  * 切换界面语言时，把「未被用户改动的示例商品」重写成新语言。
- * 只精确匹配种子名（任一语言、同一位次）与提示文案（含历史长文案），
- * 用户改过名或自己加的商品绝不触碰。
+ * 只精确匹配种子名（任一语言、同一位次）；用户改过名或自己加的商品绝不触碰。
+ * 引导备注已停用——遇到任一历史备注一律清空（切语言即顺手抹掉旧提示）。
  */
 export function relocalizeExampleItems(
   items: Array<{ id: string; name: string; note?: string | null }>,
@@ -54,7 +55,6 @@ export function relocalizeExampleItems(
 ): RelocalizePatch[] {
   const target = SEEDS[lang] ?? SEEDS['zh-CN'];
   const locales = Object.values(SEEDS);
-  const allHints = [...LEGACY_HINTS, ...locales.map(s => s.hint)];
   const patches: RelocalizePatch[] = [];
   for (const item of items) {
     const pos = locales.reduce<number>(
@@ -63,9 +63,7 @@ export function relocalizeExampleItems(
     );
     const patch: { name?: string; note?: string } = {};
     if (pos >= 0 && item.name !== target.items[pos]) patch.name = target.items[pos];
-    if (item.note && allHints.includes(item.note) && item.note !== target.hint) {
-      patch.note = target.hint;
-    }
+    if (item.note && LEGACY_HINTS.includes(item.note)) patch.note = '';
     if (Object.keys(patch).length > 0) patches.push({ id: item.id, patch });
   }
   return patches;
