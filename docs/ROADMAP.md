@@ -1,7 +1,7 @@
 # MaiSha 路线图
 
 > 一页纸看到「做过什么 / 在做什么 / 待办 / 推后」。功能聚合，不复刻 commit。
-> 最近更新：2026-07-08
+> 最近更新：2026-07-19
 
 ---
 
@@ -162,7 +162,7 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 
 ## 🚧 进行中
 
-- **收藏系统「钤印集章」— 定方向（2026-07-08 brainstorm + mockup 确认，spec 待写）** — 梅兰竹菊 12 花从「长尾图标兜底」**转为收藏印章**（详见 [project-design.md](project-design.md) §8.7）：完成采购随机「钤」一枚**朱红印记**（印章压下→顿→抬起→留印 + 真机触觉）→ **集章本**翻面看回忆（首钤日 · 那天买了 N 样 · 哪家店，card-flip）→ **节气限定印**（清明桃花/中秋桂花/立冬梅…，**取代**原节气采购章提案）。仪式感四要素、动效库调研（只偷 uiverse 打勾/reactbits 数字滚动/card-flip，避开网站脸）、版权排雷（POI 不做）均见 §8.7。存储须进 Supabase。mockup：scratchpad `gen-seal-mockup.mjs`。
+- **收藏系统「钤印集章」— spec 已立（2026-07-19），待写 plan/实现** — 梅兰竹菊 12 花从「长尾图标兜底」**转为收藏印章**（详见 [project-design.md](project-design.md) §8.7）：完成采购随机「钤」一枚**朱红印记**（印章压下→顿→抬起→留印 + 真机触觉）→ **集章本**翻面看回忆（首钤日 · 那天买了 N 样 · 哪家店，card-flip）→ **节气限定印**（清明桃花/中秋桂花/立冬梅…，**取代**原节气采购章提案）。仪式感四要素、动效库调研（只偷 uiverse 打勾/reactbits 数字滚动/card-flip，避开网站脸）、版权排雷（POI 不做）均见 §8.7。存储定案 account 级 `seal_collection` 表（migration 015，无 DELETE=印记不可逆）；发放定案 8 常驻随机 + 4 季节限定窗（水仙/荷/桂/梅，窗口内未拥有必得）。spec: [superpowers/specs/2026-07-19-seal-collection-design.md](superpowers/specs/2026-07-19-seal-collection-design.md)
 - **长尾兜底改纯色块（方案 B）— 决策已定（2026-07-08），待实现** — 长尾商品不再用梅兰竹菊花装饰，改**按商品名 hash 落去饱和暖色盘的柔和纯色圆角块、无首字角标**（商品名已在下方）。现役 `decor-registry`/`DecorFallback`（花+角标，07-05 shipped）据此调整或退役。
 - **图标「日式淡雅」重制 — 探索中（2026-07-08）** — 277 预设从「黑线+饱和水彩」转「日式手绘绘本」（**淡褐细线+低饱和薄涂+多留白+和风食谱插画感**）；prompt 方向已认可（番茄/鸡蛋试样对味），待干净重出对比→定 prompt→批量重制。出图脚本须 **md5 去重**防 API 返回重复图。**踩坑：Desktop 曾被 OneDrive KFM 接管，搅乱出图/大二进制/commit（8f9e2c1 决策 commit 因此丢失，未上 GitHub，靠 project-design §8.7 + memory 存档）——项目 2026-07-08 已挪到 `C:\dev\MaiSha` 脱离 OneDrive。**
 - **查超市 store-finder v1 — 代码已实现并合并（2026-06-17）** — 反向入口：输入商品 → AI 映射店类型（Gemini 文本 + `store_type_hints` 共享缓存 + 276 预填脚本）→ 原生 MapKit `MKLocalSearch` 搜附近（iOS 独占，国内走高德/北美走 Apple，免费）→ 一键把店+商品落进清单。单元 A–E 全部完成，136 单测通过、typecheck/build 干净，每单元经 spec + 代码质量双审。
