@@ -1,5 +1,7 @@
 // 钤印集章：发放规则纯函数 + Supabase 读写。spec: docs/superpowers/specs/2026-07-19-seal-collection-design.md
 // seal_id = flora 成员 id（decor-registry 同源），永不改名。
+import { supabase } from './supabase';
+
 export const RESIDENT_SEALS = ['lan', 'zhu', 'ju', 'song', 'yinxing', 'feng', 'ziteng', 'luwei'] as const;
 
 export interface SeasonalSeal {
@@ -35,4 +37,46 @@ export function pickSeal(
     if (rand() < 0.5) return seasonal.id;              // 已拥有：一半再钤（×N）
   }
   return RESIDENT_SEALS[Math.floor(rand() * RESIDENT_SEALS.length)];
+}
+
+export interface SealRecord {
+  seal_id: string;
+  first_earned_at: string;
+  first_store: string;
+  first_item_count: number;
+  times_earned: number;
+}
+
+export async function getSealCollection(accountId: string): Promise<SealRecord[]> {
+  const { data, error } = await supabase
+    .from('seal_collection')
+    .select('seal_id, first_earned_at, first_store, first_item_count, times_earned')
+    .eq('account_id', accountId);
+  if (error) throw error;
+  return (data ?? []) as SealRecord[];
+}
+
+/** 钤一枚：已有则 times+1（首钤三件套不动——回忆永远是第一次），否则插入。 */
+export async function awardSeal(
+  accountId: string, sealId: string, store: string, itemCount: number
+): Promise<{ record: SealRecord; isFirst: boolean }> {
+  const { data: existing, error: exErr } = await supabase
+    .from('seal_collection')
+    .select('times_earned').eq('account_id', accountId).eq('seal_id', sealId).maybeSingle();
+  if (exErr) throw exErr;
+  if (existing) {
+    const { data, error } = await supabase
+      .from('seal_collection')
+      .update({ times_earned: existing.times_earned + 1 })
+      .eq('account_id', accountId).eq('seal_id', sealId)
+      .select().single();
+    if (error) throw error;
+    return { record: data as SealRecord, isFirst: false };
+  }
+  const { data, error } = await supabase
+    .from('seal_collection')
+    .insert({ account_id: accountId, seal_id: sealId, first_store: store, first_item_count: itemCount, times_earned: 1 })
+    .select().single();
+  if (error) throw error;
+  return { record: data as SealRecord, isFirst: true };
 }
