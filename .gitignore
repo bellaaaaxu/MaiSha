@@ -14,3 +14,9 @@ dist-ssr/
 supabase/.temp/
 icon-staging/
 icon-gallery.html
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
