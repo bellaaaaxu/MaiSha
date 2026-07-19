@@ -192,6 +192,8 @@ Capacitor 封装 iOS/Android；隐私政策页；App 图标生成（iOS / Androi
 
 ## 🗺️ 路线图（已规划但推后）
 
+- **钤印集章终审跟进三小项** — ① flora 资产漂移防线测试（seals 12 id ⊆ public/flora webp 存在 + 三语 name 键齐；decor-registry 退役为纯色块时 flora webp 归 seals 所有不得删）② 集章本翻面日期跟 app i18n 语言而非浏览器 locale ③ ShoppingEndModal 存量硬编码中文整体 i18n 化（揭晓视图已 i18n，前半程未——en 用户先中后英）
+
 - **账号化图标库 v2 实时同步** — 家人新添加图标无需刷新即可在所有设备见到；与多清单实时同步一同考虑
 - **多清单实时同步** — 多设备同时打开时清单列表变化实时推送（v1 接受手动刷新）
 - **数据恢复 Phase 2** — iOS iCloud KVS 自动存储 recovery token，无感找回，不需要用户手动抄 recovery code
