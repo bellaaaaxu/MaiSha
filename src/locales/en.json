@@ -60,6 +60,7 @@
     "title": "Settings",
     "language": "Language",
     "iconLibrary": "Icon library",
+    "sealBook": "Seal book",
     "importText": "Import text",
     "exportText": "Copy list as text",
     "textCopied": "List copied as text",
@@ -207,10 +208,19 @@
     "saveFailed": "Couldn't save. Please try again."
   },
   "seals": {
+    "title": "Seal book",
+    "progress": "Collected {{n}} / {{total}}",
+    "firstMemory": "{{date}} · {{count}} items at {{store}}",
     "earned": "Sealed!",
     "firstTime": "First time · today",
     "timesEarned": "Stamped ×{{count}}",
     "toBook": "Add to seal book →",
+    "locked": {
+      "shuixian": "Spring · unlocks in season",
+      "he": "Summer · unlocks in season",
+      "gui": "Autumn · unlocks in season",
+      "mei": "Winter · unlocks in season"
+    },
     "name": {
       "mei": "Plum",
       "lan": "Orchid",

@@ -13,6 +13,7 @@ import Privacy from '@/routes/Privacy';
 import MyLists from './routes/MyLists';
 import AllLists from './routes/AllLists';
 import StoreFinder from './routes/StoreFinder';
+import SealBook from './routes/SealBook';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { WechatBanner } from './components/WechatBanner';
 import { useAuth } from './hooks/useAuth';
@@ -74,6 +75,7 @@ function AuthedApp() {
         <Route path="/my-lists" element={<MyLists />} />
         <Route path="/all-lists" element={<AllLists />} />
         <Route path="/store-finder" element={<StoreFinder />} />
+        <Route path="/seals" element={<SealBook />} />
         <Route path="*" element={<Navigate to="/list" replace />} />
       </Routes>
     </div>

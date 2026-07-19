@@ -60,6 +60,7 @@
     "title": "設定",
     "language": "語言設定",
     "iconLibrary": "圖標庫",
+    "sealBook": "集章本",
     "importText": "匯入文字",
     "exportText": "複製清單文字",
     "textCopied": "清單文字已複製",
@@ -207,10 +208,19 @@
     "saveFailed": "儲存失敗，請重試"
   },
   "seals": {
+    "title": "集章本",
+    "progress": "已集 {{n}} / {{total}}",
+    "firstMemory": "{{date}} · 在{{store}}買了 {{count}} 樣",
     "earned": "鈐下一枚",
     "firstTime": "第一次得到 · 今天",
     "timesEarned": "共鈐 ×{{count}}",
     "toBook": "貼進集章本 →",
+    "locked": {
+      "shuixian": "春 · 到季開鈐",
+      "he": "夏 · 到季開鈐",
+      "gui": "秋 · 到季開鈐",
+      "mei": "冬 · 到季開鈐"
+    },
     "name": {
       "mei": "梅",
       "lan": "蘭",

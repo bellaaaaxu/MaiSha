@@ -48,6 +48,7 @@ export function SettingsDrawer({ open, itemCount, onClose, onClearList, onOpenIm
   const items: MenuItem[] = [
     { label: t('settings.language'), action: () => setLangOpen(true), keepOpen: true },
     { label: t('settings.iconLibrary'), action: () => nav('/icons') },
+    { label: t('settings.sealBook'), action: () => nav('/seals') },
     { label: t('settings.importText'), action: onOpenImport },
     { label: t('settings.exportText'), action: onCopyText },
     { label: t('settings.personalPresets'), action: () => nav('/manage-stores') },
