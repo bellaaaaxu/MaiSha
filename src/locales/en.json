@@ -205,5 +205,25 @@
     "added": "Added \"{{item}}\" to \"{{store}}\"",
     "searchError": "Something went wrong. Please try again.",
     "saveFailed": "Couldn't save. Please try again."
+  },
+  "seals": {
+    "earned": "Sealed!",
+    "firstTime": "First time · today",
+    "timesEarned": "Stamped ×{{count}}",
+    "toBook": "Add to seal book →",
+    "name": {
+      "mei": "Plum",
+      "lan": "Orchid",
+      "zhu": "Bamboo",
+      "ju": "Chrysanthemum",
+      "song": "Pine",
+      "he": "Lotus",
+      "gui": "Osmanthus",
+      "yinxing": "Ginkgo",
+      "feng": "Maple",
+      "shuixian": "Narcissus",
+      "ziteng": "Wisteria",
+      "luwei": "Reed"
+    }
   }
 }

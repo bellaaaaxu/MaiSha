@@ -205,5 +205,25 @@
     "added": "已把「{{item}}」加到「{{store}}」",
     "searchError": "出錯了，請重試",
     "saveFailed": "儲存失敗，請重試"
+  },
+  "seals": {
+    "earned": "鈐下一枚",
+    "firstTime": "第一次得到 · 今天",
+    "timesEarned": "共鈐 ×{{count}}",
+    "toBook": "貼進集章本 →",
+    "name": {
+      "mei": "梅",
+      "lan": "蘭",
+      "zhu": "竹",
+      "ju": "菊",
+      "song": "松",
+      "he": "荷",
+      "gui": "桂",
+      "yinxing": "銀杏",
+      "feng": "楓",
+      "shuixian": "水仙",
+      "ziteng": "紫藤",
+      "luwei": "蘆葦"
+    }
   }
 }

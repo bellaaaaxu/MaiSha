@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { savePurchaseHistory } from '@/lib/purchase-history';
 import { track } from '@/lib/analytics';
 import { getOrDetectCurrency, getSavedCurrency, saveCurrency, getAllCurrencies, type CurrencyConfig } from '@/utils/currency';
+import { getCachedAccount } from '@/lib/active-list';
+import { pickSeal, getSealCollection, awardSeal } from '@/lib/seals';
+import { SealImprint } from '@/components/SealImprint';
 import type { Item } from '@/types/item';
 import type { HistoryItemSnapshot } from '@/types/purchase-history';
 
@@ -29,14 +34,46 @@ export function ShoppingEndModal({
   open, supermarketName, totalCount: _totalCount, boughtCount: _boughtCount, missedCount,
   listId, supermarketId, items, onClose, onDone,
 }: Props) {
+  const nav = useNavigate();
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [amountStr, setAmountStr] = useState('');
   const [currency, setCurrency] = useState<CurrencyConfig>(getOrDetectCurrency);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(!getSavedCurrency());
+  const [earned, setEarned] = useState<{ sealId: string; isFirst: boolean; times: number } | null>(null);
   const allDone = missedCount === 0;
+
+  useEffect(() => { if (open) { setEarned(null); setSaving(false); } }, [open]);
   const celebration = CELEBRATIONS[Math.floor(Math.random() * CELEBRATIONS.length)];
 
   if (!open) return null;
+
+  if (earned) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'rgba(40,30,20,.5)', zIndex: 1000 }}>
+        <div className="mx-6 w-full max-w-xs rounded-3xl p-6 text-center" style={{ background: 'linear-gradient(180deg,#faf6f0,#f3ede4)', border: '1px solid rgba(215,205,188,.5)' }}>
+          <style>{`
+            @keyframes sealDrop { 0%{opacity:0;transform:translateY(-110px) scale(2) rotate(-20deg)} 55%{opacity:1;transform:translateY(0) scale(.92) rotate(-3deg)} 70%{transform:scale(1.06) rotate(-8deg)} 100%{transform:scale(1) rotate(-6deg)} }
+            @keyframes sealFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+          `}</style>
+          <div style={{ animation: 'sealDrop 1s cubic-bezier(.22,.68,.28,1) forwards', display: 'inline-block' }}>
+            <SealImprint sealId={earned.sealId} size={120} rotate={0} />
+          </div>
+          <div style={{ opacity: 0, animation: 'sealFade .5s ease-out .9s forwards' }}>
+            <div className="mt-3 text-sm" style={{ color: '#7a6e58' }}>{t('seals.earned')}</div>
+            <div style={{ fontFamily: 'var(--font-title)', fontSize: 26, color: '#5a4e3c' }}>{t(`seals.name.${earned.sealId}`)}</div>
+            <div className="text-xs" style={{ color: '#b0a48d' }}>{earned.isFirst ? t('seals.firstTime') : t('seals.timesEarned', { count: earned.times })}</div>
+            <div className="flex gap-2 mt-5">
+              <button className="flex-1 h-11 rounded-xl text-white text-sm" style={{ background: '#7ca982' }}
+                onClick={() => { setEarned(null); onDone(); nav('/seals'); }}>{t('seals.toBook')}</button>
+              <button className="flex-1 h-11 rounded-xl text-sm" style={{ background: '#f0e7d8', color: '#7a6e58' }}
+                onClick={() => { setEarned(null); onDone(); }}>{t('common.ok')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const selectCurrency = (c: CurrencyConfig) => {
     setCurrency(c);
@@ -46,8 +83,9 @@ export function ShoppingEndModal({
 
   const saveAndClose = async (_clearMissed: boolean) => {
     setSaving(true);
+    let snapshot: HistoryItemSnapshot[];
     try {
-      const snapshot: HistoryItemSnapshot[] = items.map(i => ({
+      snapshot = items.map(i => ({
         name: i.name,
         quantity: i.quantity,
         note: i.note,
@@ -63,6 +101,20 @@ export function ShoppingEndModal({
       setSaving(false);
       return;
     }
+    try {
+      const account = getCachedAccount();
+      if (account) {
+        const owned = new Set((await getSealCollection(account.id)).map(r => r.seal_id));
+        const sealId = pickSeal(owned, new Date());
+        const { record, isFirst } = await awardSeal(account.id, sealId, supermarketName, snapshot.filter(s => s.checked).length);
+        setEarned({ sealId, isFirst, times: record.times_earned });
+        setAmountStr('');
+        setSaving(false);
+        try { const { Haptics, ImpactStyle } = await import('@capacitor/haptics'); await Haptics.impact({ style: ImpactStyle.Medium }); } catch { /* web 降级 */ }
+        return;  // 停在揭晓视图,onDone 交给揭晓按钮
+      }
+    } catch { /* 发章失败:宁缺毋滥,直接走完成 */ }
+    setSaving(false);
     setAmountStr('');
     onDone();
   };
