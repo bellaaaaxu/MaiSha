@@ -65,7 +65,14 @@ export function ShoppingEndModal({
             <div className="text-xs" style={{ color: '#b0a48d' }}>{earned.isFirst ? t('seals.firstTime') : t('seals.timesEarned', { count: earned.times })}</div>
             <div className="flex gap-2 mt-5">
               <button className="flex-1 h-11 rounded-xl text-white text-sm" style={{ background: '#7ca982' }}
-                onClick={() => { setEarned(null); onDone(); nav('/seals'); }}>{t('seals.toBook')}</button>
+                onClick={() => {
+                  // 不走 onDone：其 nav(-1) 与本处 push 是两个竞态的异步 history 操作，
+                  // 会把 /seals 覆盖掉（e2e 实测落回 /list）。replace 掉当前购物页，
+                  // 从集章本返回时自然回到清单。
+                  setEarned(null);
+                  onClose();
+                  nav('/seals', { replace: true });
+                }}>{t('seals.toBook')}</button>
               <button className="flex-1 h-11 rounded-xl text-sm" style={{ background: '#f0e7d8', color: '#7a6e58' }}
                 onClick={() => { setEarned(null); onDone(); }}>{t('common.ok')}</button>
             </div>
