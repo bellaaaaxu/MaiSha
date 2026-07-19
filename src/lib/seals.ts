@@ -26,6 +26,11 @@ function inWindow(now: Date, s: SeasonalSeal): boolean {
   return a <= b ? md >= a && md <= b : md >= a || md <= b;  // 跨年窗
 }
 
+/** 发章门槛（spec §1/§3）：至少买到 1 件才配得上一枚印——0 件的「采购」不钤。 */
+export function qualifiesForSeal(checkedCount: number): boolean {
+  return checkedCount >= 1;
+}
+
 export function pickSeal(
   owned: ReadonlySet<string>,
   now: Date,

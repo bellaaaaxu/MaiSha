@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickSeal, RESIDENT_SEALS, SEASONAL_SEALS } from '@/lib/seals';
+import { pickSeal, qualifiesForSeal, RESIDENT_SEALS, SEASONAL_SEALS } from '@/lib/seals';
 
 const none = new Set<string>();
 
@@ -33,5 +33,15 @@ describe('pickSeal', () => {
     expect(RESIDENT_SEALS).toHaveLength(8);
     expect(SEASONAL_SEALS.map(s => s.id)).toEqual(['shuixian', 'he', 'gui', 'mei']);
     expect(RESIDENT_SEALS.some(r => SEASONAL_SEALS.find(s => s.id === r))).toBe(false);
+  });
+});
+
+describe('qualifiesForSeal', () => {
+  it('0 件已购不发章（spec §1/§3/§7.2 调用侧门槛）', () => {
+    expect(qualifiesForSeal(0)).toBe(false);
+  });
+  it('≥1 件已购发章', () => {
+    expect(qualifiesForSeal(1)).toBe(true);
+    expect(qualifiesForSeal(12)).toBe(true);
   });
 });

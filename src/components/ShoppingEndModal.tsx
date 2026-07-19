@@ -5,7 +5,7 @@ import { savePurchaseHistory } from '@/lib/purchase-history';
 import { track } from '@/lib/analytics';
 import { getOrDetectCurrency, getSavedCurrency, saveCurrency, getAllCurrencies, type CurrencyConfig } from '@/utils/currency';
 import { getCachedAccount } from '@/lib/active-list';
-import { pickSeal, getSealCollection, awardSeal } from '@/lib/seals';
+import { pickSeal, qualifiesForSeal, getSealCollection, awardSeal } from '@/lib/seals';
 import { SealImprint } from '@/components/SealImprint';
 import type { Item } from '@/types/item';
 import type { HistoryItemSnapshot } from '@/types/purchase-history';
@@ -110,10 +110,11 @@ export function ShoppingEndModal({
     }
     try {
       const account = getCachedAccount();
-      if (account) {
+      const checkedCount = snapshot.filter(s => s.checked).length;
+      if (account && qualifiesForSeal(checkedCount)) {
         const owned = new Set((await getSealCollection(account.id)).map(r => r.seal_id));
         const sealId = pickSeal(owned, new Date());
-        const { record, isFirst } = await awardSeal(account.id, sealId, supermarketName, snapshot.filter(s => s.checked).length);
+        const { record, isFirst } = await awardSeal(account.id, sealId, supermarketName, checkedCount);
         setEarned({ sealId, isFirst, times: record.times_earned });
         setAmountStr('');
         setSaving(false);
